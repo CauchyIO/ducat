@@ -219,3 +219,6 @@ __marimo__/
 
 # Claude
 CLAUDE.md
+
+# Local environment notes, never committed
+/environment.local.md
