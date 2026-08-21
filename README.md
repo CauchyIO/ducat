@@ -17,28 +17,30 @@ is a Markdown proposal a human reviews and decides on.
 
 ## Status
 
-**Design complete, implementation not started.** [`docs/skill-spec.md`](docs/skill-spec.md) is the
-design of record — what the skill does, what evidence it may use, and what it may claim.
+**Implemented.** [`docs/skill-spec.md`](docs/skill-spec.md) is the design of record — what the skill
+does, what evidence it may use, and what it may claim. The package derives from it:
 
-The skill package itself is not yet written:
-
-| Path | State |
+| Path | Derived from |
 |---|---|
-| `SKILL.md` | Not written — scope gate, workflow, authorization boundary, routing |
-| `references/data-sources.md` | Not written — evidence semantics, precedence, attribution, pricing joins |
-| `references/opportunity-catalog.md` | Not written — optimization practices, routed by scope |
-| `references/proposal-contract.md` | Not written — calculation contract, decision card, artifact structure |
+| `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, routing |
+| `references/data-sources.md` | Evidence semantics, precedence, attribution, pricing joins |
+| `references/opportunity-catalog.md` | Optimization practices, routed by scope |
+| `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |
 
-Section 5 of the spec specifies the layout these will take and the sections each derives from.
+Not yet validated against the behavioural witnesses in Section 10 of the spec.
 
 ## Install
 
-Not yet installable.
+Copy or symlink this repository into your skills directory, keeping the directory name:
+
+```sh
+ln -s "$PWD" ~/.claude/skills/databricks-cost-optimizer
+```
 
 ## Invoke
 
-Once packaged: explicitly as `$databricks-cost-optimizer`, or through automatic discovery when a
-request matches the skill's description.
+Explicitly as `$databricks-cost-optimizer`, or through automatic discovery when a request matches
+the skill's description.
 
 ## Layout
 
@@ -60,5 +62,5 @@ databricks-cost-optimizer/
 
 MIT — see [LICENSE](LICENSE).
 
-The references will carry distilled enumerations of the FinOps Framework and FOCUS v1.4, both
+The references carry distilled enumerations of the FinOps Framework and FOCUS v1.4, both
 CC BY 4.0. Their attribution obligations are recorded in [NOTICE.md](NOTICE.md).

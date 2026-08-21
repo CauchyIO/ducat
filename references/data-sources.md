@@ -1,0 +1,231 @@
+# Data sources
+
+Evidence semantics for the preflight and baseline stages. Read this before the scope type matters.
+
+Distilled 2026-08-21 from the Databricks cost component matrix, the Databricks cost tracking guide,
+the 2026-07-01 pricing reassessment findings, and FOCUS v1.4 (see `NOTICE.md`).
+
+## Contents
+
+- [Precedence](#precedence)
+- [Sources and what each supports](#sources-and-what-each-supports)
+- [The core join](#the-core-join)
+- [Billing origin is not SKU](#billing-origin-is-not-sku)
+- [Attribution](#attribution)
+- [Cost bases and FOCUS vocabulary](#cost-bases-and-focus-vocabulary)
+- [Evidence invariants](#evidence-invariants)
+- [Freshness overlay](#freshness-overlay)
+- [Fallbacks](#fallbacks)
+
+## Precedence
+
+One ordering governs every evidence plane. Higher rung wins a disagreement:
+
+1. live read-only Databricks SQL, APIs, CLI;
+2. live read-only Azure Cost Management, Resource Graph, pricing APIs;
+3. current official Databricks and Microsoft documentation;
+4. user-provided exports;
+5. explicitly limited estimates.
+
+Business constraints sit outside the ladder — they come from the user and have no fallback. So does
+packaged practice material, including this file: it seeds the analysis and never outranks rungs 1–3
+on a mutable vendor fact.
+
+## Sources and what each supports
+
+| Evidence | Where it comes from | What it supports |
+|---|---|---|
+| Databricks usage | `system.billing.usage` | Usage quantity, SKU, product, resource, identity, tag attribution |
+| Historical published cost | Date-valid `system.billing.list_prices` | Historical list cost, normalized comparisons |
+| Workload behaviour | `system.lakeflow.*`, `system.compute.*`, `system.query.history`, serving telemetry | Runtime, failures, utilization, schedules, consumers, performance |
+| Object configuration | Read-only Databricks APIs or CLI | Current settings, ownership, policies, resource relationships |
+| Actual Azure cost | Cost Management actual or amortized data | Billed cost, discounts, classic infrastructure, invoice reconciliation |
+| Azure attribution | Resource Graph, resource tags | Resource identity, region, ownership, tag context |
+| Forward pricing | Official Databricks pricing, Azure Retail Prices API | Target-state counterfactuals |
+| Practice guidance | `opportunity-catalog.md` plus current official docs | Mechanisms, constraints, current product behaviour |
+| Business constraints | User confirmation | Required outcomes, risk tolerance, ownership, feasibility |
+
+Starting authorities — follow successor pages when Microsoft moves them, and record retrieval dates:
+
+- [Monitor costs using Azure Databricks system tables](https://learn.microsoft.com/en-us/azure/databricks/admin/usage/system-tables)
+- [Billable usage system table reference](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/billing)
+- [Pricing system table reference](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/pricing)
+- [Monitor job costs and performance](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/jobs-cost)
+- [Actual and amortized Azure cost data](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/review-subscription-billing)
+- [Azure Retail Prices API](https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices)
+
+**System tables have no SLA.** Data typically lands hours after the usage. They are an accounting
+source, not an operational one — never present a system-table figure as real-time.
+
+## The core join
+
+Everything starts here. Get this wrong and every downstream number is wrong.
+
+```sql
+SELECT
+  u.billing_origin_product,
+  u.sku_name,
+  u.usage_date,
+  u.custom_tags,
+  u.usage_quantity AS dbus,
+  u.usage_quantity * lp.pricing.effective_list.default AS estimated_list_cost
+FROM system.billing.usage u
+JOIN system.billing.list_prices lp
+  ON lp.sku_name = u.sku_name
+  AND u.usage_end_time >= lp.price_start_time
+  AND (lp.price_end_time IS NULL OR u.usage_end_time < lp.price_end_time)
+WHERE u.usage_date >= :period_start
+  AND u.usage_date <  :period_end
+```
+
+Two failure modes to avoid:
+
+**Dropping the price validity window.** Without `price_start_time` / `price_end_time`, a SKU with
+more than one price record fans out and inflates the total. This is the most common Databricks cost
+calculation error. It also means you must never apply today's price retroactively across a whole
+baseline — a price change inside the period is a real feature of the period.
+
+**Grouping by `sku_name` alone.** See below.
+
+## Billing origin is not SKU
+
+`billing_origin_product` says **what generated the cost**. `sku_name` says **how it is priced**.
+Different dimensions. Many services have no SKU of their own and bill through another service's.
+
+Join on `sku_name` to get a price. Group by `billing_origin_product` to understand a driver. Group
+by SKU alone and Vector Search disappears into the serving line, while Predictive Optimization hides
+inside serverless jobs — which is exactly how a background service escapes an assessment.
+
+Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment — verify live):
+
+| `billing_origin_product` | `sku_name`(s) | Mechanics |
+|---|---|---|
+| `ALL_PURPOSE` | `ALL_PURPOSE_COMPUTE`, `..._(PHOTON)` | Classic cluster DBU |
+| `INTERACTIVE` | `ALL_PURPOSE_SERVERLESS_COMPUTE`, `MODEL_TRAINING` | Serverless interactive; GPU work on the training SKU |
+| `JOBS` | `JOBS_COMPUTE`, `..._(PHOTON)`, `JOBS_SERVERLESS_COMPUTE` | Classic or serverless jobs |
+| `SQL` | `SQL_COMPUTE`, `SQL_PRO_COMPUTE`, `SERVERLESS_SQL_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Warehouse compute; JOBS_SERVERLESS for DLT-backed streaming tables and MVs |
+| `DLT` | `DLT_CORE/PRO/ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Classic DLT on DLT SKUs; serverless DLT on JOBS_SERVERLESS |
+| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, `ANTHROPIC/OPENAI/GEMINI_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own |
+| `VECTOR_SEARCH` | `SERVERLESS_REAL_TIME_INFERENCE` + `JOBS_SERVERLESS_COMPUTE` | **Dual billing**: endpoint serving plus background index sync |
+| `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE` + `DATABRICKS_STORAGE` + maintenance | **Triple component**: compute, storage in DSUs, background jobs |
+| `APPS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Lakehouse Apps |
+| `PREDICTIVE_OPTIMIZATION` | `JOBS_SERVERLESS_COMPUTE` | Background service, per catalog/schema |
+| `DATA_QUALITY_MONITORING` | `JOBS_SERVERLESS_COMPUTE` | **Renamed** from `LAKEHOUSE_MONITORING` (~Feb 2026); old value now legacy |
+| `AI_FUNCTIONS` | `SERVERLESS_REAL_TIME_INFERENCE` | Only `ai_parse_document`, `ai_extract`, `ai_classify`. **`ai_query` bills under `MODEL_SERVING`** as batch inference |
+| `AI_GATEWAY`, `AGENT_EVALUATION` | `SERVERLESS_REAL_TIME_INFERENCE` | Own origin values, inference SKU |
+| `DATA_CLASSIFICATION`, `FINE_GRAINED_ACCESS_CONTROL`, `BASE_ENVIRONMENTS` | `JOBS_SERVERLESS_COMPUTE` | Background platform services |
+| `ONLINE_TABLES`, `LAKEFLOW_CONNECT` | `DLT_*_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Bill through the pipeline underneath |
+| `AI_RUNTIME` | `ALL_PURPOSE_SERVERLESS_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Serverless GPU pool |
+| `FOUNDATION_MODEL_TRAINING` | `MODEL_TRAINING` | Fine-tuning |
+| `NOTEBOOKS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Distinct origin from `INTERACTIVE` |
+| `CLEAN_ROOM` | `CLEAN_ROOMS_COLLABORATOR` | Flat per-DAY rate, not a DBU rate — never price it per hour |
+| `NETWORKING` | Egress and connectivity SKUs | Per-GB by route; per-hour for private endpoints |
+| `GENIE` | `GENIE` (from 2026-07-06) | Metered DBUs; underlying SQL compute still billed on top |
+
+Other origins to expect: `DEFAULT_STORAGE`, `AGENT_BRICKS`, `DATA_SHARING`,
+`EXTERNAL_COMPATIBILITY`. Enumerate what is actually present rather than assuming this list is
+closed — always start a scan with `SELECT DISTINCT billing_origin_product`.
+
+Newer attribution surfaces worth using: `usage_type`, `product_features` (`jobs_tier`, `sql_tier`,
+`dlt_tier`, `is_serverless`, `is_photon`, `serving_type`), `identity_metadata`, and `usage_metadata`
+subfields including `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`, `notebook_id`,
+`app_name`, `database_instance_id`, `budget_policy_id`.
+
+## Attribution
+
+Resolve scope before aggregation, and keep the populations apart:
+
+| Population | Meaning |
+|---|---|
+| **Native** | Tag or `usage_metadata` identifier ties the record to the scope directly |
+| **Manual** | User-confirmed mapping from an object to the scope |
+| **Inferred** | Claimed without tag evidence — weakest, and labelled as such |
+| **Unallocated** | Matched nothing. Stays visible; never redistributed silently |
+
+Caveats that change what a number means. Preserve them into the output:
+
+| Situation | Consequence |
+|---|---|
+| Cluster launched from a pool (Azure/AWS) | Cloud resources inherit pool and workspace tags only — cluster tags never reach the VMs, so Azure Cost Analysis cannot see them |
+| Pool tag key collides with cluster tag key | Pool tag wins; the cluster tag is silently dropped on cloud resources |
+| Custom tag key collides with a default | Custom key is prefixed `x_` |
+| Job runs on all-purpose compute | No `job_id` on the billing record. Per-job attribution is impossible on shared all-purpose compute — this is a structural gap, not a query problem |
+| Notebook runs inside a job | The job's serverless usage policy applies; the notebook's is ignored |
+| Pipeline in development mode | Policy tag updates take up to 24 h to propagate |
+| Workspace tag change | Up to 1 h to propagate; existing resources need a restart |
+| Multiple policies assigned to one user | First alphabetically becomes the default |
+| Query tags | Land in `system.query.history` only, never in `system.billing.usage`, and only for SQL warehouse queries |
+| Unity Catalog tags | Governance only. They do not appear in billing usage |
+
+Reserved keys that must not be used as custom tags: `Vendor`, `ClusterId`, `ClusterName`, `Creator`,
+`Name`, `RunName`, `JobId`, `DatabricksInstancePoolId`, `DatabricksInstancePoolCreatorId`,
+`SqlWarehouseId`, the `LakehouseMonitoring*` family, and the `budget-policy-*` family. Overriding
+`Name` breaks cluster tracking and auto-termination — a tagging change that causes runaway cost.
+
+Tags cannot be applied retroactively to historical billing records. A tagging improvement is a
+prerequisite that improves future attribution, never a saving.
+
+Shared resources need proportional allocation. For a warehouse serving several teams, weight the
+warehouse cost by query execution time from `system.query.history`, and state the method and its
+coverage — queries without a team tag are unallocated, not free.
+
+## Cost bases and FOCUS vocabulary
+
+Four bases, never silently combined. FOCUS v1.4 column identifiers give them stable names:
+
+| Basis | FOCUS column | Meaning here |
+|---|---|---|
+| Billed | `BilledCost` (M) | What the invoice charges. Needs Azure Cost Management |
+| Effective | `EffectiveCost` (M) | Amortized, including commitment discounts |
+| List | `ListCost` (M) | Usage × time-valid public price. What `list_prices` gives you |
+| Contracted | `ContractedCost` (M) | Negotiated rate. Not derivable from `list_prices` |
+
+`system.billing.list_prices` exposes `pricing.default` and `pricing.effective_list`. Effective list
+resolves list plus promotional pricing. **Neither reflects negotiated discounts.** Treat Databricks
+list cost and Azure billed cost as different measures — never invent a global discount factor to
+convert one into the other.
+
+Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedTags`, and
+`AllocatedMethodDetails` (all conditional). Use them when stating how a shared cost was split.
+
+## Evidence invariants
+
+- Record source, query or export identifier, retrieval time, evidence period, currency, cost basis,
+  and coverage for every figure.
+- Join published prices on cloud, SKU, and validity interval. Real SKU names carry tier and region
+  (`PREMIUM_ALL_PURPOSE_SERVERLESS_COMPUTE_US_EAST`), so match the region you are actually pricing.
+- Query every region relevant to an Azure price counterfactual.
+- Classic compute cost is DBU plus VM plus material ancillary cost. Serverless SKUs bundle the VM —
+  adding a VM line to a serverless workload double-counts it.
+- Missing records prove nothing. Not zero cost, not zero use, not ownership.
+- User assertions are valid business context and are not billing evidence.
+
+## Freshness overlay
+
+Confirmed drift as of 2026-07-01. Treat every item as re-checkable, not settled:
+
+- **"Serverless budget policies" are now "serverless usage policies."** The mechanism and the
+  `budget_policy_id` column are unchanged; only the name moved.
+- **DLT is now "Lakeflow Spark Declarative Pipelines" — in name only.** Billing is untouched:
+  origin `DLT`, SKUs `DLT_CORE/PRO/ADVANCED_COMPUTE`. Do not rename anything in billing logic.
+- **Monitoring's origin changed** to `DATA_QUALITY_MONITORING`.
+- **`ai_query` bills under `MODEL_SERVING`**, not `AI_FUNCTIONS`.
+- **Genie moved to pay-as-you-go on 2026-07-06** with its own metered DBUs, 150 free per identified
+  user per month, and no free allowance for service principals.
+- **Lakebase snapshot storage became billable 2026-06-01.**
+- **The Standard tier is being retired** — Azure auto-upgrades to Premium on 2026-10-01. Flag
+  Standard-tier prices as sunsetting rather than quoting them as durable.
+- **Governed tags went GA 2026-04-02.** Still Public Preview: serverless usage policies,
+  `system.query.history`, query tags, Lakeflow pipeline tags, account budgets.
+- Public pricing pages render figures in JavaScript, so static fetches cannot confirm `$/DBU`. Live
+  `list_prices` is the only reliable price source.
+
+## Fallbacks
+
+Each plane degrades to a user-provided export, then to an explicitly limited estimate. When direct
+access is missing, generate a targeted query or a precise export request — never install a
+dependency, never create infrastructure, and never resize compute to make a query run.
+
+Where a workspace spans metastores, remember `system.billing.usage` is regional while
+`system.billing.workspaces` is global. A single-metastore query silently under-reports a
+multi-region estate; say so rather than presenting a partial total as complete.
