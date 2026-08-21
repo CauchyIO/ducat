@@ -219,8 +219,10 @@ already available in the user's environment and falls back to supplied exports. 
 service or CLI merely to coordinate existing capabilities.
 
 It ships from its own repository, so the design, the skill and its references travel together and
-install as one unit. No file is duplicated from another repository: material originating elsewhere
-is distilled into the references and cited there, never copied in alongside them.
+install as one unit. Material originating elsewhere is distilled into the references and cited
+there, never copied in alongside them as a second copy of the source. Third-party standards are
+carried the same way, as distilled enumerations, with their licence obligations recorded in
+`NOTICE.md`.
 
 ```text
 databricks-cost-optimizer/
@@ -232,6 +234,7 @@ databricks-cost-optimizer/
 ├── docs/
 │   └── skill-spec.md
 ├── README.md
+├── NOTICE.md
 └── LICENSE
 ```
 
@@ -243,6 +246,7 @@ databricks-cost-optimizer/
 | `references/proposal-contract.md` | Calculation contract, decision-card shape, and final artifact structure | Sections 7, 8 and 9 |
 | `docs/skill-spec.md` | This document, as the record of why the skill behaves as it does | — |
 | `README.md` | Repository entry point: what the skill is, how to install and invoke it | — |
+| `NOTICE.md` | Source, licence, attribution and retrieval date for every third-party standard carried in the references | Section 6.5 |
 | `LICENSE` | MIT | — |
 
 The two references are kept apart because they load at different moments. `data-sources.md` is
@@ -344,8 +348,10 @@ infrastructure and ancillary Azure costs.
 
 ### 6.5 Practice sources
 
-The existing FinOps materials are the canonical seed for the opportunity catalog, not optional
-background reading:
+Two bodies of material seed the references. Neither is optional background reading.
+
+**Internal material.** Distilled into the references; the seeds themselves are not carried into the
+repository.
 
 | Seed material | Contribution |
 |---|---|
@@ -354,10 +360,19 @@ background reading:
 | Databricks cost tracking guide | Broader tracking, allocation, governance, workload, budget, and optimization practices |
 | Pricing reassessment findings | Mandatory freshness overlay for renamed products, changed origins, new fields, tier changes, and price drift |
 
-Each seed is internal Cauchy material. The distilled reference records the seed it came from and
-the date it was distilled; the seeds themselves are not carried into the repository. The skill
-routes explicitly to the packaged references after scope selection rather than loading the complete
-guide at runtime.
+**Third-party standards.** Carried as distilled enumerations — canonical identifiers, titles and
+URLs only, never reproduced prose — each with its source, licence, attribution and retrieval date
+recorded in `NOTICE.md`.
+
+| Standard | Contribution | Licence |
+|---|---|---|
+| FinOps Framework, FinOps Foundation | Canonical practice taxonomy of four domains and twenty-two capabilities, giving invariant 5 a fixed vocabulary for the practice each opportunity traces to | CC BY 4.0 |
+| FOCUS v1.4, Joint Development Foundation | Standard names for the cost bases in 7.1 (`BilledCost`, `EffectiveCost`, `ListCost`, `ContractedCost`) and for attribution method (`AllocatedMethodId`, `AllocatedTags`) | CC BY 4.0 |
+
+A distilled reference records the seed it came from and the date it was distilled. A standard is
+refreshed by re-running its distillation rather than edited in place, and a refreshed enumeration
+supersedes the packaged copy. The skill routes explicitly to the packaged references after scope
+selection rather than loading the complete guide at runtime.
 
 ### 6.6 Scope routing
 

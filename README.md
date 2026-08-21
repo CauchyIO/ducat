@@ -52,9 +52,13 @@ databricks-cost-optimizer/
 ├── docs/
 │   └── skill-spec.md
 ├── README.md
+├── NOTICE.md
 └── LICENSE
 ```
 
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
+
+The references will carry distilled enumerations of the FinOps Framework and FOCUS v1.4, both
+CC BY 4.0. Their attribution obligations are recorded in [NOTICE.md](NOTICE.md).
