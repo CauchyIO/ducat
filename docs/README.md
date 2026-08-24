@@ -16,7 +16,6 @@ last section.
 | `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
 | `map-workspaces-to-azure.md` | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
 | `identity-and-credentials.md` | Which identity a command runs as, and how to change it back | A command acts as the wrong principal, or a credential misbehaves |
-| `demo-script.md` | The shape of the demo: four beats, two audiences | Showing this to a team or a client |
 | `decisions/` | Dated records of a choice and the reasoning behind it | You want to know why something is the way it is |
 
 Session transcripts from validation runs are **not here and not committed**. They capture whole
