@@ -42,6 +42,16 @@ changes if a workspace moves.
 Without Azure access, the portal shows the same facts one workspace at a time: **Overview →
 Managed Resource Group**, with the subscription in the breadcrumb.
 
+## Verify before using it
+
+Count both sides. The workspaces returned by Resource Graph must reconcile with those in
+`system.access.workspaces_latest`; a shortfall means a workspace sits in a subscription the caller
+cannot read, and the map is incomplete rather than small.
+
+Do not infer a managed resource group from its name. The default is
+`databricks-rg-<workspace>-<hash>`, but it can be set to anything at creation — one workspace in the
+first estate mapped this way used a plain `dbrmanagedrg`. Read the property; never pattern-match it.
+
 ## What the map is for
 
 It sizes the access request. One cost-reader grant is needed per subscription holding a workspace in
