@@ -59,6 +59,10 @@ Starting authorities — follow successor pages when Microsoft moves them, and r
 **System tables have no SLA.** Data typically lands hours after the usage. They are an accounting
 source, not an operational one — never present a system-table figure as real-time.
 
+**Azure Cost Management throttles hard.** A second query within a minute returns HTTP 429. Put every
+grouping you need into one query rather than looping over scopes, and back off in minutes rather
+than seconds. A 429 is a rate limit, not an access problem — do not read it as missing permission.
+
 ## The core join
 
 Everything starts here. Get this wrong and every downstream number is wrong.
@@ -224,6 +228,14 @@ resolves list plus promotional pricing. **Neither reflects negotiated discounts.
 list cost and Azure billed cost as different measures — never invent a global discount factor to
 convert one into the other.
 
+**The two planes may not even share a currency.** One estate priced Databricks usage in USD while
+Azure reported EUR, so the figures were never comparable as printed. State the currency beside every
+figure, never sum across two, and do not apply an exchange rate the evidence did not supply — a
+converted number is a modeled number and loses its measured label.
+
+Where amortized cost equals actual cost, there is no commitment or reservation in play. That is a
+finding, not a null result: it says the discount picture is empty rather than unavailable.
+
 Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedTags`, and
 `AllocatedMethodDetails` (all conditional). Use them when stating how a shared cost was split.
 
@@ -236,6 +248,11 @@ Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedT
 - Query every region relevant to an Azure price counterfactual.
 - Classic compute cost is DBU plus VM plus material ancillary cost. Serverless SKUs bundle the VM —
   adding a VM line to a serverless workload double-counts it.
+- **Per-workspace infrastructure is never bundled, however serverless the workload.** A workspace's
+  managed resource group bills for its NAT gateway, public IPs and storage account whether or not
+  anything runs. Measured in one estate: a workspace with zero DBUs for a week still cost €7.38,
+  ninety percent of it NAT gateway — around €384 a year to exist. No Databricks system table shows
+  a cent of it. Serverless closes the per-workload gap and never touches this one.
 - Missing records prove nothing. Not zero cost, not zero use, not ownership.
 - User assertions are valid business context and are not billing evidence.
 
