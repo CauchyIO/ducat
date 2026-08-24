@@ -34,8 +34,8 @@ confirmed. Three witnesses remain.
 
 ## What it can claim
 
-Access it does not have narrows what the skill says rather than stopping the assessment. It reports
-what its evidence supports, and labels every figure with the basis behind it.
+A missing source narrows what the skill may claim; it does not stop the assessment. The skill
+reports what its evidence supports and labels every figure with the basis behind it.
 
 ```mermaid
 flowchart LR
