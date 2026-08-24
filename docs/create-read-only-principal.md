@@ -118,19 +118,33 @@ databricks grants get-effective CATALOG <catalog> --principal $SP
 databricks grants get-effective SCHEMA <catalog>.<schema> --principal $SP
 ```
 
-## Incomplete
+## The workspace-catalog exception
 
-The write probe currently **succeeds**, so this guide is not finished.
+The write probe above will **succeed** against the workspace catalog's `default` schema, and that is
+not a misconfiguration. Databricks grants every workspace principal create rights there through an
+automatic `_workspace_users_<catalog>_<workspace-id>` group. Membership is implicit and
+system-managed, Unity Catalog has no `DENY`, and removing the `workspace-access` entitlement does
+not change it. The only way to remove those rights is to revoke the grant from every user of the
+workspace.
 
-Databricks grants every workspace principal create rights on the workspace catalog's `default`
-schema, through an automatic `_workspace_users_<catalog>_<workspace-id>` group. The principal
-inherits `CREATE_TABLE` there. Unity Catalog has no `DENY`, so it cannot be patched over.
+Do not revoke it. It disrupts colleagues for one scratch schema, and a client workspace will not
+permit it — a design that depends on it does not travel.
 
-Remaining steps:
+Probe a governed catalog instead, where the boundary is real:
 
-1. Remove the `workspace-access` entitlement and re-check whether implicit membership follows it.
-   `databricks service-principals patch <scim-id> --json '{"Operations":[{"op":"remove","path":"entitlements[value eq \"workspace-access\"]"}],"schemas":["urn:ietf:params:scim:api:messages:2.0:PatchOp"]}'`
-2. If it does not, ask the catalog owner to revoke those defaults from the group.
-3. Re-run the effective-privilege sweep and the write probe, and record both.
-4. Ask an account admin to narrow `SELECT` on `system` to the five schemas the skill reads.
-5. Rotate the secret once the MCP client is wired.
+```sh
+dbsp api post /api/2.0/sql/statements --json '{
+  "warehouse_id":"<warehouse-id>",
+  "statement":"CREATE TABLE <governed-catalog>.<schema>.write_probe (x INT)",
+  "wait_timeout":"30s"}'          # expect state FAILED, PERMISSION_DENIED
+```
+
+What the principal ends up with: read on `system`, `BROWSE` or nothing on every governed catalog,
+`CAN_USE` on one warehouse, and create rights confined to the workspace catalog's `default` schema.
+It cannot read data in a governed catalog, modify any existing object anywhere, or reach a job,
+cluster or warehouse beyond running queries on the one it was given.
+
+## Remaining
+
+1. Ask an account admin to narrow `SELECT` on `system` to the schemas the skill reads.
+2. Rotate the OAuth secret once the MCP client is wired.
