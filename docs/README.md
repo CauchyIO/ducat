@@ -1,8 +1,12 @@
 # Documentation
 
-Two kinds of document live here. `docs/` explains **how the skill was designed and how to connect
-it**. `references/` holds what the skill actually reads at runtime, and that is where most of the
-criteria a client would want to argue with live — see the last section.
+This guide covers `docs/`. The repository root `README.md` covers the skill itself — what it does
+and how to install it.
+
+Two kinds of document exist. `docs/` explains **how the skill was designed and how to connect it**.
+`references/`, at the repository root beside this folder, holds what the skill actually reads at
+runtime, and that is where most of the criteria a client would want to argue with live — see the
+last section.
 
 | File | What it is | Read it when |
 |---|---|---|
@@ -34,7 +38,8 @@ correct them only if they are wrong about the past.
 ## Where the analytical criteria live
 
 If the question is *what counts as evidence* or *what counts as a saving*, the answer is in
-`references/`, not here:
+`references/`, not here. That folder has its own guide at `references/README.md`, which enumerates
+each lever in full. In short:
 
 - **`data-sources.md`** — the evidence precedence ladder, the four cost bases, the attribution
   populations (native, manual, inferred, unallocated) and the rule that unallocated cost stays

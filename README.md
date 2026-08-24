@@ -47,16 +47,28 @@ the skill's description.
 ```text
 databricks-cost-optimizer/
 ├── SKILL.md
-├── references/
+├── references/                     ← what the skill reads at runtime
+│   ├── README.md                   ← the criteria, and how to change them
 │   ├── data-sources.md
 │   ├── opportunity-catalog.md
 │   └── proposal-contract.md
-├── docs/
-│   └── skill-spec.md
+├── docs/                           ← how it was designed and how to connect it
+│   ├── README.md                   ← what each document is for
+│   ├── skill-spec.md
+│   ├── create-read-only-principal.md
+│   ├── connect-mcp-server.md
+│   ├── smoke-check.md
+│   └── logs/
+├── .mcp.json
+├── .claude/settings.json
 ├── README.md
 ├── NOTICE.md
 └── LICENSE
 ```
+
+Two guides orient a new reader. [`references/README.md`](references/README.md) enumerates the levers
+that decide what the skill may claim and what counts as a saving — start there to revise criteria.
+[`docs/README.md`](docs/README.md) names each design and setup document and says when to read it.
 
 ## Licence
 
