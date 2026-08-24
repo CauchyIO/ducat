@@ -1,7 +1,6 @@
-# Skill writer log
+# Writing the skill package
 
-**Date:** 2026-08-21
-**Change:** Implemented the skill package from `docs/skill-spec.md`.
+**Decision record — 2026-08-21.** The skill package was implemented from `docs/skill-spec.md`.
 
 ## What was written
 

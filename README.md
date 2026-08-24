@@ -78,7 +78,9 @@ databricks-cost-optimizer/
 │   ├── create-read-only-principal.md
 │   ├── connect-mcp-server.md
 │   ├── smoke-check.md
-│   └── logs/
+│   ├── map-workspaces-to-azure.md
+│   ├── identity-and-credentials.md
+│   └── decisions/
 ├── .mcp.json
 ├── .claude/settings.json
 ├── README.md

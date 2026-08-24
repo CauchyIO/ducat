@@ -222,3 +222,7 @@ CLAUDE.md
 
 # Local environment notes, never committed
 /environment.local.md
+
+# Validation logs
+# Session transcripts from validation runs — whole sessions, credentials included
+transcripts/

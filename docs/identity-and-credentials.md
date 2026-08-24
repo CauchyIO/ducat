@@ -1,6 +1,6 @@
-# Which identity the Databricks CLI uses
+# Identity and credentials
 
-**Date:** 2026-08-21
+Which identity a command runs as, and how to change it back.
 
 Two identities now exist on this machine. Confusing them produced a false result during CAU-1350,
 so this note records how the CLI chooses and how to undo the choice.
