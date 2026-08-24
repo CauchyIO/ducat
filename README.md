@@ -80,6 +80,7 @@ databricks-cost-optimizer/
 │   ├── smoke-check.md
 │   ├── map-workspaces-to-azure.md
 │   ├── identity-and-credentials.md
+│   ├── demo-script.md
 │   └── decisions/
 ├── .mcp.json
 ├── .claude/settings.json
