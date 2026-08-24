@@ -10,6 +10,7 @@ the 2026-07-01 pricing reassessment findings, and FOCUS v1.4 (see `NOTICE.md`).
 - [Precedence](#precedence)
 - [Sources and what each supports](#sources-and-what-each-supports)
 - [The core join](#the-core-join)
+- [Executing through the MCP server](#executing-through-the-mcp-server)
 - [Billing origin is not SKU](#billing-origin-is-not-sku)
 - [Attribution](#attribution)
 - [Cost bases and FOCUS vocabulary](#cost-bases-and-focus-vocabulary)
@@ -37,6 +38,7 @@ on a mutable vendor fact.
 |---|---|---|
 | Databricks usage | `system.billing.usage` | Usage quantity, SKU, product, resource, identity, tag attribution |
 | Historical published cost | Date-valid `system.billing.list_prices` | Historical list cost, normalized comparisons |
+| Per-statement attribution | `system.billing.attributed_usage` | DBSQL statement-level DBUs, query tags, executing identity. Empty in some accounts — check before designing around it |
 | Workload behaviour | `system.lakeflow.*`, `system.compute.*`, `system.query.history`, serving telemetry | Runtime, failures, utilization, schedules, consumers, performance |
 | Object configuration | Read-only Databricks APIs or CLI | Current settings, ownership, policies, resource relationships |
 | Actual Azure cost | Cost Management actual or amortized data | Billed cost, discounts, classic infrastructure, invoice reconciliation |
@@ -65,27 +67,64 @@ Everything starts here. Get this wrong and every downstream number is wrong.
 SELECT
   u.billing_origin_product,
   u.sku_name,
-  u.usage_date,
-  u.custom_tags,
-  u.usage_quantity AS dbus,
-  u.usage_quantity * lp.pricing.effective_list.default AS estimated_list_cost
+  sum(u.usage_quantity)                                     AS dbus,
+  sum(u.usage_quantity * lp.pricing.effective_list.default) AS list_cost
 FROM system.billing.usage u
 JOIN system.billing.list_prices lp
-  ON lp.sku_name = u.sku_name
+  ON  lp.cloud         = u.cloud
+  AND lp.sku_name      = u.sku_name
+  AND lp.usage_unit    = u.usage_unit
+  AND lp.currency_code = :currency
   AND u.usage_end_time >= lp.price_start_time
   AND (lp.price_end_time IS NULL OR u.usage_end_time < lp.price_end_time)
 WHERE u.usage_date >= :period_start
   AND u.usage_date <  :period_end
+GROUP BY ALL
+ORDER BY list_cost DESC
+LIMIT 50
 ```
 
-Two failure modes to avoid:
+**Grain decides the row count, not the `LIMIT`.** Period totals over an account this size return
+around a dozen rows. Add `usage_date` to see a trend and the same query returns one row per driver
+per day — 71 rows for a single week here, and worse over a month. Take the period total first, then
+ask for a trend on the one scope that earned it.
+
+Break down by tag, job or warehouse with a second grouped query. Never return the detail and sum it
+afterwards.
+
+Three failure modes to avoid:
 
 **Dropping the price validity window.** Without `price_start_time` / `price_end_time`, a SKU with
 more than one price record fans out and inflates the total. This is the most common Databricks cost
 calculation error. It also means you must never apply today's price retroactively across a whole
-baseline — a price change inside the period is a real feature of the period.
+baseline — a price change inside the period is a real feature of the period. `PREMIUM_JOBS_COMPUTE`
+has been $0.175, then $0.350, now $0.300: pricing 2018 usage at today's rate is wrong by 17%.
+
+**Dropping `currency_code`.** `list_prices` holds one row per currency per price period. Omit the
+filter in an account that publishes more than one and every usage record matches twice, doubling the
+cost silently and plausibly. Join on `cloud` and `usage_unit` for the same reason.
 
 **Grouping by `sku_name` alone.** See below.
+
+## Executing through the MCP server
+
+Queries reach Databricks through the managed SQL MCP server, using `execute_sql_read_only`. The
+read-write tool on that server is denied by configuration; the identity behind it cannot write
+either.
+
+Two behaviours change how a query must be written:
+
+**Results are truncated to protect the context window.** A truncated result looks exactly like a
+complete one unless the `truncated` flag is checked. Never eyeball a row count and assume you have
+the whole set — aggregate so the whole set is small.
+
+**Execution is asynchronous.** A call returns a statement ID with `PENDING`; the result arrives from
+`poll_sql_result`. A cold warehouse takes a minute or so, and that is a wait, not a failure.
+
+Every packaged query therefore: aggregates in SQL, bounds its period to the confirmed scope,
+orders by the measure that matters, and carries `LIMIT 100` or tighter. System tables also refuse
+insufficiently selective queries outright — `System Table query returned too much data` is a
+missing predicate, not an outage.
 
 ## Billing origin is not SKU
 
@@ -154,7 +193,7 @@ Caveats that change what a number means. Preserve them into the output:
 | Pipeline in development mode | Policy tag updates take up to 24 h to propagate |
 | Workspace tag change | Up to 1 h to propagate; existing resources need a restart |
 | Multiple policies assigned to one user | First alphabetically becomes the default |
-| Query tags | Land in `system.query.history` only, never in `system.billing.usage`, and only for SQL warehouse queries |
+| Query tags | Never in `system.billing.usage`. They reach `system.query.history`, and statement-level `system.billing.attributed_usage` where that table is populated — confirm it carries rows before relying on it |
 | Unity Catalog tags | Governance only. They do not appear in billing usage |
 
 Reserved keys that must not be used as custom tags: `Vendor`, `ClusterId`, `ClusterName`, `Creator`,
@@ -226,6 +265,11 @@ Each plane degrades to a user-provided export, then to an explicitly limited est
 access is missing, generate a targeted query or a precise export request — never install a
 dependency, never create infrastructure, and never resize compute to make a query run.
 
-Where a workspace spans metastores, remember `system.billing.usage` is regional while
-`system.billing.workspaces` is global. A single-metastore query silently under-reports a
-multi-region estate; say so rather than presenting a partial total as complete.
+**Billing is global; behaviour is regional.** `system.billing.usage` and `list_prices` cover the
+whole account. `compute`, `lakeflow`, `query` and `access` carry only their own metastore's region,
+and the workspace inventory is `system.access.workspaces_latest` — not a billing table.
+
+A workload running outside your metastore's region therefore appears in the cost total with no
+runtime detail behind it, and the gap is invisible unless you look for it: joining usage to
+`system.lakeflow.jobs` simply returns no name. Report such a scope as cost without detail. Never
+infer a cause you cannot observe, and never read the missing detail as missing cost.
