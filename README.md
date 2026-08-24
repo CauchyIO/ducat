@@ -29,6 +29,23 @@ does, what evidence it may use, and what it may claim. The package derives from 
 
 Not yet validated against the behavioural witnesses in Section 10 of the spec.
 
+## What it can claim
+
+Access it does not have narrows what the skill says rather than stopping the assessment. It reports
+what its evidence supports, and labels every figure with the basis behind it.
+
+```mermaid
+flowchart LR
+  DBX["Databricks system tables"] -->|"usage, list cost, behaviour"| NOW["What it costs today"]
+  AZ["Azure Cost Management"] -->|"billed and amortized cost"| NOW
+  NOW --> ASSUME["Stated assumptions"]
+  ASSUME -->|"modeled, never measured"| TARGET["What a change would cost"]
+```
+
+With Databricks alone, every figure is list cost. Billed cost, negotiated discounts and classic
+infrastructure need Azure as well. And every target-state figure is modeled, because nothing
+measures a change that has not happened yet.
+
 ## Install
 
 Copy or symlink this repository into your skills directory, keeping the directory name:

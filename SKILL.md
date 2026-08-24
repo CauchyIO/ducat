@@ -230,20 +230,47 @@ Query shape is not optional: aggregate, bound the period, cap the rows, per
 every figure came from. A reader who cannot tell a measured baseline from a directional estimate
 will treat both as fact.
 
-Read the table two ways. The first two rows are **complementary planes**, not a descent: Azure Cost
-Management supplies what Databricks SQL structurally cannot — billed cost, discounts, classic
-infrastructure — so reaching it adds a basis rather than replacing one. The last three rows are a
-real fallback, each weaker than the one above. And note what rung 1 does *not* become with perfect
-freshness: usage priced at published rates is list cost. Lag is a separate limitation from basis,
-and closing one never closes the other.
+Sources become available independently — neither live plane implies the other — and documentation is
+a lens on all of them rather than a rung of its own.
 
-| Reachable | What may be claimed | What may not |
-|---|---|---|
-| Live Databricks SQL | List-cost baseline at time-valid prices, observed runtime and utilization, settings history, measured confidence where billed cost also exists | Billed or amortized cost, negotiated discounts, classic VM and ancillary cost |
-| Azure Cost Management as well | Actual and amortized cost, discount effects, complete classic-compute cost, invoice reconciliation | Databricks-side attribution beyond what rung 1 already supports |
-| Documentation only | Mechanisms, constraints, product behaviour, qualitative direction | Any quantity whatsoever |
-| User-supplied exports | Whatever the export covers, labelled with its as-of date and grain | Completeness beyond the export's boundary, or any figure outside its period |
-| Nothing but stated assumptions | A modeled counterfactual with every input named, at directional confidence | Any figure presented as measured, and any saving offered without naming the evidence that would confirm it |
+```mermaid
+flowchart LR
+  subgraph SRC["Sources — availability varies independently"]
+    A["Live Databricks SQL"]
+    B["Azure Cost Management"]
+    C["User-supplied exports"]
+  end
+
+  subgraph FACT["What is being established"]
+    Q1["Present cost"]
+    Q2["Present behaviour<br/>and settings"]
+    Q3["Target-state cost"]
+  end
+
+  A -->|"list basis"| Q1
+  B -->|"billed, amortized"| Q1
+  C -->|"as-of the export"| Q1
+  A -->|"observed"| Q2
+  C -->|"partial"| Q2
+
+  Q1 --> M["Stated assumptions"]
+  Q2 --> M
+  M -->|"modeled — never measured"| Q3
+
+  DOC["Documentation<br/>read alongside every source"] -.-> Q1
+  DOC -.-> Q2
+  DOC -.-> Q3
+```
+
+Four prohibitions the diagram implies and the assessment must honour:
+
+- **Databricks SQL never yields billed cost.** No discounts, no classic VM or ancillary cost, at any
+  freshness. Usage at published rates is list cost — lag and basis are separate limitations, and
+  closing one never closes the other.
+- **Documentation yields no quantity at all.** It explains a mechanism; it never sizes one.
+- **An export supports nothing outside its own period and grain**, and carries both as labels.
+- **Target-state cost is modeled by definition.** Nothing measures a change that has not happened,
+  so a saving is modeled or directional on that side however strong the present-state evidence is.
 
 With no live route at all, name the exports that would restore one — billable usage for the period,
 the jobs and clusters inventory, and the workspace's own usage dashboard — rather than asking the
