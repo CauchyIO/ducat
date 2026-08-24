@@ -230,6 +230,13 @@ Query shape is not optional: aggregate, bound the period, cap the rows, per
 every figure came from. A reader who cannot tell a measured baseline from a directional estimate
 will treat both as fact.
 
+Read the table two ways. The first two rows are **complementary planes**, not a descent: Azure Cost
+Management supplies what Databricks SQL structurally cannot — billed cost, discounts, classic
+infrastructure — so reaching it adds a basis rather than replacing one. The last three rows are a
+real fallback, each weaker than the one above. And note what rung 1 does *not* become with perfect
+freshness: usage priced at published rates is list cost. Lag is a separate limitation from basis,
+and closing one never closes the other.
+
 | Reachable | What may be claimed | What may not |
 |---|---|---|
 | Live Databricks SQL | List-cost baseline at time-valid prices, observed runtime and utilization, settings history, measured confidence where billed cost also exists | Billed or amortized cost, negotiated discounts, classic VM and ancillary cost |
