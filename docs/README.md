@@ -14,6 +14,7 @@ last section.
 | `create-read-only-principal.md` | Runbook for the identity the skill connects as | Setting up a new workspace |
 | `connect-mcp-server.md` | Runbook for wiring the client to Databricks | After the principal exists |
 | `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
+| `map-workspaces-to-azure.md` | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
 | `logs/` | Dated records of what was done and why | Something looks odd and you want the history |
 
 ## What you can change, and where

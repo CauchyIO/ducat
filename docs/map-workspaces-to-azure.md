@@ -1,0 +1,53 @@
+# Map workspaces to Azure
+
+Azure Databricks bills through Azure. Joining cloud cost back to Databricks objects runs through
+each workspace's **managed resource group** — the resource group Databricks creates and fills with
+the VMs, disks, public IPs and NAT a workspace consumes. Without that key, Azure cost is a lump sum
+you cannot attribute.
+
+## The Databricks half
+
+```sql
+SELECT workspace_id, workspace_name, workspace_url, status
+FROM system.access.workspaces_latest
+ORDER BY create_time
+```
+
+Note what this table does **not** carry: any Azure resource ID, subscription or resource group. It
+lists workspaces and nothing about where they live. The Azure half has to come from Azure.
+
+Cancelled workspaces disappear from this table, so a workspace that billed earlier in the period may
+not appear at all. Reconcile against `system.billing.usage` grouped by `workspace_id` rather than
+assuming the inventory is complete.
+
+## The Azure half
+
+Resource Graph queries every subscription you can read, in one call:
+
+```sh
+az extension add --name resource-graph
+az graph query -q "resources
+  | where type =~ 'microsoft.databricks/workspaces'
+  | project name,
+            workspaceId = tostring(properties.workspaceId),
+            workspaceUrl = tostring(properties.workspaceUrl),
+            managedResourceGroup = tostring(properties.managedResourceGroupId),
+            resourceGroup, subscriptionId, tenantId, location" -o table
+```
+
+`properties.workspaceId` is the join key: it equals `workspace_id` in the system tables. Match on
+that rather than on name — workspace names are not unique across subscriptions, and `workspaceUrl`
+changes if a workspace moves.
+
+Without Azure access, the portal shows the same facts one workspace at a time: **Overview →
+Managed Resource Group**, with the subscription in the breadcrumb.
+
+## What the map is for
+
+It sizes the access request. One cost-reader grant is needed per subscription holding a workspace in
+scope, or one at a management group covering them all. Record which subscriptions were granted and
+which were not — an ungranted subscription is reported as list-price only, never quietly dropped.
+
+The map also exposes regional structure. A workspace whose SKUs carry a different region suffix from
+your metastore bills into the same account while its runtime detail stays invisible to your queries.
+Name that workspace in the map so the gap is a known boundary rather than a surprise.
