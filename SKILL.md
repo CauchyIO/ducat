@@ -214,7 +214,36 @@ forward, so an object untouched since before a field shipped reads null where a 
 a null against the row's vintage: a recent row means genuinely unset, an older row means unknown.
 Never report "no schedule" from a null on an old row.
 
-## Routing
+## Reaching Databricks
+
+Rung 1 is the Databricks-managed SQL MCP server at `https://<workspace-hostname>/api/2.0/mcp/sql`.
+Use `execute_sql_read_only` for every query and `poll_sql_result` for anything that returns
+`PENDING`. That server also exposes `execute_sql`, which reads *and writes*; it is denied in
+configuration. Its absence is deliberate — never ask for it, and never route around it.
+
+No warehouse is named in the call. The server picks one the caller may use, and the skill's identity
+holds `CAN_USE` on exactly one, so the choice is settled by permission rather than configuration.
+Query shape is not optional: aggregate, bound the period, cap the rows, per
+`references/data-sources.md`.
+
+**When that route is unavailable, the assessment continues and the claims narrow.** State the rung
+every figure came from. A reader who cannot tell a measured baseline from a directional estimate
+will treat both as fact.
+
+| Reachable | What may be claimed | What may not |
+|---|---|---|
+| Live Databricks SQL | List-cost baseline at time-valid prices, observed runtime and utilization, settings history, measured confidence where billed cost also exists | Billed or amortized cost, negotiated discounts, classic VM and ancillary cost |
+| Azure Cost Management as well | Actual and amortized cost, discount effects, complete classic-compute cost, invoice reconciliation | Databricks-side attribution beyond what rung 1 already supports |
+| Documentation only | Mechanisms, constraints, product behaviour, qualitative direction | Any quantity whatsoever |
+| User-supplied exports | Whatever the export covers, labelled with its as-of date and grain | Completeness beyond the export's boundary, or any figure outside its period |
+| Nothing but stated assumptions | A modeled counterfactual with every input named, at directional confidence | Any figure presented as measured, and any saving offered without naming the evidence that would confirm it |
+
+With no live route at all, name the exports that would restore one — billable usage for the period,
+the jobs and clusters inventory, and the workspace's own usage dashboard — rather than asking the
+user to open access. An export the user can produce in a minute beats an access request that takes a
+week.
+
+## Reference routing
 
 | Read this | When |
 |---|---|
