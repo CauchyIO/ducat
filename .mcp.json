@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "databricks-sql": {
+      "type": "http",
+      "url": "${DATABRICKS_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${DATABRICKS_SP_TOKEN}"
+      }
+    }
+  }
+}
