@@ -22,7 +22,7 @@ does, what evidence it may use, and what it may claim. The package derives from 
 
 | Path | Derived from |
 |---|---|
-| `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, routing |
+| `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, object settings, routing |
 | `references/data-sources.md` | Evidence semantics, precedence, attribution, pricing joins |
 | `references/opportunity-catalog.md` | Optimization practices, routed by scope |
 | `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |

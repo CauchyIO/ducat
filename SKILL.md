@@ -184,6 +184,36 @@ outranks rungs 1 to 3 on a mutable vendor fact. Prices, SKU names, product termi
 availability are never timeless. Record the source and as-of date wherever such a fact affects a
 recommendation.
 
+## Object settings
+
+Settings come from the same system tables as cost, as slowly-changing dimensions carrying a
+`change_time`. That history is why they are the source: an assessment prices a past period, and only
+a snapshot says what a setting *was* during it. A live API returns only what it is now.
+
+| Scope | Table | Carries |
+|---|---|---|
+| Cluster | `system.compute.clusters` | Node types, fixed or autoscale bounds, auto-termination, spot attributes, pools, runtime version, policy id, tags |
+| Warehouse | `system.compute.warehouses` | Type, size, min and max clusters, auto-stop, channel |
+| Job | `system.lakeflow.jobs` | Trigger and cron expression, paused, timeout, health rules, run-as |
+| Pipeline | `system.lakeflow.pipelines` | Pipeline configuration over time |
+
+Not carried: Photon — read `product_features.is_photon` on the usage record instead — cluster-policy
+contents behind `policy_id`, task-level compute mapping, retry and concurrency limits, and
+notification configuration. Ask the user to confirm any of these rather than inferring them, and
+mark the recommendation as resting on a confirmed setting.
+
+**Configuration is intent; the timeline is behaviour.** Corroborate every setting against
+`system.lakeflow.job_run_timeline` or `system.compute.node_timeline` before recommending a change to
+it. Observed in a live workspace: 15 of 16 scheduled jobs were paused, yet 6 of those paused jobs
+ran 21 times in 30 days — pausing stops the trigger, not the job. Meanwhile jobs with no trigger at
+all produced most of the week's runs, orchestrated from outside Databricks. A recommendation drawn
+from the schedule alone would have been wrong about nearly every job.
+
+**A null is not a zero.** These columns were added over time and populate from a row's `change_time`
+forward, so an object untouched since before a field shipped reads null where a value exists. Judge
+a null against the row's vintage: a recent row means genuinely unset, an older row means unknown.
+Never report "no schedule" from a null on an old row.
+
 ## Routing
 
 | Read this | When |
