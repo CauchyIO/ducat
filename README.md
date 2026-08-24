@@ -27,7 +27,10 @@ does, what evidence it may use, and what it may claim. The package derives from 
 | `references/opportunity-catalog.md` | Optimization practices, routed by scope |
 | `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |
 
-Not yet validated against the behavioural witnesses in Section 10 of the spec.
+Validation has begun. One of the four behavioural witnesses in Section 10 has been observed holding
+— the scope gate, against a recorded control that fails it: without the skill the same request
+produced twenty unrequested queries and a set of verdicts; with it, no query ran until a scope was
+confirmed. Three witnesses remain.
 
 ## What it can claim
 

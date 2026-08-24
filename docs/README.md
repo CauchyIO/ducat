@@ -17,6 +17,8 @@ last section.
 | `map-workspaces-to-azure.md` | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
 | `logs/` | Dated records of what was done and why | Something looks odd and you want the history |
 
+Validation transcripts live under `logs/validation_logs/` and are **not committed**. They capture whole sessions including credentials in cleartext, so the evidence stays on the machine that produced it; the findings travel in the issue instead.
+
 ## What you can change, and where
 
 **`skill-spec.md` — the policy layer.** Nine invariants govern everything the skill will and will
