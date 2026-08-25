@@ -49,8 +49,9 @@ Count both sides. The workspaces returned by Resource Graph must reconcile with 
 cannot read, and the map is incomplete rather than small.
 
 Do not infer a managed resource group from its name. The default is
-`databricks-rg-<workspace>-<hash>`, but it can be set to anything at creation — one workspace in the
-first estate mapped this way used a plain `dbrmanagedrg`. Read the property; never pattern-match it.
+`databricks-rg-<workspace>-<hash>`, but it can be set to anything at creation — in the first estate
+mapped this way, one workspace used a short custom name matching no convention at all. Read the
+property; never pattern-match it.
 
 ## What the map is for
 

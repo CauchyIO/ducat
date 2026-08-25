@@ -53,7 +53,7 @@ Scope the principal to single commands instead of the whole shell. In `~/.zshrc`
 
 ```sh
 dbsp() {
-  DATABRICKS_HOST="<host>" \
+  DATABRICKS_HOST="https://<workspace-hostname>" \
   DATABRICKS_CLIENT_ID="<application-id>" \
   DATABRICKS_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w)" \
   databricks "$@"
