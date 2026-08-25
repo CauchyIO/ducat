@@ -231,3 +231,6 @@ personal-notes.md
 
 # Generated deliverables — name a specific estate
 artifacts/
+
+# Scripted test run sheets — local only
+plans/scripted-test.md
