@@ -4,6 +4,41 @@ One job, one week, two independent sources that must agree. This is the cheapest
 that the credential, the warehouse, the MCP transport and the system tables all work — and the first
 place the skill's own honesty rules get tested.
 
+## First: does the evidence exist at all?
+
+Before reconciling anything, confirm the schemas carry rows. One query covers all five:
+
+```sql
+SELECT 'billing.usage' AS source, count(*) AS row_count,
+       cast(min(usage_date) AS string) AS earliest, cast(max(usage_date) AS string) AS latest
+FROM system.billing.usage WHERE usage_date > current_date() - 30
+UNION ALL
+SELECT 'compute.clusters', count(*), cast(min(change_time) AS string), cast(max(change_time) AS string)
+FROM system.compute.clusters
+UNION ALL
+SELECT 'lakeflow.jobs', count(*), cast(min(change_time) AS string), cast(max(change_time) AS string)
+FROM system.lakeflow.jobs
+UNION ALL
+SELECT 'query.history', count(*), cast(min(start_time) AS string), cast(max(start_time) AS string)
+FROM system.query.history WHERE start_time > current_timestamp() - INTERVAL 30 DAYS
+UNION ALL
+SELECT 'access.workspaces_latest', count(*), cast(min(create_time) AS string), cast(max(create_time) AS string)
+FROM system.access.workspaces_latest;
+```
+
+Five rows with a count above zero is the pass. Read `latest` as carefully as the count: a figure
+several days old means the feed has stalled, not that the schema is off.
+
+Zero on `query.history` is often genuine — nobody ran SQL on a warehouse in the window — so widen to
+90 days before treating it as a gap. Zero on `billing.usage` never is, and means the schema is
+enabled but not yet backfilled; check again in a few hours.
+
+Databricks enables these schemas centrally. If one is genuinely empty the escalation is Databricks,
+not a local admin, because the customer-facing enable API refuses them.
+
+The two queries below are the reconciliation, and they come later — after a scope exists to point
+them at.
+
 ## 1. Cost from billing
 
 ```sql
