@@ -24,7 +24,8 @@ does, what evidence it may use, and what it may claim. The package derives from 
 |---|---|
 | `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, object settings, tool and reference routing |
 | `references/data-sources.md` | Evidence semantics, precedence, attribution, pricing joins |
-| `references/opportunity-catalog.md` | Optimization practices, routed by scope |
+| `references/opportunity-catalog.md` | Practice taxonomy, price baseline, scope routing |
+| `references/opportunities/` | Optimization practices, one file per scope type |
 | `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |
 
 Validation has begun. One of the four behavioural witnesses in Section 10 has been observed holding
@@ -71,6 +72,7 @@ databricks-cost-optimizer/
 │   ├── README.md                   ← the criteria, and how to change them
 │   ├── data-sources.md
 │   ├── opportunity-catalog.md
+│   ├── opportunities/               ← one file per scope type
 │   └── proposal-contract.md
 ├── docs/                           ← how it was designed and how to connect it
 │   ├── README.md                   ← what each document is for

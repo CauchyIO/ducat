@@ -1,22 +1,10 @@
 # Opportunity catalog
 
-Optimization practices, routed to the confirmed scope. Load only the section matching the scope
-type — the whole catalog is not meant to be in context at once.
+What every scope needs — the practice taxonomy and the price baseline — plus the route to the one
+scope file that applies. The scope files live in `opportunities/`; load exactly one.
 
 Distilled 2026-08-21 from the Databricks cost component matrix, the Databricks cost tracking guide,
 the 2026-07-01 pricing reassessment findings, and the FinOps Framework (see `NOTICE.md`).
-
-## Contents
-
-- [How to use this](#how-to-use-this)
-- [Practice taxonomy](#practice-taxonomy)
-- [Reference prices](#reference-prices)
-- [Job or pipeline](#job-or-pipeline)
-- [SQL warehouse](#sql-warehouse)
-- [Serving or Vector Search](#serving-or-vector-search)
-- [Team or workstream](#team-or-workstream)
-- [Background platform service](#background-platform-service)
-
 ## How to use this
 
 Every opportunity must trace to a practice below, to observed evidence, and to a reproducible
@@ -107,108 +95,17 @@ Ratios that survive price drift better than the figures do, and that usually dri
    classic.
 5. **Egress is easy to miss** and compounds with Delta Sharing and cross-region replication.
 
-## Job or pipeline
+## Scope routing
 
-Practices: `usage-optimization`, `architecting-workload-placement`, `rate-optimization`,
-`allocation`, `governance-policy-risk`.
+Read exactly one, chosen by the confirmed scope. Reading a second means the scope was not confirmed.
 
-| Opportunity | Evidence to establish it | Trade-off to state |
-|---|---|---|
-| Move off all-purpose onto job compute | Job runs on an `ALL_PURPOSE` origin; ~45% rate gap | Loses interactive attach; cluster start latency per run |
-| Rightsize the cluster | Utilization from `system.compute.*`, autoscale floor never reached, worker count vs runtime curve | Longer runtime; headroom against input growth must be stated |
-| Fix autoscaling bounds | Min workers pinned high, or scale events clustered at the ceiling | Latency at the new floor |
-| Change the schedule | Deadline headroom from downstream consumers; overlap with other work on shared capacity | Deadline risk; the input growth at which headroom disappears |
-| Classic ↔ serverless | Full classic cost (DBU + VM + ancillary) against the serverless rate | Serverless removes VM control and pool reuse; tag mechanism changes to usage policies |
-| Photon on or off | Runtime and DBU change together — Photon carries no separate SKU premium on jobs | Only worth it where the runtime reduction exceeds the DBU increase |
-| Remediate failed and repaired runs | Cost by `result_state`; repair-run cost over 30 days; runs above the P90 baseline | None, usually — this is waste, not a service-level trade |
-| Tier down DLT | `dlt_tier` in use vs features actually used (CDC, expectations, flow lineage) | Losing a tier feature the pipeline depends on |
-| Cut idle time | Auto-termination settings; time between last command and termination | Restart latency for interactive users |
+| Confirmed scope | Read |
+|---|---|
+| A job or Lakeflow pipeline | `opportunities/job-or-pipeline.md` |
+| A SQL warehouse | `opportunities/sql-warehouse.md` |
+| A serving endpoint or Vector Search index | `opportunities/serving-or-vector-search.md` |
+| A team or workstream | `opportunities/team-or-workstream.md` | 
+| A background platform service | `opportunities/background-service.md` |
 
-Attribution note that constrains everything above: **a job on all-purpose compute has no `job_id` on
-its billing record.** Per-job cost on shared all-purpose compute cannot be measured, only modeled.
-Say which one you did.
-
-Normalize by cost per successful run when volume moved during the period. A pipeline that got
-cheaper per run while total cost rose has not regressed.
-
-## SQL warehouse
-
-Practices: `usage-optimization`, `rate-optimization`, `allocation`, `reporting-analytics`.
-
-| Opportunity | Evidence to establish it | Trade-off to state |
-|---|---|---|
-| Shorten auto-stop | Idle minutes between last query and stop, across the period | Cold-start latency on the next query |
-| Resize the warehouse | Query duration distribution, queue time, spill, concurrency | Slower large queries; queueing at peak |
-| Change tier (classic / pro / serverless) | Rate difference for the region against startup behaviour and feature use | Serverless removes control; pro is regionally priced |
-| Align to a schedule | Query arrival by hour and weekday | Out-of-hours users hit a cold warehouse |
-| Fix expensive queries | `system.query.history` by duration, bytes scanned, spill | Engineering time is the change cost |
-| Allocate shared use proportionally | Execution time by `query_tags` team | Untagged queries stay unallocated, never spread silently |
-
-Query tags exist only in `system.query.history`, only for SQL warehouse queries, and never in
-billing usage. Any team split from them is a modeled allocation, not a measured cost.
-
-Watch for AI functions billed through the warehouse context: `ai_query` surfaces under
-`MODEL_SERVING`, and the other `ai_*` functions under `AI_FUNCTIONS`. Both can dominate a warehouse
-line without appearing to be SQL cost.
-
-## Serving or Vector Search
-
-Practices: `usage-optimization`, `architecting-workload-placement`, `unit-economics`.
-
-Both bill in more than one component, which is where assessments usually go wrong.
-
-- **Vector Search** bills endpoint serving on `SERVERLESS_REAL_TIME_INFERENCE` **and** index sync on
-  `JOBS_SERVERLESS_COMPUTE`, both under origin `VECTOR_SEARCH`. An index synced continuously against
-  an endpoint serving few queries spends most of its cost on maintenance nobody asked for.
-- **Model serving** splits between custom inference and the foundation model SKUs. Foundation model
-  pricing is published per 1M tokens; do not carry a flat per-DBU figure into a counterfactual.
-- **Lakebase** bills compute, storage in DSUs, and background maintenance. Snapshot storage became
-  billable 2026-06-01.
-
-| Opportunity | Evidence to establish it | Trade-off to state |
-|---|---|---|
-| Continuous → triggered sync | Sync cost share; index update frequency against query volume | A stated freshness delay, confirmed with every consuming application |
-| Scale-to-zero or right-size the endpoint | Request rate by hour; provisioned concurrency vs served requests | Cold-start latency on first request |
-| Consolidate endpoints | Endpoints serving overlapping models or low traffic | Blast radius; noisy-neighbour latency |
-| Change model tier | Cost per served request by model family | Quality change — needs an evaluation, not an assertion |
-| Retire the workload | Consumers observed over the period; benefit claimed by the owner | Whether anything still depends on it |
-
-Normalize by cost per served request. An endpoint whose cost rose with traffic is behaving
-correctly; one whose cost rose without traffic is the finding.
-
-## Team or workstream
-
-Practices: `allocation`, `invoicing-chargeback`, `reporting-analytics`, `governance-policy-risk`.
-
-A team is not a platform object. Build the mapping to objects that are, then keep the populations
-separate — native, manual, inferred, unallocated — through to the output. A single allocated total
-is what invites the dispute you were asked to settle.
-
-| Opportunity | Evidence to establish it | Trade-off to state |
-|---|---|---|
-| Idle all-purpose compute | Clusters running without commands; auto-termination absent or long | Interactive convenience |
-| Warehouse auto-stop and sizing | As in the warehouse section, scoped to the team's warehouses | Shared warehouses need proportional splitting first |
-| Consolidate duplicated compute | Multiple clusters or warehouses with the same purpose and low utilization | Team autonomy; migration effort |
-| Enforce tagging and usage policies | Unallocated share; tag coverage over time | **Not a saving.** It is a prerequisite that improves future attribution — say so explicitly |
-| Move chargeback to the defensible portion | The native and manual populations, with the inferred and unallocated shown beside them | Charging back less than the true figure until attribution improves |
-
-Deliver the allocation map itself. It is reusable as the team's showback definition and is often
-worth more than the savings figure.
-
-## Background platform service
-
-Practices: `usage-optimization`, `governance-policy-risk`, `unit-economics`.
-
-Predictive Optimization, Data Quality Monitoring, Data Classification, Fine-Grained Access Control,
-Base Environments, AI Runtime. These bill through another service's SKU, are mostly not taggable,
-and are found by filtering on `billing_origin_product` — never by SKU.
-
-| Opportunity | Evidence to establish it | Trade-off to state |
-|---|---|---|
-| Narrow the enablement scope | Cost by catalog or schema against tables actually queried | Losing optimization or monitoring where it was earning its cost |
-| Reduce monitor frequency | Refresh cost against how often results are read | Staleness in a governance signal |
-| Disable where the benefit is unobserved | Cost of the service against measured benefit — query improvement, issues caught | The benefit may be real and unmeasured; say which |
-
-The honest question for this scope is whether the service still earns its cost. Often it does, and
-the finding is a narrowed scope rather than a removal. A background service is also the one place
-where "we did not know we were paying for this" is a legitimate finding on its own.
+A scope that matches none of these is not yet confirmed. Return to the scope gate rather than
+picking the closest file.

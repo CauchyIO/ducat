@@ -50,9 +50,9 @@ each lever in full. In short:
 - **`data-sources.md`** — the evidence precedence ladder, the four cost bases, the attribution
   populations (native, manual, inferred, unallocated) and the rule that unallocated cost stays
   visible. Change these and you change what the skill is allowed to claim.
-- **`opportunity-catalog.md`** — the practice taxonomy and a dated price baseline. The prices carry
-  an as-of date and lose to a live query; the ratios beneath them survive price drift and usually
-  decide the case.
+- **`opportunity-catalog.md`** and **`opportunities/`** — the practice taxonomy, a dated price
+  baseline, and one file per scope type. The prices carry an as-of date and lose to a live query;
+  the ratios beneath them survive price drift and usually decide the case.
 - **`proposal-contract.md`** — which figures may be reported at all, how savings are calculated,
   the rule that overlapping opportunities are a portfolio rather than a sum, the confidence levels,
   and the shape of the decision card a human signs off.

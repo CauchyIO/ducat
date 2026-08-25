@@ -137,8 +137,9 @@ is not a baseline — return to the attribution boundary rather than building on
 
 ### 4. Opportunity selection
 
-Apply only practices relevant to the confirmed scope. Route by scope type into
-`references/opportunity-catalog.md`; do not load the whole catalog.
+Apply only practices relevant to the confirmed scope. Read `references/opportunity-catalog.md` for
+the practice taxonomy and price baseline, then exactly one file from `references/opportunities/`,
+chosen by the confirmed scope. Reading a second scope file means the scope was not confirmed.
 
 Present a quantified shortlist as decision cards. The user selects what deserves a deep dive.
 Unselected items stay observations, not recommendations.
@@ -282,7 +283,8 @@ week.
 | Read this | When |
 |---|---|
 | `references/data-sources.md` | Preflight and baseline — before the scope type matters |
-| `references/opportunity-catalog.md` | After scope selection, routed to the confirmed scope type |
+| `references/opportunity-catalog.md` | After scope selection — taxonomy, prices, and the route onward |
+| `references/opportunities/<scope>.md` | Exactly one, chosen by the confirmed scope |
 | `references/proposal-contract.md` | Quantifying opportunities and writing the handoff |
 
 The two references load at different moments and are deliberately not merged: answering a question
