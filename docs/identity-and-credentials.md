@@ -9,7 +9,7 @@ so this note records how the CLI chooses and how to undo the choice.
 
 | Identity | How it authenticates | What it can do |
 |---|---|---|
-| `pablo@cauchy.io` | OAuth U2M, profile in `~/.databrickscfg`, token in the OS keyring | Workspace admin. Reads and **writes**. |
+| Your own login | OAuth U2M, profile in `~/.databrickscfg`, token in the OS keyring | Workspace admin. Reads and **writes**. |
 | `sp-databricks-cost-optimizer` | OAuth M2M, client ID and secret | Reads `system` only. No write anywhere. |
 
 Identifiers are in `environment.local.md`, which git ignores.
@@ -31,7 +31,7 @@ earlier instruction, and it was the wrong shape.
 ## What went wrong
 
 The environment variables were never set, so the read and write probes both ran as
-`pablo@cauchy.io`. `CREATE TABLE` succeeded, a table was created in `<workspace-catalog>.default`, and the
+your own login. `CREATE TABLE` succeeded, a table was created in `<workspace-catalog>.default`, and the
 read-only boundary was never tested.
 
 ## Revert
@@ -42,7 +42,7 @@ Nothing persistent was changed unless you edited `~/.zshrc`. Check and clear:
 env | grep DATABRICKS          # expect no output
 grep DATABRICKS ~/.zshrc       # remove any export lines found
 unset DATABRICKS_HOST DATABRICKS_CLIENT_ID DATABRICKS_CLIENT_SECRET
-databricks auth describe       # expect User: pablo@cauchy.io
+databricks auth describe       # expect your own user, not the principal
 ```
 
 The keychain entry is inert on its own — it is read only by a command that asks for it.
