@@ -15,7 +15,7 @@ the 2026-07-01 pricing reassessment findings, and FOCUS v1.4 (see `NOTICE.md`).
 - [Attribution](#attribution)
 - [Cost bases and FOCUS vocabulary](#cost-bases-and-focus-vocabulary)
 - [Evidence invariants](#evidence-invariants)
-- [Freshness overlay](#freshness-overlay)
+- [Freshness](#freshness)
 - [Fallbacks](#fallbacks)
 
 ## Precedence
@@ -256,25 +256,11 @@ Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedT
 - Missing records prove nothing. Not zero cost, not zero use, not ownership.
 - User assertions are valid business context and are not billing evidence.
 
-## Freshness overlay
+## Freshness
 
-Confirmed drift as of 2026-07-01. Treat every item as re-checkable, not settled:
-
-- **"Serverless budget policies" are now "serverless usage policies."** The mechanism and the
-  `budget_policy_id` column are unchanged; only the name moved.
-- **DLT is now "Lakeflow Spark Declarative Pipelines" — in name only.** Billing is untouched:
-  origin `DLT`, SKUs `DLT_CORE/PRO/ADVANCED_COMPUTE`. Do not rename anything in billing logic.
-- **Monitoring's origin changed** to `DATA_QUALITY_MONITORING`.
-- **`ai_query` bills under `MODEL_SERVING`**, not `AI_FUNCTIONS`.
-- **Genie moved to pay-as-you-go on 2026-07-06** with its own metered DBUs, 150 free per identified
-  user per month, and no free allowance for service principals.
-- **Lakebase snapshot storage became billable 2026-06-01.**
-- **The Standard tier is being retired** — Azure auto-upgrades to Premium on 2026-10-01. Flag
-  Standard-tier prices as sunsetting rather than quoting them as durable.
-- **Governed tags went GA 2026-04-02.** Still Public Preview: serverless usage policies,
-  `system.query.history`, query tags, Lakeflow pipeline tags, account budgets.
-- Public pricing pages render figures in JavaScript, so static fetches cannot confirm `$/DBU`. Live
-  `list_prices` is the only reliable price source.
+Vendor facts drift: origins get renamed, tiers retire, functions move between billing origins. Those
+carry a distillation date and a review date, so they live in `freshness.md` rather than here. Read it
+during the preflight, before designing a query around a product's current behaviour.
 
 ## Fallbacks
 

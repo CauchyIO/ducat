@@ -24,6 +24,7 @@ does, what evidence it may use, and what it may claim. The package derives from 
 |---|---|
 | `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, object settings, tool and reference routing |
 | `references/data-sources.md` | Evidence semantics, precedence, attribution, pricing joins |
+| `references/freshness.md` | Dated vendor facts, with a review date |
 | `references/opportunity-catalog.md` | Practice taxonomy, price baseline, scope routing |
 | `references/opportunities/` | Optimization practices, one file per scope type |
 | `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |
@@ -71,6 +72,7 @@ databricks-cost-optimizer/
 ├── references/                     ← what the skill reads at runtime
 │   ├── README.md                   ← the criteria, and how to change them
 │   ├── data-sources.md
+│   ├── freshness.md
 │   ├── opportunity-catalog.md
 │   ├── opportunities/               ← one file per scope type
 │   └── proposal-contract.md

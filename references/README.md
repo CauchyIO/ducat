@@ -10,6 +10,7 @@ as a saving, changes something here. See `docs/README.md` for the design and set
 | File | Governs | Read it when |
 |---|---|---|
 | `data-sources.md` | What counts as evidence, and what a figure means | A number is disputed, or attribution looks wrong |
+| `freshness.md` | Vendor facts that drift, with a distillation date and a review date | Preflight, and whenever a product behaves unexpectedly |
 | `opportunity-catalog.md` | The practice taxonomy, the price baseline, and the route to a scope | Deciding what to propose |
 | `opportunities/` | One file per scope type — job, warehouse, serving, team, background service | After the scope is confirmed |
 | `proposal-contract.md` | What may be reported, and how it is calculated | Writing or reviewing a proposal |

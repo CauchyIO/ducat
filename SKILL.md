@@ -283,6 +283,7 @@ week.
 | Read this | When |
 |---|---|
 | `references/data-sources.md` | Preflight and baseline — before the scope type matters |
+| `references/freshness.md` | Preflight — dated vendor facts, carrying a review date |
 | `references/opportunity-catalog.md` | After scope selection — taxonomy, prices, and the route onward |
 | `references/opportunities/<scope>.md` | Exactly one, chosen by the confirmed scope |
 | `references/proposal-contract.md` | Quantifying opportunities and writing the handoff |
