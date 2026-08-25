@@ -226,3 +226,5 @@ CLAUDE.md
 # Validation logs
 # Session transcripts from validation runs — whole sessions, credentials included
 transcripts/
+# Personal working notes — never committed
+personal-notes.md
