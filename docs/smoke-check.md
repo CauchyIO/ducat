@@ -1,8 +1,21 @@
 # Smoke check: prove the evidence path
 
-One job, one week, two independent sources that must agree. This is the cheapest end-to-end proof
-that the credential, the warehouse, the MCP transport and the system tables all work — and the first
-place the skill's own honesty rules get tested.
+One job, one week, two independent sources that must agree. The cheapest end-to-end proof that the
+credential, the warehouse, the transport and the system tables all work together.
+
+Do not move on until every box is crossed. A half-passed smoke check is worse than none, because
+every later figure inherits the doubt without carrying the warning.
+
+| # | Confirm | Crossed when | Where |
+|---|---|---|---|
+| 1 | The schemas carry rows | All five sources return a count above zero, with a recent `latest` | [Does the evidence exist](#first-does-the-evidence-exist-at-all) |
+| 2 | One job is chosen as the subject | It ran at least twice inside the window, so a rate can be compared across runs | [Cost from billing](#1-cost-from-billing) |
+| 3 | Its cost is priced from billing | The query returns usage rows joined to a date-valid price | [Cost from billing](#1-cost-from-billing) |
+| 4 | Its runs are listed independently | The timeline returns runs for the same job and window | [Runs from the timeline](#2-runs-from-the-timeline) |
+| 5 | The two agree | DBU per hour holds constant across billed runs | [What agreement looks like](#what-agreement-looks-like) |
+| 6 | Every mismatch has a named cause | Each unmatched run traces to lag, a window boundary, or a region | [Appears to fail](#two-ways-it-appears-to-fail-when-nothing-is-wrong) · [Genuinely fails](#when-it-genuinely-fails) |
+
+Box 5 is the one that matters. Matching totals can agree by coincidence; a stable rate cannot.
 
 ## First: does the evidence exist at all?
 
@@ -40,6 +53,9 @@ The two queries below are the reconciliation, and they come later — after a sc
 them at.
 
 ## 1. Cost from billing
+
+Pick a job that ran **at least twice** in the window. One run cannot show a constant rate, and a
+constant rate is what box 5 tests.
 
 ```sql
 SELECT u.usage_date, u.sku_name, round(u.usage_quantity, 4) AS quantity,
