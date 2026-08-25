@@ -53,7 +53,10 @@ measures a change that has not happened yet.
 
 ## Install
 
-Copy or symlink this repository into your skills directory, keeping the directory name:
+The skill needs a read-only identity and a connection before it can read anything;
+[`docs/getting-started.md`](docs/getting-started.md) walks the whole sequence. To install the
+package itself, copy or symlink this repository into your skills directory, keeping the directory
+name:
 
 ```sh
 ln -s "$PWD" ~/.claude/skills/databricks-cost-optimizer
@@ -78,6 +81,7 @@ databricks-cost-optimizer/
 │   └── proposal-contract.md
 ├── docs/                           ← how it was designed and how to connect it
 │   ├── README.md                   ← what each document is for
+│   ├── getting-started.md          ← the setup sequence, in order
 │   ├── skill-spec.md
 │   ├── create-read-only-principal.md
 │   ├── connect-mcp-server.md

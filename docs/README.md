@@ -10,6 +10,7 @@ last section.
 
 | File | What it is | Read it when |
 |---|---|---|
+| `getting-started.md` | The setup sequence, in order, with what each step achieves | **Start here** if you are standing this up |
 | `skill-spec.md` | The design of record: scope, invariants, workflow, validation strategy | You want to know why the skill behaves as it does, or you disagree with a rule |
 | `create-read-only-principal.md` | Runbook for the identity the skill connects as | Setting up a new workspace |
 | `connect-mcp-server.md` | Runbook for wiring the client to Databricks | After the principal exists |
