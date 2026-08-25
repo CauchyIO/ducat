@@ -29,7 +29,8 @@ different authorization.
    assessment, and it returns candidates rather than conclusions.
 3. Directly attributed, manually confirmed, inferred, and unallocated cost stay separate all the way
    to the output. Collapsing them into one total destroys the reader's ability to judge it.
-4. Actual, amortized, list-price, and modeled values are labelled and never silently combined.
+4. Actual, amortized, list-price, and modeled values are labelled and never silently combined, and
+   neither are currencies. `references/data-sources.md` defines the bases; this is the rule.
 5. Every opportunity links a practice, observed evidence, a reproducible calculation, trade-offs,
    and a verification method.
 6. A cheaper design is a saving only when required output, performance, reliability, and service

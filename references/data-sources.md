@@ -214,6 +214,9 @@ coverage — queries without a team tag are unallocated, not free.
 
 ## Cost bases and FOCUS vocabulary
 
+**Canonical.** The four bases are defined here and nowhere else. Other files apply them; when a rule
+about what a figure *means* needs changing, it changes here and the others inherit it.
+
 Four bases, never silently combined. FOCUS v1.4 column identifiers give them stable names:
 
 | Basis | FOCUS column | Meaning here |

@@ -44,10 +44,16 @@ Report a range or sensitivity whenever a material input is uncertain, and name t
 
 ## Which cost the figures are in
 
+The four bases — billed, effective, list, contracted — are defined in `data-sources.md`, which is
+canonical. What this file adds is which of them a *proposal* may lead with.
+
 Billed or amortized cost is the primary basis when it is available, and the proposal states why that
-basis fits the decision. Published-list cost (usage × time-valid public price) and modeled cost (a
-counterfactual from measured inputs and stated assumptions) are separate planes. They are never
-silently combined — not with billed cost, and not with each other.
+basis fits the decision. Where it is not available, say so in the same breath as the figure rather
+than in a footnote. Modeled cost — a counterfactual from measured inputs and stated assumptions — is
+a separate plane again, and a target state is always modeled.
+
+Carry the currency beside every figure and never sum across two. Both rules, and the reason a
+converted number stops being a measured one, are in `data-sources.md`.
 
 Classic compute cost includes DBUs, Azure VM cost, and material ancillary cost. Serverless SKUs
 bundle the VM; adding a VM line to a serverless workload double-counts it. Storage, network,
