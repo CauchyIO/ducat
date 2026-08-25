@@ -228,3 +228,6 @@ CLAUDE.md
 transcripts/
 # Personal working notes — never committed
 personal-notes.md
+
+# Generated deliverables — name a specific estate
+artifacts/
