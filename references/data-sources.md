@@ -176,6 +176,18 @@ subfields including `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`
 
 ## Attribution
 
+**Check for a native identifier before offering a method.** `usage_metadata` carries the object's
+own identity on the billing record — `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`,
+`app_name`, `notebook_id`, `database_instance_id` — and where one covers the scope, that is native
+attribution: the platform has already done the work. Query for it first, offer it first, and label
+it native.
+
+Tags, name matching and a user-supplied object list are what you fall back to when no native
+identifier covers the scope. Offering them alongside native as equal choices invites the user to
+pick a weaker method than the evidence supports, and the label follows the method rather than the
+evidence: a native mapping recorded as manual weakens every figure downstream of it, because
+confidence ranks the shortlist and the portfolio rule leans on those labels.
+
 Resolve scope before aggregation, and keep the populations apart:
 
 | Population | Meaning |

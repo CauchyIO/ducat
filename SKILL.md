@@ -94,6 +94,9 @@ Gather only what is missing and could change the assessment:
 - workspaces, regions, environments;
 - known ownership, attribution rules, material changes during the period.
 
+Check `usage_metadata` for a native identifier before proposing any attribution method — where the
+billing record already names the object, that is the strongest population and no mapping is needed.
+
 Where tags are unreliable, build a confirmed mapping from jobs, pipelines, clusters, warehouses,
 endpoints, catalogs, workspaces, or identities to the scope. Label each mapping **native**,
 **manual**, or **inferred**, and keep unmatched spend visible as **unallocated**.
