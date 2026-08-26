@@ -12,7 +12,7 @@ as a saving, changes something here. See `docs/README.md` for the design and set
 | `data-sources.md` | What counts as evidence, and what a figure means | A number is disputed, or attribution looks wrong |
 | `freshness.md` | Vendor facts that drift, with a distillation date and a review date | Preflight, and whenever a product behaves unexpectedly |
 | `opportunity-catalog.md` | The practice taxonomy, the price baseline, and the route to a scope | Deciding what to propose |
-| `opportunities/` | One file per scope type — job, warehouse, serving, team, background service | After the scope is confirmed |
+| `opportunities/` | One file per scope type — job, warehouse, serving, team, background service, app | After the scope is confirmed |
 | `proposal-contract.md` | What may be reported, and how it is calculated | Writing or reviewing a proposal |
 
 ## The levers, file by file
@@ -36,8 +36,9 @@ as a saving, changes something here. See `docs/README.md` for the design and set
   query. The ratios beneath them — job compute against all-purpose, for instance — survive price
   drift and usually decide the case.
 - **The scope files** in `opportunities/` — job or pipeline, SQL warehouse, serving, team,
-  background service — which determine what the skill even considers for a given target. One loads
-  per assessment; adding an opportunity to the wrong file means it is never considered.
+  background service, app — which determine what the skill even considers for a given target. One
+  loads per assessment; adding an opportunity to the wrong file means it is never considered. The
+  catalogue also states what to do for a scope type none of them covers.
 
 **`proposal-contract.md`**
 

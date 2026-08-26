@@ -106,6 +106,15 @@ Read exactly one, chosen by the confirmed scope. Reading a second means the scop
 | A serving endpoint or Vector Search index | `opportunities/serving-or-vector-search.md` |
 | A team or workstream | `opportunities/team-or-workstream.md` | 
 | A background platform service | `opportunities/background-service.md` |
+| A Databricks App | `opportunities/app.md` |
 
-A scope that matches none of these is not yet confirmed. Return to the scope gate rather than
-picking the closest file.
+**A scope that matches none of these is not a licence to improvise.** Do not ask the user which
+practice lens to apply — routing is this skill's job, and the question arrives at the worst moment,
+after a baseline has been agreed. Instead: pick the file whose billing shape matches, say which and
+why, re-verify every mechanism against current documentation rather than transferring it, and record
+in the proposal both the substitution and any mechanism that did not transfer. Then file the gap so
+the next assessment does not repeat the improvisation.
+
+Billing shape is the criterion, not product family. Anything charging for provisioned uptime rather
+than work done reads closest to `app.md` or `serving-or-vector-search.md`; anything charging per run
+reads closest to `job-or-pipeline.md`.
