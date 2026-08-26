@@ -39,7 +39,8 @@ different authorization.
 8. Education is offered, never forced into the decision flow.
 9. Collect narrowly. Bound query periods to the scope, never request pasted credentials, never
    persist secrets, never retain row-level business data or raw exports in this package, and agree
-   the output location before writing anything.
+   the output location before writing anything — never proposing a git working tree, since the
+   deliverable describes one estate and a repository redistributes what it holds.
 
 ## Workflow
 

@@ -104,7 +104,25 @@ what make it a decision rather than a suggestion.
 ## Final handoff
 
 The only required engagement artifact is `cost-optimization-design.md`. Agree its location before
-writing it.
+writing it, and treat that agreement as a decision rather than a formality.
+
+**The deliverable describes one estate.** It names workspaces, objects, costs, sometimes people. It
+belongs beside the evidence that produced it, on the machine that ran the assessment — not anywhere
+it can be redistributed by an unrelated action.
+
+So: never propose a git working tree, and never accept one without saying what it means. Before
+writing, check whether the chosen path sits inside version control:
+
+```sh
+git -C "$(dirname <path>)" rev-parse --is-inside-work-tree 2>/dev/null
+```
+
+If that returns `true`, say so and offer an ignored directory or a path outside the repository. If
+the user still wants it there, write it and tell them plainly that an assessment of their estate now
+sits one `git add` from wherever that repository pushes. A secret reached a public remote in exactly
+that way during this skill's own construction, through a sweeping add nobody inspected.
+
+The same rule governs transcripts, exports and any scratch file holding query results.
 
 1. **Decision summary** — confirmed scope and period, current cost and basis, selected
    opportunities, gross and net savings, payback, confidence, constraints, required decisions.
