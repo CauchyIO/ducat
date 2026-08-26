@@ -52,10 +52,25 @@ Never add the principal to a group holding `MANAGE` on `system`. `MANAGE` permit
 
 ## 4. Give it one warehouse
 
+The principal needs somewhere to execute SQL. System tables are readable from any warehouse in the
+workspace — the warehouse is compute, not a data source, and has no relationship to what is being
+assessed. List them and copy an ID:
+
+```sh
+databricks warehouses list
+```
+
+Choose a small serverless one, and **not** a warehouse you intend to assess: the assessment's own
+queries would start it, add billed minutes and change the idle profile being measured. Then paste
+that ID in place of `<warehouse-id>`:
+
 ```sh
 databricks warehouses update-permissions <warehouse-id> --json "{\"access_control_list\":[
   {\"service_principal_name\":\"$SP\",\"permission_level\":\"CAN_USE\"}]}"
 ```
+
+Grant exactly one. The MCP server picks a warehouse the caller may use, so a second grant makes the
+choice arbitrary rather than deterministic.
 
 `update-permissions` merges; `set-permissions` replaces. Check the existing owner survived.
 
@@ -75,8 +90,13 @@ The secret prints once. Record its ID and expiry locally; never the secret itsel
 `DATABRICKS_*` environment variables outrank any profile, so exporting them globally makes every
 command run as the principal. Scope them to one command instead. macOS:
 
+The command below prompts for a value and echoes nothing, so the secret never reaches your shell
+history. **What to paste is the `secret` field from step 5's output** — the long string beginning
+`dose`, not the `id` or the `secret_hash` beside it, and not a passphrase of your own. `security`
+calls whatever it stores a "password"; here that word means the credential itself. It asks twice.
+
 ```sh
-security add-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w   # prompts, no history
+security add-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w
 
 dbsp() {
   DATABRICKS_HOST="https://<workspace-hostname>" \
@@ -85,6 +105,15 @@ dbsp() {
   databricks "$@"
 }
 ```
+
+Confirm it stored what you meant before relying on it:
+
+```sh
+security find-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w | cut -c1-4
+```
+
+That should print `dose`. Anything else — a stray character, a pasted comment — means the entry is
+wrong, and the failure will surface later as an authentication error naming no cause.
 
 On Windows, a dedicated `[cost-optimizer-sp]` profile in `.databrickscfg` invoked with `-p` gives
 the same separation.

@@ -46,13 +46,27 @@ well as at the grant:
               "mcp__databricks-sql__poll_sql_result"] } }
 ```
 
-Store the token in the OS keychain and export both variables from your shell profile:
+Store the token in the OS keychain and export both variables from your shell profile.
+
+The first command prompts for a value and echoes nothing. **What to paste is the `token_value` from
+the `tokens create` output above** — the string beginning `dapi`, not the `token_id` beside it, and
+not a passphrase of your own. It asks twice. Note this is a *different* credential from the `dose`
+secret held under `databricks-cost-optimizer-sp`: same identity, two credentials, because this
+client sends a static bearer token while an OAuth secret mints tokens that expire hourly.
 
 ```sh
 security add-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w
 export DATABRICKS_MCP_URL="https://<workspace-hostname>/api/2.0/mcp/sql"
 export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
 ```
+
+Confirm the keychain holds the token rather than something else:
+
+```sh
+security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w | cut -c1-4
+```
+
+That should print `dapi`.
 
 Claude Code reads these from the environment of the process that launched it, so start it from a
 shell where both are set. Approve the project server once, then `/mcp` should report `connected`
