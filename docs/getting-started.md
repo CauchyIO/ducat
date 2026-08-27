@@ -9,6 +9,8 @@ Budget an hour for a workspace nobody has prepared, most of it waiting on other 
 
 - **The Databricks CLI**, authenticated against the workspace. Installation is in step 2's runbook.
 - **Workspace admin.** You do not need account admin, and the runbooks say where that matters.
+- **The Azure CLI**, if Azure cost is in scope. Decide that now rather than later; the requirements
+  and the check are in [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md).
 - **A Unity Catalog workspace** whose `system` schemas carry rows. Databricks enables them centrally
   now, so this is a check rather than a task — confirm before assuming a gap.
 
@@ -35,6 +37,11 @@ cheapest evidence that credential, warehouse, transport and tables all work toge
 **Only if Azure cost is in scope:** map each workspace to its subscription and managed resource
 group. Databricks cannot see per-workspace networking cost, and that is where an idle workspace
 hides. [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md)
+
+Settle that question before the first assessment, not after it. Without the Azure plane every figure
+the skill produces is labelled list cost and stays that way, and a billed figure cannot be added to a
+finished document — the assessment reasoned from the plane it could read, so recovering one means
+running it again.
 
 ## You are done when
 

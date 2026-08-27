@@ -39,7 +39,7 @@ credential lives, which warehouse the queries run on, and whether the read-write
 in the client configuration. The workspace-catalog exception is documented in the principal runbook
 along with the reason it was left open.
 
-**`logs/` — no levers.** These record what happened on a date. Nothing here configures anything;
+**`decisions/` — no levers.** These record what happened on a date. Nothing here configures anything;
 correct them only if they are wrong about the past.
 
 ## Where the analytical criteria live

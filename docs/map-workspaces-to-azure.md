@@ -5,6 +5,32 @@ each workspace's **managed resource group** — the resource group Databricks cr
 the VMs, disks, public IPs and NAT a workspace consumes. Without that key, Azure cost is a lump sum
 you cannot attribute.
 
+## Requirements
+
+- **Azure CLI.** macOS: `brew install azure-cli`. Windows: `winget install Microsoft.AzureCLI`.
+  Linux: `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`.
+- **A subscription selected, not just a tenant.** `az login` can leave you at tenant scope, and the
+  cost commands then return nothing without reporting a failure.
+- **Cost Management Reader** on every subscription in the map, or a role that contains it. Resource
+  Graph needs only read access to the workspaces; cost figures need this as well.
+
+Prove both before assessing anything:
+
+```sh
+az account show --query "{sub:name, id:id, user:user.name}" -o table
+
+az rest --method post \
+  --url "https://management.azure.com/subscriptions/<subscription-id>/providers/Microsoft.CostManagement/query?api-version=2024-08-01" \
+  --body '{"type":"ActualCost","timeframe":"MonthToDate","dataset":{"granularity":"None","aggregation":{"total":{"name":"Cost","function":"Sum"}}}}'
+```
+
+The first must name a subscription. The second must return a number. A `403` means the role is
+missing. A `429` means throttling — wait a minute and repeat; it is not a permission failure.
+
+**What skipping this costs.** Every figure stays labelled list cost. That is honest, and it is
+permanent: a billed figure cannot be added to a finished assessment, because the reasoning was built
+on the plane that answered. Recovering one means running the assessment again.
+
 ## The Databricks half
 
 ```sql
