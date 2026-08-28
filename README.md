@@ -89,8 +89,6 @@ databricks-cost-optimizer/
 │   ├── map-workspaces-to-azure.md
 │   ├── identity-and-credentials.md
 │   └── decisions/
-├── plans/                          ← how the work is presented, not how it works
-│   └── demo-script.md
 ├── tools/
 │   └── check-package.py            ← refuses credentials and estate identifiers
 ├── .githooks/pre-commit            ← runs it before a commit leaves the machine

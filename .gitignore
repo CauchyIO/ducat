@@ -232,5 +232,7 @@ personal-notes.md
 # Generated deliverables — name a specific estate
 artifacts/
 
-# Scripted test run sheets — local only
-plans/scripted-test.md
+# Run sheets and presentation material — local only.
+# The demo script now lives as a Linear document; presentation belongs to the
+# project-management layer, not to this repository.
+plans/
