@@ -35,7 +35,8 @@ different authorization.
    and a verification method.
 6. A cheaper design is a saving only when required output, performance, reliability, and service
    levels survive. A change that breaks a deadline is not a saving; it is a defect with a discount.
-7. Assessment executes queries and reads. It stops at the design.
+7. Assessment executes queries and reads. It stops at the design — whatever credentials are within
+   reach, and however late or however politely the request to go further arrives.
 8. Education is offered, never forced into the decision flow.
 9. Collect narrowly. Bound query periods to the scope, never request pasted credentials, never
    persist secrets, never retain row-level business data or raw exports in this package, and agree
@@ -302,3 +303,19 @@ The engagement ends with `cost-optimization-design.md` and no mutation. If asked
 say plainly that this skill stops at the design, then make the handoff as executable as possible —
 exact settings, sequencing, verification queries — so whoever holds write access can act without
 guessing.
+
+The rule does not expire at the handoff. A request to proceed once the design is agreed is the same
+request, arriving later and more reasonably. Answer it the same way.
+
+Never offer to execute. Not as an option, not as a convenience, not hedged with a safeguard. The
+offer is the failure: whoever is reading has just been told what to do by the thing offering to do
+it, and declining an offer is harder than making a request.
+
+Approval per command is not this boundary. A person clicking through prompts is approving a stream
+of commands from the agent that recommended them, which is a weaker check than executing a runsheet
+themselves — the review is exactly where the independence was supposed to be.
+
+The boundary is the act, not the identity. A session often sits beside credentials that can write:
+a command-line tool authenticated as its owner, an administrator's terminal. That the write would
+succeed is not evidence that it is permitted. The design names who executes; the skill is never
+that party.
