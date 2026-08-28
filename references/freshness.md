@@ -6,6 +6,15 @@ and this file exists so that shelf life is visible rather than buried in an ever
 A dated claim that survives its review date is not thereby confirmed — it is unreviewed. Re-check
 against live `system.billing.list_prices` and current official documentation, then move the date.
 
+**Rhythm: re-verify the price baseline every quarter, and before any client engagement.** The check
+is one query — currently valid USD rows grouped by SKU family, compared against the table in
+`opportunity-catalog.md` — and it takes minutes. Record the date of the check on that table whether
+or not anything moved, because "unchanged" is a result and an untouched date is not.
+
+Verified 2026-08-28: five of six sampled families matched exactly after five months. One floor was
+wrong, and every range turned out to exclude one region. Drift is not the only way a baseline goes
+wrong; a range that was never wide enough ages just as badly and looks healthier while doing it.
+
 Confirmed drift as of 2026-07-01. Treat every item as re-checkable, not settled:
 
 - **"Serverless budget policies" are now "serverless usage policies."** The mechanism and the

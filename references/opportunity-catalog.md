@@ -60,10 +60,14 @@ titles, and URLs.
 
 ## Reference prices
 
-**As of 2026-03-15, verified unchanged against live `list_prices` on 2026-07-01.** USD per DBU
-unless noted, regional variants collapsed to ranges. This is a sanity-check baseline, not a quotable
-price — query `system.billing.list_prices` for the account, region, and period you are assessing,
-and use that. A figure here that disagrees with a live query loses.
+**As of 2026-03-15, re-verified against live `list_prices` on 2026-08-28.** USD per DBU unless
+noted, regional variants collapsed to ranges. This is a sanity-check baseline, not a quotable price
+— query `system.billing.list_prices` for the account, region, and period you are assessing, and use
+that. A figure here that disagrees with a live query loses.
+
+**Ranges exclude India West (Jio),** where every SKU family runs two to three times the ceiling
+below and where the two "flat" claims in this section do not hold. A live price above a range here
+is a prompt to check the region before doubting the query.
 
 | SKU | Tier | Price | Note |
 |---|---|---|---|
@@ -72,13 +76,13 @@ and use that. A figure here that disagrees with a live query loses.
 | `JOBS_COMPUTE` (± Photon) | Premium | 0.30 | Standard 0.15, sunsetting |
 | `JOBS_LIGHT_COMPUTE` | Premium | 0.22 | Legacy tier |
 | `JOBS_SERVERLESS_COMPUTE` | Premium | 0.45–0.65 | VM included |
-| `SQL_COMPUTE` | — | 0.22 | Flat across regions |
+| `SQL_COMPUTE` | — | 0.22 | Flat across regions; India West 0.72 |
 | `SQL_PRO_COMPUTE` | Premium | 0.55–0.96 | Regional |
 | `SERVERLESS_SQL_COMPUTE` | Premium | 0.55–1.09 | Regional |
-| `DLT_CORE / PRO / ADVANCED_COMPUTE` | — | 0.30 / 0.38 / 0.54 | Tier-based, not regional |
+| `DLT_CORE / PRO / ADVANCED_COMPUTE` | — | 0.30 / 0.38 / 0.54 | Tier-based, not regional; India West 0.97 / — / 1.75 |
 | `SERVERLESS_REAL_TIME_INFERENCE` | — | 0.07–0.12 | Regional |
 | `ANTHROPIC / OPENAI / GEMINI_MODEL_SERVING` | — | 0.105 / 0.07 / 0.07 | Foundation model pricing is now published per 1M tokens; re-derive before quoting |
-| `MODEL_TRAINING` | — | 0.65–1.11 | Regional |
+| `MODEL_TRAINING` | — | 0.40–1.11 | Regional; floor corrected 2026-08-28 |
 | `DATABASE_SERVERLESS_COMPUTE` | — | 0.26–0.45 effective | ~50% promotional; expect change at GA |
 | `DATABRICKS_STORAGE` | — | 0.023–0.041 per DSU | |
 | Egress | — | 0.01–0.18 per GB | By route; inter-region 0.02–0.16 |
@@ -90,9 +94,10 @@ Ratios that survive price drift better than the figures do, and that usually dri
    largest single lever on a job.
 2. **Serverless carries a premium but bundles the VM.** Comparing a serverless DBU rate against a
    classic DBU rate without adding the classic VM cost is not a comparison.
-3. **DLT is tier-based, not regional.** Core → Advanced is a 1.8× step.
+3. **DLT is tier-based, not regional.** Core → Advanced is a 1.8× step. India West is the one
+   exception, and it is an exception to every ratio here.
 4. **SQL classic is flat, Pro is regional.** Region choice matters for Pro and serverless, not for
-   classic.
+   classic — again outside India West.
 5. **Egress is easy to miss** and compounds with Delta Sharing and cross-region replication.
 
 ## Scope routing
