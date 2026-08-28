@@ -46,7 +46,9 @@ well as at the grant:
               "mcp__databricks-sql__poll_sql_result"] } }
 ```
 
-Store the token in the OS keychain and export both variables from your shell profile.
+Store the token in the OS keychain and export both variables into the shell you launch from.
+Not your shell profile: that makes them global and permanent — every shell on the machine, every
+project, long after the engagement ends.
 
 The first command prompts for a value and echoes nothing. **What to paste is the `token_value` from
 the `tokens create` output above** — the string beginning `dapi`, not the `token_id` beside it, and
@@ -71,6 +73,28 @@ That should print `dapi`.
 Claude Code reads these from the environment of the process that launched it, so start it from a
 shell where both are set. Approve the project server once, then `/mcp` should report `connected`
 with three tools.
+
+### Where the variables live
+
+Three constraints, whichever route you take. They are scoped to this work rather than to your
+account. No secret is written to disk — the export reads the keychain, so the value exists only in
+the running process. And any file holding the exports is ignored by git.
+
+For one session, exporting in the shell you launch from satisfies all three and leaves nothing
+behind.
+
+For repeated use, a project-scoped `.envrc` read by [direnv](https://direnv.net) is better: the same
+two lines, active only inside that directory, gone when you leave it.
+
+```sh
+# .envrc — a keychain lookup, not a credential
+export DATABRICKS_MCP_URL="https://<workspace-hostname>/api/2.0/mcp/sql"
+export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
+```
+
+`direnv allow` once, and add `.envrc` to `.gitignore`. Note what that file holds: a command that
+fetches the token, never the token itself. Paste a literal value there instead and the pre-commit
+check refuses the commit — the credential rules apply to every file, not only to the package.
 
 ## Warehouse selection
 
