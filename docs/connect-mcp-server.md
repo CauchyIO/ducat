@@ -76,9 +76,9 @@ with three tools.
 
 ### Where the variables live
 
-Three constraints, whichever route you take. They are scoped to this work rather than to your
-account. No secret is written to disk — the export reads the keychain, so the value exists only in
-the running process. And any file holding the exports is ignored by git.
+Two constraints, whichever route you take. They are scoped to this work rather than to your
+account. And no secret is written to disk — the export reads the keychain, so the value exists only
+in the running process.
 
 For one session, exporting in the shell you launch from satisfies all three and leaves nothing
 behind.
@@ -92,9 +92,9 @@ export DATABRICKS_MCP_URL="https://<workspace-hostname>/api/2.0/mcp/sql"
 export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
 ```
 
-`direnv allow` once, and add `.envrc` to `.gitignore`. Note what that file holds: a command that
-fetches the token, never the token itself. Paste a literal value there instead and the pre-commit
-check refuses the commit — the credential rules apply to every file, not only to the package.
+`direnv allow` once, and note what the file holds: a command that fetches the token, never the token
+itself. Paste a literal value there instead and the pre-commit check refuses the commit — the
+credential rules apply to every file, not only to the package.
 
 ## Warehouse selection
 
