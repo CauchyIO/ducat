@@ -1,0 +1,24 @@
+#!/bin/sh
+# Refuse a commit whose staged content carries a credential or an estate identifier.
+#
+# Staged content, not the working tree: a partially staged file is committed as its
+# staged version, and that is the version that reaches the remote.
+#
+# Enable once per clone:  git config core.hooksPath .githooks
+
+set -e
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+printf '%s\n' "$staged" | while IFS= read -r f; do
+  mkdir -p "$tmp/$(dirname "$f")"
+  git show ":$f" > "$tmp/$f" 2>/dev/null || true
+done
+
+cd "$tmp"
+# shellcheck disable=SC2046
+"$OLDPWD/tools/check-package.py" $(printf '%s\n' "$staged")

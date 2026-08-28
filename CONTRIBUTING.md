@@ -1,0 +1,59 @@
+# Contributing
+
+One check runs on this repository, and it exists because both failures it prevents have
+already happened here.
+
+## What runs
+
+`tools/check-package.py` refuses two things.
+
+**Credentials, in every file.** A service principal secret reached GitHub on 24 August 2026
+inside a file swept up by `git add -A`. The fix was rotation, because deleting a pushed
+secret does not unpublish it.
+
+**Estate identifiers, in the package a client reads** — `SKILL.md`, `references/`, `docs/`
+and the configuration beside them. A workspace id in a working note is nobody's problem.
+The same id in a runbook is what a client sees, and the runbooks are clean today only
+because someone grepped them by hand.
+
+Identifiers are matched by shape, never by value. A checker holding the list of ids it
+forbids would be the leak it exists to prevent, and would protect exactly one estate.
+
+## When it runs
+
+**Before the commit**, as a hook. Enable it once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+This is the one that matters. CI reports a credential faster; the hook is what stops it
+reaching the remote at all.
+
+**In CI**, on every push and pull request, as the backstop for a machine where the hook was
+never enabled.
+
+Run it by hand any time:
+
+```sh
+git ls-files -z | xargs -0 ./tools/check-package.py
+```
+
+## When it fails
+
+The output names the file, the line and the rule.
+
+- **A credential must be rotated**, not merely deleted. It is already on this machine and
+  may be in the history.
+- **An estate identifier belongs in `environment.local.md`**, which is gitignored, with a
+  placeholder such as `<workspace-id>` where it was.
+- **A deliberate example** needs `check-allow` on the line, and a sentence nearby saying why
+  the example is safe to publish.
+
+## Still open
+
+The checker knows the credential shapes this project actually handles — Databricks tokens
+and OAuth secrets, private keys, JSON web tokens, and anything assigned to a
+secret-looking name. It is not a general secret scanner. GitHub's own push protection is
+the broad net, free on public repositories and licensed on private ones; whether it covers
+this repository has not been settled.

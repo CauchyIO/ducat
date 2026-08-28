@@ -91,9 +91,14 @@ databricks-cost-optimizer/
 │   └── decisions/
 ├── plans/                          ← how the work is presented, not how it works
 │   └── demo-script.md
+├── tools/
+│   └── check-package.py            ← refuses credentials and estate identifiers
+├── .githooks/pre-commit            ← runs it before a commit leaves the machine
+├── .github/workflows/checks.yml    ← runs it again on push, as a backstop
 ├── .mcp.json
 ├── .claude/settings.json
 ├── README.md
+├── CONTRIBUTING.md
 ├── NOTICE.md
 └── LICENSE
 ```
@@ -101,6 +106,12 @@ databricks-cost-optimizer/
 Two guides orient a new reader. [`references/README.md`](references/README.md) enumerates the levers
 that decide what the skill may claim and what counts as a saving — start there to revise criteria.
 [`docs/README.md`](docs/README.md) names each design and setup document and says when to read it.
+
+## Contributing
+
+One check guards this repository: no credential in any file, and no identifier from one
+estate in the package a client reads. [`CONTRIBUTING.md`](CONTRIBUTING.md) says what runs,
+how to enable the hook, and what to do when it fails.
 
 ## Licence
 
