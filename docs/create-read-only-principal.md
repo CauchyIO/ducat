@@ -45,8 +45,43 @@ databricks grants update CATALOG system \
 ```
 
 Catalog level, because per-schema grants on `system` are refused to anyone but an account admin.
-This reads wider than the skill needs — `system.access.audit` included — so narrowing it later is
-worth an issue.
+Tested on 2026-08-28: a workspace admin holding `MANAGE` on the catalog through a group can grant at
+catalog level and is refused at schema and table level — `User is not an account admin for Account`.
+`MANAGE` is not enough.
+
+**This reads wider than the skill needs.** It includes `system.access.audit` — every action every
+user takes in the workspace — along with both lineage tables and the network logs. A cost tool has
+no business reading any of them, and a client will ask.
+
+If you can reach an account admin, ask for this instead. It is the same access with none of the
+surplus:
+
+```sh
+# Traversal only at the catalog.
+databricks grants update CATALOG system \
+  --json "{\"changes\":[{\"principal\":\"$SP\",\"add\":[\"USE_CATALOG\"]}]}"
+
+# The four schemas the skill reads whole. Every table in them is cost or
+# infrastructure telemetry: billing 3, query 1, compute 7, lakeflow 8.
+for S in billing compute lakeflow query; do
+  databricks grants update SCHEMA system.$S \
+    --json "{\"changes\":[{\"principal\":\"$SP\",\"add\":[\"USE_SCHEMA\",\"SELECT\"]}]}"
+done
+
+# access holds eight tables and the skill needs one. Traverse the schema,
+# read only workspaces_latest; audit and the lineage tables stay unreadable.
+databricks grants update SCHEMA system.access \
+  --json "{\"changes\":[{\"principal\":\"$SP\",\"add\":[\"USE_SCHEMA\"]}]}"
+databricks grants update TABLE system.access.workspaces_latest \
+  --json "{\"changes\":[{\"principal\":\"$SP\",\"add\":[\"SELECT\"]}]}"
+```
+
+Add the narrow grants before removing the wide one. Between the two the principal holds both, Unity
+Catalog takes the union, and nothing is exposed that was not already. Revoking first means a broken
+connection if the grants are refused.
+
+Verify by reading one table from each schema, then confirming `SELECT * FROM system.access.audit
+LIMIT 1` fails with `42501`. A narrowing nobody tested is a narrowing nobody has.
 
 Never add the principal to a group holding `MANAGE` on `system`. `MANAGE` permits granting.
 
