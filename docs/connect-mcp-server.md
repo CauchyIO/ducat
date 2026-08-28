@@ -36,15 +36,34 @@ This works because the principal holds `CAN_USE` on tokens. The value prints onc
 }
 ```
 
-`.claude/settings.json` denies the read-write tool, so the boundary holds at the tool surface as
-well as at the grant:
+`.claude/settings.json` carries the deny rules. Two groups, and the second matters more than it
+looks.
 
-```json
-{ "permissions": {
-    "deny": ["mcp__databricks-sql__execute_sql"],
-    "allow": ["mcp__databricks-sql__execute_sql_read_only",
-              "mcp__databricks-sql__poll_sql_result"] } }
-```
+**The MCP tool.** Deny `mcp__databricks-sql__execute_sql`, allow only `execute_sql_read_only` and
+`poll_sql_result`, so the boundary holds at the tool surface as well as at the grant.
+
+**The command line.** Deny every Databricks CLI command that mutates — roughly 130 rules, one per
+service and verb: `Bash(databricks apps delete:*)`, `Bash(databricks jobs update:*)`,
+`Bash(databricks database delete-database-instance:*)`, `Bash(databricks bundle destroy:*)`, and so
+on. Read verbs — `list`, `get`, `describe`, `get-effective` — stay allowed, because the skill and
+these runbooks depend on them.
+
+The second group exists because the first was never the exposed path. The assessment principal holds
+`SELECT` and `CAN_USE` and cannot write whatever tool it reaches for; Unity Catalog refuses it. The
+CLI in the same session is authenticated as *you*, and on 2026-08-28 a session used it to stop a
+running app and a database instance after being told to proceed. Every write in that incident, and
+in the one that followed it, went through the command line. Denying only the MCP tool enforces the
+path that was never going to work.
+
+**Provisioning is not exempt; it is not the agent's job.** Creating the service principal, minting
+its secret, granting `SELECT`, and setting warehouse permissions are all denied here, and all
+appear in [`create-read-only-principal.md`](create-read-only-principal.md). Run them yourself, in
+your own terminal, outside a session. That is the separation: a person provisions, an agent
+assesses. Letting a session do the provisioning is how one workspace ended up with three service
+principals sharing a name.
+
+Copy the file from this repository rather than retyping it; the rule list is long and a missing
+entry is invisible until it matters.
 
 Store the token in the OS keychain and export both variables into the shell you launch from.
 Not your shell profile: that makes them global and permanent — every shell on the machine, every
