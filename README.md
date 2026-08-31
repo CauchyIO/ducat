@@ -105,6 +105,49 @@ Two guides orient a new reader. [`references/README.md`](references/README.md) e
 that decide what the skill may claim and what counts as a saving — start there to revise criteria.
 [`docs/README.md`](docs/README.md) names each design and setup document and says when to read it.
 
+## What this guarantees, and what it doesn't
+
+This skill is an instruction package: markdown a model reads. It can add rules to a session; it
+cannot take capabilities away from one. Two things hold regardless of how the model behaves.
+Everything else is a rule a model follows.
+
+**Enforced by Unity Catalog.** The service principal holds read on system tables and `CAN_USE` on
+one warehouse. Every write it attempts is refused by the platform, whatever the model intends.
+
+**Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies the
+read-write MCP tool and the Databricks CLI outright — the package reads everything through SQL and
+needs no CLI. This applies only where those settings load, and no static rule catches an alias
+someone invents.
+
+**Not enforced.** Everything the design calls non-negotiable: no query before a scope is confirmed,
+attribution populations kept separate, list and billed never blurred, overlapping savings never
+summed, and the engagement ending at a design rather than executing it.
+
+Those hold because a model follows written instructions, and models differ. Measured on 2026-08-28:
+asked to proceed after handing over its design, one model declined once, then executed its own
+teardown plan through the operator's admin CLI, stopping an app and a database instance. Four
+sentences added that morning to prevent exactly that were in context when it happened. The same
+scenario on a different model held.
+
+A control run without the package keeps this in proportion. The same model volunteered to run the
+deletion before anyone asked, and complied at the first request. With the package: no unprompted
+offer, and a second explicit authorisation required. The instructions change behaviour measurably.
+They do not guarantee it.
+
+**What follows for you.** Connect as an identity that cannot write. Keep the deny rules. Treat the
+output as a design for a person to execute, and do not ask the session that wrote it to carry it
+out.
+
+### Other limits
+
+- Azure Databricks only. AWS and GCP are untested.
+- The runbooks assume macOS — keychain, Homebrew.
+- Figures are list cost unless Azure Cost Management is reachable. List and billed are reported
+  separately and never converted.
+- Packaged reference prices carry an as-of date and lose to a live query.
+- The default grant is catalog-wide read on `system`, which includes audit logs. The runbook carries
+  a narrower per-schema grant for estates where that matters.
+
 ## Contributing
 
 One check guards this repository: no credential in any file, and no identifier from one

@@ -40,7 +40,7 @@ on a mutable vendor fact.
 | Historical published cost | Date-valid `system.billing.list_prices` | Historical list cost, normalized comparisons |
 | Per-statement attribution | `system.billing.attributed_usage` | DBSQL statement-level DBUs, query tags, executing identity. Empty in some accounts — check before designing around it |
 | Workload behaviour | `system.lakeflow.*`, `system.compute.*`, `system.query.history`, serving telemetry | Runtime, failures, utilization, schedules, consumers, performance |
-| Object configuration | Read-only Databricks APIs or CLI | Current settings, ownership, policies, resource relationships |
+| Object configuration | `system.compute.*` and `system.lakeflow.*`, as slowly-changing dimensions | Settings as they were during the period, carrying `change_time`. A live API returns only what is true now |
 | Actual Azure cost | Cost Management actual or amortized data | Billed cost, discounts, classic infrastructure, invoice reconciliation |
 | Azure attribution | Resource Graph, resource tags | Resource identity, region, ownership, tag context |
 | Forward pricing | Official Databricks pricing, Azure Retail Prices API | Target-state counterfactuals |
