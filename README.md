@@ -29,10 +29,11 @@ does, what evidence it may use, and what it may claim. The package derives from 
 | `references/opportunities/` | Optimization practices, one file per scope type |
 | `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |
 
-Validation has begun. One of the four behavioural witnesses in Section 10 has been observed holding
-— the scope gate, against a recorded control that fails it: without the skill the same request
-produced twenty unrequested queries and a set of verdicts; with it, no query ran until a scope was
-confirmed. Three witnesses remain.
+All four behavioural witnesses in Section 10 have been run against recorded controls. The clearest
+is the scope gate: without the skill the same request produced twenty unrequested queries and a set
+of verdicts; with it, no query ran until a scope was confirmed. The witness covering the refusal to
+implement has failed and passed on different models, which is why the section below states what is
+enforced and what is not.
 
 ## What it can claim
 
@@ -87,8 +88,7 @@ databricks-cost-optimizer/
 │   ├── connect-mcp-server.md
 │   ├── smoke-check.md
 │   ├── map-workspaces-to-azure.md
-│   ├── identity-and-credentials.md
-│   └── decisions/
+│   └── identity-and-credentials.md
 ├── tools/
 │   └── check-package.py            ← refuses credentials and estate identifiers
 ├── .githooks/pre-commit            ← runs it before a commit leaves the machine

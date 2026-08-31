@@ -17,7 +17,6 @@ last section.
 | `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
 | `map-workspaces-to-azure.md` | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
 | `identity-and-credentials.md` | Which identity a command runs as, and how to change it back | A command acts as the wrong principal, or a credential misbehaves |
-| `decisions/` | Dated records of a choice and the reasoning behind it | You want to know why something is the way it is |
 
 Session transcripts from validation runs are **not here and not committed**. They capture whole
 sessions including credentials in cleartext, so they stay in a gitignored `transcripts/` at the
@@ -33,15 +32,14 @@ skill stops at an approved design rather than implementing it. Section 10 fixes 
 tests the package is meant to pass. Loosen an invariant here and every downstream document changes
 meaning.
 
-**The two runbooks — the access layer.** Each setup decision is a lever: how wide the read grant is
+**The setup runbooks — the access layer.** `create-read-only-principal.md` and
+`connect-mcp-server.md` carry the decisions; `smoke-check.md` and `map-workspaces-to-azure.md` prove
+and extend them. Each setup decision is a lever: how wide the read grant is
 (catalog-level by default, which includes audit logs; a tighter per-schema grant needs an account
 admin, and the runbook carries both), how long the
 credential lives, which warehouse the queries run on, and whether the read-write tool stays denied
 in the client configuration. The workspace-catalog exception is documented in the principal runbook
 along with the reason it was left open.
-
-**`decisions/` — no levers.** These record what happened on a date. Nothing here configures anything;
-correct them only if they are wrong about the past.
 
 ## Where the analytical criteria live
 
