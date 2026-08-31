@@ -34,7 +34,8 @@ tests the package is meant to pass. Loosen an invariant here and every downstrea
 meaning.
 
 **The two runbooks — the access layer.** Each setup decision is a lever: how wide the read grant is
-(catalog-level today, which includes audit logs; narrowing needs an account admin), how long the
+(catalog-level by default, which includes audit logs; a tighter per-schema grant needs an account
+admin, and the runbook carries both), how long the
 credential lives, which warehouse the queries run on, and whether the read-write tool stays denied
 in the client configuration. The workspace-catalog exception is documented in the principal runbook
 along with the reason it was left open.

@@ -49,12 +49,12 @@ Tested on 2026-08-28: a workspace admin holding `MANAGE` on the catalog through 
 catalog level and is refused at schema and table level — `User is not an account admin for Account`.
 `MANAGE` is not enough.
 
-**This reads wider than the skill needs.** It includes `system.access.audit` — every action every
-user takes in the workspace — along with both lineage tables and the network logs. A cost tool has
-no business reading any of them, and a client will ask.
+This grant is read-only and wider than the eleven tables the skill names: it also reaches
+`system.access.audit`, the lineage tables and the network logs. Reading them changes nothing, and
+for most setups the simplicity is worth more than the precision.
 
-If you can reach an account admin, ask for this instead. It is the same access with none of the
-surplus:
+Where least privilege matters — a client engagement, a shared workspace, an estate whose audit log
+is sensitive — an account admin can grant exactly what the skill reads instead:
 
 ```sh
 # Traversal only at the catalog.
@@ -207,8 +207,3 @@ What the principal ends up with: read on `system`, `BROWSE` or nothing on every 
 `CAN_USE` on one warehouse, and create rights confined to the workspace catalog's `default` schema.
 It cannot read data in a governed catalog, modify any existing object anywhere, or reach a job,
 cluster or warehouse beyond running queries on the one it was given.
-
-## Remaining
-
-1. Ask an account admin to narrow `SELECT` on `system` to the schemas the skill reads.
-2. Rotate the OAuth secret once the MCP client is wired.
