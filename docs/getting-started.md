@@ -16,9 +16,9 @@ Budget an hour for a workspace nobody has prepared, most of it waiting on other 
 
 ## The sequence
 
-**1. Confirm the evidence exists.** Query one table per schema for row counts and freshness. A
-schema present but empty means backfill, not a permissions problem. The queries are in
-[`smoke-check.md`](smoke-check.md).
+**1. Confirm the evidence exists.** Run check 1 of [`smoke-check.md`](smoke-check.md) as yourself —
+one query, five row counts and freshness dates. Nothing has been built yet, and nothing should be
+until this passes: a schema present but empty means backfill, not a permissions problem.
 
 **2. Build the read-only identity.** A dedicated service principal, read on the `system` catalog,
 one warehouse, and a credential — plus the workspace-catalog exception you will inherit and cannot
@@ -27,9 +27,9 @@ remove. [`create-read-only-principal.md`](create-read-only-principal.md)
 **3. Connect the client.** The managed SQL MCP server, a token, and configuration that carries
 neither secret nor workspace identity. [`connect-mcp-server.md`](connect-mcp-server.md)
 
-**4. Prove the path end to end.** One job, one week, reconciled against its run history — the
+**4. Prove the path end to end.** Checks 2 to 5 of [`smoke-check.md`](smoke-check.md), now run as
+the principal through the connection: one job, one week, reconciled against its run history. The
 cheapest evidence that credential, warehouse, transport and tables all work together.
-[`smoke-check.md`](smoke-check.md)
 
 **5. Install the skill.** Symlink the repository into your skills directory; the root
 [`README`](../README.md) has the command.
