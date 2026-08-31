@@ -62,8 +62,22 @@ your own terminal, outside a session. That is the separation: a person provision
 assesses. Letting a session do the provisioning is how one workspace ended up with three service
 principals sharing a name.
 
+**Two doors the service-and-verb rules do not close on their own**, both found by using them:
+
+- `databricks api post /api/2.0/apps/<name>/stop` does what `databricks apps stop <name>` does, and
+  matches none of the per-service rules. The four `databricks api` write verbs are denied.
+- `dbsp` is the shell wrapper these runbooks define for the principal. `dbsp apps stop` is the same
+  program under a different first word. The whole wrapper is denied, which costs nothing: setup is a
+  person's work in a person's terminal.
+
+What no list can close is an alias someone invents. Anyone can write `d() { databricks "$@"; }` and
+no static rule will see it. That is the honest limit of this control: it governs *your* credentials,
+where the defence is convention with a cost attached. The principal's boundary is different in kind
+— Unity Catalog refuses its writes whatever anyone types.
+
 Copy the file from this repository rather than retyping it; the rule list is long and a missing
-entry is invisible until it matters.
+entry is invisible until it matters. A rule added while a session is running takes a moment to be
+picked up — test it twice before believing it does not work.
 
 Store the token in the OS keychain and export both variables into the shell you launch from.
 Not your shell profile: that makes them global and permanent — every shell on the machine, every

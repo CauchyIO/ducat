@@ -135,7 +135,12 @@
       "Bash(databricks workspace import:*)",
       "Bash(databricks workspace mkdirs:*)",
       "Bash(databricks workspace set-permissions:*)",
-      "Bash(databricks workspace update-permissions:*)"
+      "Bash(databricks workspace update-permissions:*)",
+      "Bash(databricks api post:*)",
+      "Bash(databricks api put:*)",
+      "Bash(databricks api patch:*)",
+      "Bash(databricks api delete:*)",
+      "Bash(dbsp:*)"
     ],
     "allow": [
       "mcp__databricks-sql__execute_sql_read_only",
