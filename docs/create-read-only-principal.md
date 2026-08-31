@@ -211,19 +211,6 @@ That should print `dose`. Anything else — a stray character, a pasted comment,
 the `secret` — means the entry is wrong, and the failure surfaces later as an authentication error
 naming no cause.
 
-Two lines in the wrapper exist to stop the same failure, and neither is decoration.
-
-`DATABRICKS_AUTH_TYPE="oauth-m2m"` pins the authentication method. Without it the SDK works down its
-own list of candidates and can settle on your CLI login even with a client id and secret present —
-succeeding as the wrong identity rather than failing. Pinning it means a bad credential is an error.
-
-`: "${WORKSPACE_URL:?…}"` guards the variables. A shell function expands them when it is *called*,
-so in a later shell where they are unset the client id would be empty and, again, you would get
-yourself. The guard makes that an error too.
-
-Both convert a silent wrong answer into a loud one, which is the only useful behaviour when the
-thing being tested is which identity you are.
-
 ## 7. Verify
 
 Four checks. Run all of them — a half-verified principal is one you cannot make claims about.
