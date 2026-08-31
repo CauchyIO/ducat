@@ -63,6 +63,38 @@ dbsp() {
 `databricks ...` stays you. `dbsp ...` is the principal. `dbsp auth describe` should print
 `oauth-m2m` and the application ID — if it prints your email, the credential did not load.
 
+## Rotation
+
+Two credentials, two lifetimes, one rhythm.
+
+**The personal access token** is minted by the principal for itself with a 90-day lifetime, so it
+expires on its own. Treat 90 days as the ceiling, not the schedule: rotate at the end of an
+engagement, whenever a transcript or a log has carried the value, and on any change of who holds
+access. A token that outlives the work it was minted for is one nobody remembers to revoke.
+
+**The OAuth secret** behind `dbsp` follows the same rule and the same 90 days.
+
+The order matters, and it is the reverse of what feels natural:
+
+1. Mint the replacement — `dbsp tokens create` for the token, the secrets proxy for the secret.
+2. Put it in the keychain. `security add-generic-password` will not overwrite, so delete first.
+3. Re-export in the shell and restart the client. The variables are read once, at launch.
+4. Prove the new credential works: one query that returns rows.
+5. **Only then revoke the old one**, and prove it again. While both are valid a successful query
+   says nothing about which is in use; after the revoke it says everything.
+
+Step 5 is the whole point. A rotation that stops at step 4 has added a credential rather than
+replaced one, and leaves the compromised value live.
+
+Rotating leaves no trace in `.mcp.json` or any committed file, because neither ever held the value.
+It does leave a stale entry in any transcript that captured the old one — those are gitignored, and
+the token they name is dead once step 5 is done.
+
+**Rotated 2026-08-31.** The 2026-08-24 token appeared in cleartext in two session transcripts and
+was revoked once its replacement was proven. The OAuth secret in use was minted 2026-08-25, after
+the leak, and was left in place — checked rather than assumed, by listing the principal's secrets
+and finding exactly one active.
+
 ## Update 2026-08-24: three identities, not two
 
 A third identity now exists — a personal access token the service principal minted for itself. The
