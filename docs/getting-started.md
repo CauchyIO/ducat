@@ -52,8 +52,9 @@ running it again.
 ## When something behaves oddly
 
 Almost every setup problem here is an identity problem: a command running as you when you expected
-the principal, or the reverse. [`identity-and-credentials.md`](identity-and-credentials.md) covers
-which identity resolves, why environment variables outrank profiles, and how to undo an override.
+the principal, or the reverse. Check with `dbsp auth describe`, which must print `oauth-m2m` and the
+principal's application id. If it prints your own account, the credential did not load and every
+result after that tested you.
 
 The second most common is a rate limit read as a permission failure. Azure Cost Management returns
 `429` on a second query within a minute; it means wait, not forbidden.

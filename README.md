@@ -87,8 +87,7 @@ databricks-cost-optimizer/
 │   ├── create-read-only-principal.md
 │   ├── connect-mcp-server.md
 │   ├── smoke-check.md
-│   ├── map-workspaces-to-azure.md
-│   └── identity-and-credentials.md
+│   └── map-workspaces-to-azure.md
 ├── tools/
 │   └── check-package.py            ← refuses credentials and estate identifiers
 ├── .githooks/pre-commit            ← runs it before a commit leaves the machine

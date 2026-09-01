@@ -16,7 +16,6 @@ last section.
 | `connect-mcp-server.md` | Runbook for wiring the client to Databricks | After the principal exists |
 | `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
 | `map-workspaces-to-azure.md` | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
-| `identity-and-credentials.md` | Which identity a command runs as, and how to change it back | A command acts as the wrong principal, or a credential misbehaves |
 
 Session transcripts from validation runs are **not here and not committed**. They capture whole
 sessions including credentials in cleartext, so they stay in a gitignored `transcripts/` at the
