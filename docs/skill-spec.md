@@ -1,7 +1,12 @@
 # Databricks Cost Optimizer Skill
 
+> **Historical.** This is the original design proposal, written on 2026-08-20 before any of the
+> package existed. It is kept because it records why the skill was built the way it was, and it is
+> no longer maintained — the project has since grown past it. Where this document and the package
+> disagree, `SKILL.md` and `references/` are correct.
+
 - **Date:** 2026-08-20
-- **Status:** Proposed design
+- **Status:** Original proposal, superseded by the package
 - **Implementation:** Standalone skill, shipping from its own repository
 - **Proposed invocation:** `$databricks-cost-optimizer`
 

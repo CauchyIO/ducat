@@ -17,8 +17,9 @@ is a Markdown proposal a human reviews and decides on.
 
 ## Status
 
-**Implemented.** [`docs/skill-spec.md`](docs/skill-spec.md) is the design of record — what the skill
-does, what evidence it may use, and what it may claim. The package derives from it:
+**Implemented.** `SKILL.md` and `references/` are the package, and they are authoritative.
+[`docs/skill-spec.md`](docs/skill-spec.md) is the original proposal it grew from — kept for the
+reasoning, no longer maintained. The package derives from it:
 
 | Path | Derived from |
 |---|---|

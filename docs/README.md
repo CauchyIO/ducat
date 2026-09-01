@@ -11,7 +11,7 @@ last section.
 | File | What it is | Read it when |
 |---|---|---|
 | `getting-started.md` | The setup sequence, in order, with what each step achieves | **Start here** if you are standing this up |
-| `skill-spec.md` | The design of record: scope, invariants, workflow, validation strategy | You want to know why the skill behaves as it does, or you disagree with a rule |
+| `skill-spec.md` | The original design proposal, kept for its reasoning and no longer maintained | You want to know why the skill was built the way it was |
 | `create-read-only-principal.md` | Runbook for the identity the skill connects as | Setting up a new workspace |
 | `connect-mcp-server.md` | Runbook for wiring the client to Databricks | After the principal exists |
 | `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
@@ -23,13 +23,12 @@ repository root; the findings travel in the Linear issue instead.
 
 ## What you can change, and where
 
-**`skill-spec.md` — the policy layer.** Nine invariants govern everything the skill will and will
-not do. The consequential ones: scope is confirmed before any tool runs; a broad driver scan needs
-separate confirmation and returns candidates rather than conclusions; cost bases are never blurred;
-a cheaper design counts as a saving only when the workload's required outcomes survive; and the
-skill stops at an approved design rather than implementing it. Section 10 fixes the four behavioural
-tests the package is meant to pass. Loosen an invariant here and every downstream document changes
-meaning.
+**`SKILL.md` — the policy layer.** Nine invariants govern everything the skill will and will not do.
+The consequential ones: scope is confirmed before any tool runs; a broad driver scan needs separate
+confirmation and returns candidates rather than conclusions; cost bases are never blurred; a cheaper
+design counts as a saving only when the workload's required outcomes survive; and the skill stops at
+an approved design rather than implementing it. Loosen an invariant here and every downstream
+document changes meaning.
 
 **The setup runbooks — the access layer.** `create-read-only-principal.md` and
 `connect-mcp-server.md` carry the decisions; `smoke-check.md` and `map-workspaces-to-azure.md` prove
