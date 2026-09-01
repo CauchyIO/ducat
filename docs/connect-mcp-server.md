@@ -5,7 +5,7 @@ The skill reads evidence through the Databricks-managed SQL MCP server at
 with a statement ID, and a second call returns the rows.
 
 Build the read-only principal first — [`create-read-only-principal.md`](create-read-only-principal.md).
-This runbook assumes `dbsp` works and `WORKSPACE_URL` is exported.
+This runbook assumes `dbsp` works and `WORKSPACE_URL` is exported. If in a fresh terminal, redo steps 0, 1, and 6 of that runbook.
 
 ## 1. Mint a token
 
@@ -39,7 +39,7 @@ Linux:
 secret-tool store --label="databricks cost optimizer token" service databricks-cost-optimizer-pat account "$USER"
 ```
 
-Windows, PowerShell:
+Windows (PowerShell):
 
 ```powershell
 Set-Secret -Name databricks-cost-optimizer-pat
@@ -91,15 +91,13 @@ SQL. It allows `execute_sql_read_only` and `poll_sql_result`.
 
 ## 5. Verify
 
-Start Claude Code from the directory holding `.mcp.json`, in the shell where you exported the
-variables. Approve the project server when prompted.
+In the shell where you exported the variables, start Claude Code from the directory holding `.mcp.json` — it reads that file from the working directory and expands `${…}` from that shell's environment. Approve the project server when prompted, then type `/mcp` at the Claude Code prompt:
 
 ```
 /mcp
 ```
 
-**Passes when** `databricks-sql` is listed as connected with three tools. Then run the checks in
-[`smoke-check.md`](smoke-check.md).
+**The verification passes when** `databricks-sql` is listed as connected with three tools. After verification is complete, run the checks in [`smoke-check.md`](smoke-check.md).
 
 The server picks a warehouse the caller may use, and the principal has `CAN_USE` on exactly one, so
 you do not choose one here.
@@ -107,6 +105,7 @@ you do not choose one here.
 ## Potential causes of failure
 
 ### Wrong credential
+
 Check the credential first. An empty or malformed bearer token surfaces as a generic connection
 error naming nothing.
 
@@ -119,5 +118,6 @@ means a stray character reached the prompt — delete the entry, add it again, a
 alone.
 
 ### MCP server missing
+
 If the server is missing from `/mcp` entirely, you started Claude Code somewhere other than the
 directory holding `.mcp.json`, or in a shell where the variables were not set.

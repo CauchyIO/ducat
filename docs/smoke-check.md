@@ -1,15 +1,17 @@
 # Smoke check: prove the evidence path
 
 This runbook proves that the skill can read what it needs to read. You take one job, look at one
-week of its history, and ask two parts of Databricks what that job cost. The two answers come from
-sources that know nothing about each other, so when the answers agree you have shown that the
-credential, the warehouse, the connection and the system tables are all working together.
+week of its history, and ask two parts of Databricks about it: one that knows what it cost, one that
+knows what it did. The two answers come from sources that know nothing about each other, so when the
+answers agree you have shown that the credential, the warehouse, the connection, and the system
+tables are all working together.
 
 Work through the five checks in order and do not move on until a check passes. A smoke check that
 half passed is worse than no smoke check at all, because every figure the skill later produces
 inherits the doubt without carrying a warning about it.
 
-**You will open this runbook twice, at two different points in the setup.**
+**Note:** You will open this runbook twice — check 1 before you build anything, run as yourself, and
+checks 2 to 5 after the connection exists, run as the principal.
 
 **Check 1 comes first, before you have built anything.** Run check 1 as yourself, using a workspace
 admin login, in the SQL editor or through the CLI. Check 1 asks a question about the workspace
@@ -180,12 +182,14 @@ the two sections below explain when a gap is expected and when a gap is a real p
 **Billing lags behind the work.** A run that finished minutes ago has no usage row yet. Whenever the
 skill states a current cost, it also has to state how fresh the billing data behind that cost is.
 
-**The two windows do not start at the same moment.** `usage_date > current_date() - 7` begins at
-midnight, while `current_timestamp() - INTERVAL 7 DAYS` begins at whatever time of day you run the
-query. The two windows can disagree by up to a day, and a run that falls into the gap looks like
-missing cost. State the window you used, and use the same window on both sides of the comparison.
+**The two windows do not start at the same moment.** Check 3 uses `usage_date > current_date() - 7`,
+which begins at midnight; checks 2, 4 and 5 use `current_timestamp() - INTERVAL 8 DAYS`, which begins
+at whatever time of day you run them. The extra day on the timeline side absorbs that offset, so a
+run near the edge of the billing window still has a run record to match against. A run outside both
+windows looks like missing cost and is not. State the window you used, and use the same one on both
+sides of any comparison you report.
 
-## When it genuinely fails
+## When the tables cannot explain the cost
 
 A job that has cost but no run record is not a bug in the setup. `system.billing.usage` covers the
 whole account, while `lakeflow`, `compute` and `query` only cover your metastore's region. A job

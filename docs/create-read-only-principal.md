@@ -9,26 +9,37 @@ untracked note, not here.
 
 ## Requirements
 
-- Databricks CLI. macOS: `brew tap databricks/tap && brew install databricks`. Windows:
-  `winget install Databricks.DatabricksCLI`. Linux:
-  `curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh`.
+- Databricks CLI, which can be installed using one of the methods below, depending on your operating system. If you encounter any difficulties, you can read the official Databricks instructions [here](https://docs.databricks.com/aws/en/dev-tools/cli/install).
+  - macOS: `brew tap databricks/tap && brew install databricks`.
+  - Windows: `winget install Databricks.DatabricksCLI`
+  - Linux: `curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh`.
 - A workspace admin login: `databricks auth login --host https://<workspace-hostname>`.
   `<workspace-hostname>` is the address bar of your browser while you are in the workspace, with
   `https://` and everything after the first `/` removed.
-- Unity Catalog system schemas already carrying rows.
+- Unity Catalog system schemas enabled on the metastore and already carrying rows. Enablement is an
+  account-admin action, per metastore, and rows accrue only from that point on — so a recently
+  enabled metastore may answer a query and still hold too little history to cost anything.
 
 Account admin is **not** required. Granting on individual `system` schemas is, which is why step 3
 grants on the catalog instead.
 
 ## 0. Set the workspace address
 
-Everything below runs in one shell. Export the workspace address first — it is the address bar of
-your browser while you are in the workspace, with `https://` and everything after the first `/`
-removed.
+**All of the steps in this runbook are to be executed in one shell**. Export the workspace address first — it is the address bar of your browser while you are in the workspace, with `https://` and everything after the first `/` removed.
+
+**Example:** If the address bar reads `https://adb-8271946503728461.11.azuredatabricks.net/explore/data o=8271946503728461`, the hostname is `adb-8271946503728461.11.azuredatabricks.net`.
 
 ```sh
 export WORKSPACE_URL=<workspace-hostname>
 ```
+
+You can verify that it exported properly by printing the value in your terminal:
+
+```sh
+echo $WORKSPACE_URL
+```
+
+This should print the workspace URL value that you assigned.
 
 ## 1. Create the principal
 
@@ -49,9 +60,19 @@ export SP=<the applicationId field from the output above>
 export SCIM=<the id field from the output above>
 ```
 
+As before, you can verify that both of these exported properly by printing the values in the terminal:
+
+```sh
+echo $SP && echo $SCIM
+```
+
+This should print the service principal application ID and the SCIM ID that you assigned.
+
 The principal arrives with `workspace-access` and `databricks-sql-access`, and no groups but `users`.
 
 ## 2. Allow it to hold tokens
+
+Creating a personal access token is a workspace permission in its own right — without it the principal can authenticate but cannot mint one, which is what c[`connect-mcp-server.md`](connect-mcp-server.md) step 1 needs it to do. `CAN_USE` grants that, and `update-permissions` adds the principal to the existing access control list rather than replacing it; `set-permissions` takes the same JSON and would revoke everyone else's token access in the same call.
 
 ```sh
 databricks token-management update-permissions --json "{\"access_control_list\":[
@@ -60,26 +81,27 @@ databricks token-management update-permissions --json "{\"access_control_list\":
 
 ## 3. Grant read on the system catalog
 
+This is the grant that makes the principal useful and keeps it harmless. `USE_CATALOG` and `USE_SCHEMA` permit traversal only — they expose no rows — and `SELECT` is the one privilege that reads any; no write follows from the three. As in step 2, update with add extends the catalog's existing grants rather than replacing them.
+
 ```sh
 databricks grants update CATALOG system \
   --json "{\"changes\":[{\"principal\":\"$SP\",\"add\":[\"USE_CATALOG\",\"USE_SCHEMA\",\"SELECT\"]}]}"
 ```
 
-Catalog level, because granting on individual `system` schemas is refused to anyone but an account
-admin — holding `MANAGE` on the catalog is not enough.
+The target is the catalog, not the individual schemas, because per-schema grants on system are refused to anyone but an account admin — holding `MANAGE` on the catalog is not enough.
 
 The grant is read-only and wider than the eleven tables the skill names: it also reaches
 `system.access.audit`, the lineage tables and the network logs. Reading them changes nothing, and
 for most setups the simplicity is worth more than the precision. If least privilege matters where
 you are deploying this, the appendix has the narrower version and who has to run it.
 
-Never add the principal to a group holding `MANAGE` on `system`. `MANAGE` permits granting.
+Never add the principal to a group holding `MANAGE` on `system`. `MANAGE` permits granting and revoking privileges on the catalog and everything under it, transferring ownership, and renaming — and a principal that can grant can grant to itself, which undoes every boundary set above.
 
 ## 4. Give it one warehouse
 
 The principal needs somewhere to execute SQL. System tables are readable from any warehouse in the
 workspace — the warehouse is compute, not a data source, and has no relationship to what is being
-assessed. List them and copy an ID:
+assessed. List them and copy the ID from the one you want to use:
 
 ```sh
 databricks warehouses list
@@ -94,35 +116,41 @@ Export its ID — the value of the `id` column in the output above.
 export WAREHOUSE_ID=<the id field of the warehouse you chose>
 ```
 
+You can verify that it exported properly using:
+
+```sh
+echo $WAREHOUSE_ID
+```
+
+This should print the warehouse ID that you selected.
+
+`CAN_USE` lets the principal run queries on this warehouse, starting it if it is idle; it does not permit resizing, stopping, or reconfiguring it. Grant it on this warehouse only — the MCP server picks a warehouse the caller may use, so holding exactly one grant is what makes that choice deterministic rather than something you configure. `update-permissions` merges here as it did in step 2.
+
 ```sh
 databricks warehouses update-permissions $WAREHOUSE_ID --json "{\"access_control_list\":[
   {\"service_principal_name\":\"$SP\",\"permission_level\":\"CAN_USE\"}]}"
 ```
-
-Grant exactly one. The MCP server picks a warehouse the caller may use, so a second grant makes the
-choice arbitrary rather than deterministic.
-
-`update-permissions` merges; `set-permissions` replaces. Check the existing owner survived.
 
 ## 5. Issue a credential
 
 Azure Databricks has no on-behalf-of token API — that endpoint is AWS and GCP only. Use the
 workspace secrets proxy, which a workspace admin may call for any principal in the workspace:
 
-`$SCIM` is the `id` field exported in step 1 — not `$SP`, which is the `applicationId`. Passing the
-wrong one returns an error that does not say which field it wanted.
-
 ```sh
 databricks service-principal-secrets-proxy create $SCIM --lifetime 7776000s
 ```
 
-The secret prints once. Record its ID and expiry locally; never the secret itself.
+**Note**: `$SCIM` is the `id` field exported in step 1 — not `$SP`, which is the `applicationId`. Passing the
+wrong one returns an error that does not say which field it wanted.
+
+The secret prints once and cannot be retrieved again — step 6 pastes it straight into your credential store, so keep the output on screen until then. Your local note records its ID and expiry only; never the secret itself.
 
 ## 6. Reach it from your shell
 
-Two things happen in this step. The secret goes into your operating system's credential store, so it
-never appears in a file or in your shell history. Then a wrapper called `dbsp` runs any Databricks
-command as the principal by reading the secret back out, one command at a time.
+Two things happen in this step:
+
+1. The secret goes into your operating system's credential store, so it never appears in a file or in your shell history.
+2. A wrapper called `dbsp` runs any Databricks command as the principal by reading the secret back out, one command at a time.
 
 The wrapper matters because `DATABRICKS_*` environment variables outrank any profile: exporting them
 globally would make *every* command run as the principal, including ones you meant to run as
@@ -134,7 +162,7 @@ prompt echoes nothing and asks twice.
 
 ### macOS
 
-Store it — `security` calls whatever it holds a "password"; here that word means the secret:
+Store it. The command says `add-generic-password`, but security calls everything it stores a password — here that means the `dose` secret from step 5:
 
 ```sh
 security add-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w
@@ -175,7 +203,7 @@ dbsp() {
 }
 ```
 
-### Windows, PowerShell
+### Windows (PowerShell)
 
 Store it with the `Microsoft.PowerShell.SecretManagement` and `SecretStore` modules, installing them
 first if you have not:
@@ -196,15 +224,27 @@ function dbsp {
 }
 ```
 
-Unlike the shell versions this leaves the variables set in the session, so open a fresh window when
+**Note:** Unlike the shell versions this leaves the variables set in the session, so open a fresh window when
 you want to run a command as yourself again.
 
 ### Confirm what was stored
 
-Before relying on it, check the store holds what you meant. On macOS:
+Before relying on it, check the store holds what you meant. macOS:
 
 ```sh
 security find-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w | cut -c1-4
+```
+
+Linux:
+
+```sh
+secret-tool lookup service databricks-cost-optimizer-sp account "$USER" | cut -c1-4
+```
+
+Windows (PowerShell):
+
+```powershell
+(Get-Secret -Name databricks-cost-optimizer-sp -AsPlainText).Substring(0,4)
 ```
 
 That should print `dose`. Anything else — a stray character, a pasted comment, the `id` instead of
@@ -213,7 +253,14 @@ naming no cause.
 
 ## 7. Verify
 
-Four checks. Run all of them — a half-verified principal is one you cannot make claims about.
+Four checks, one for each property this setup claims:
+
+1. The connection is the principal and not you.
+2. It can read the evidence.
+3. It cannot write.
+4. It holds nothing beyond what you granted.
+
+If you skip one, then that property is asserted rather than shown.
 
 First, name a catalog the principal was never granted anything on. `databricks catalogs list` shows
 one owner per catalog; pick any owned by a person or a team rather than by a `_workspace_admins_…`
@@ -230,8 +277,7 @@ dbsp auth describe
 ```
 
 **Passes when** it prints `oauth-m2m` and the `applicationId` from step 1. If it prints your own
-account, the credential did not load and every check below tests you instead of the principal. That
-mistake produced a false pass here once.
+account or `databricks-cli` as the authentication methof, then the credential did not load and every check below tests you instead of the principal. That mistake produced a false pass here once.
 
 ### Check 2 — the principal can read system tables
 
@@ -279,7 +325,7 @@ access to real data through a group, and the grant needs tracing before you go f
 
 ## The workspace-catalog exception
 
-One write right survives all of this, and it is not a misconfiguration.
+One write permission survives all of this, and it is not a misconfiguration.
 
 Every Databricks workspace has a catalog named after itself, and every principal in the workspace
 can create tables in that catalog's `default` schema. The right arrives through an automatic
@@ -299,9 +345,9 @@ What the principal ends up with: read on `system`, `BROWSE` or nothing on every 
 It cannot read data in a governed catalog, modify any existing object anywhere, or reach a job,
 cluster or warehouse beyond running queries on the one it was given.
 
-## Appendix: a narrower grant
+## A narrower grant (account admin only)
 
-Only an account admin can run these; a workspace admin with `MANAGE` on the catalog is refused with
+**Only an account admin can run the commands below**; a workspace admin with `MANAGE` on the catalog is refused with
 `User is not an account admin for Account`. Ask for this where least privilege matters — a client
 engagement, a shared workspace, an estate whose audit log is sensitive. Otherwise step 3 is enough.
 
