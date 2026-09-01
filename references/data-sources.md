@@ -9,10 +9,10 @@ the 2026-07-01 pricing reassessment findings, and FOCUS v1.4 (see `NOTICE.md`).
 
 - [Precedence](#precedence)
 - [Sources and what each supports](#sources-and-what-each-supports)
-- [The core join](#the-core-join)
+- [Turning usage into cost](#turning-usage-into-cost)
 - [Executing through the MCP server](#executing-through-the-mcp-server)
-- [Billing origin is not SKU](#billing-origin-is-not-sku)
-- [Attribution](#attribution)
+- [Telling a service apart from the price it bills on](#telling-a-service-apart-from-the-price-it-bills-on)
+- [Tying a cost to the scope that caused it](#tying-a-cost-to-the-scope-that-caused-it)
 - [Cost bases and FOCUS vocabulary](#cost-bases-and-focus-vocabulary)
 - [Evidence invariants](#evidence-invariants)
 - [Freshness](#freshness)
@@ -64,9 +64,12 @@ source, not an operational one — never present a system-table figure as real-t
 grouping you need into one query rather than looping over scopes, and back off in minutes rather
 than seconds. A 429 is a rate limit, not an access problem — do not read it as missing permission.
 
-## The core join
+## Turning usage into cost
 
-Everything starts here. Get this wrong and every downstream number is wrong.
+Cost is not stored anywhere. `system.billing.usage` records quantities — DBUs, gigabytes, storage
+units — and `system.billing.list_prices` records what one unit cost during a given price period.
+Every figure this skill reports is the product of the two, so every figure depends on matching each
+usage record to the price that was valid at the moment the usage happened.
 
 ```sql
 SELECT
@@ -89,27 +92,48 @@ ORDER BY list_cost DESC
 LIMIT 50
 ```
 
-**Grain decides the row count, not the `LIMIT`.** Period totals over an account this size return
-around a dozen rows. Add `usage_date` to see a trend and the same query returns one row per driver
-per day — 71 rows for a single week here, and worse over a month. Take the period total first, then
-ask for a trend on the one scope that earned it.
+Compose your own version of this query rather than copying it, and keep all three conditions in the
+`ON` clause. Each one is doing a job, and dropping any of them produces a total that looks
+reasonable and is wrong.
 
-Break down by tag, job or warehouse with a second grouped query. Never return the detail and sum it
-afterwards.
+**Condition 1 — the three join keys identify which price applies.**
 
-Three failure modes to avoid:
+```sql
+ON  lp.cloud      = u.cloud
+AND lp.sku_name   = u.sku_name
+AND lp.usage_unit = u.usage_unit
+```
 
-**Dropping the price validity window.** Without `price_start_time` / `price_end_time`, a SKU with
-more than one price record fans out and inflates the total. This is the most common Databricks cost
-calculation error. It also means you must never apply today's price retroactively across a whole
-baseline — a price change inside the period is a real feature of the period. `PREMIUM_JOBS_COMPUTE`
-has been $0.175, then $0.350, now $0.300: pricing 2018 usage at today's rate is wrong by 17%.
+A price is published per cloud, per SKU and per unit of measure, so all three are needed to find the
+right row. Matching on the SKU alone can pair a usage record with a price belonging to another cloud
+or another unit.
 
-**Dropping `currency_code`.** `list_prices` holds one row per currency per price period. Omit the
-filter in an account that publishes more than one and every usage record matches twice, doubling the
-cost silently and plausibly. Join on `cloud` and `usage_unit` for the same reason.
+**Condition 2 — `currency_code` stops the same price being counted twice.**
 
-**Grouping by `sku_name` alone.** See below.
+```sql
+AND lp.currency_code = :currency
+```
+
+`list_prices` holds one row per currency for every price period, so an account that publishes in
+more than one currency will match each usage record two or three times over. The cost then doubles
+or triples without anything failing, which is why the filter belongs in the join rather than in a
+later `WHERE`.
+
+**Condition 3 — the validity window matches usage to the price that applied at the time.**
+
+```sql
+AND u.usage_end_time >= lp.price_start_time
+AND (lp.price_end_time IS NULL OR u.usage_end_time < lp.price_end_time)
+```
+
+Prices change, and `list_prices` keeps the old rows with `price_start_time` and `price_end_time`
+marking when each was in force. Without `u.usage_end_time` bounded by those two columns, a SKU whose
+price has changed matches every price it has ever had. `PREMIUM_JOBS_COMPUTE` has been $0.175, then
+$0.350, and is now $0.300 — three rows, so every usage record for it would be counted three times.
+
+The same window is what stops you pricing an old period at today's rate. A price change inside the
+period being assessed is a real feature of that period, not an inconvenience to smooth over: valuing
+2018 usage at the current rate would overstate it by 17%.
 
 ## Executing through the MCP server
 
@@ -126,12 +150,23 @@ the whole set — aggregate so the whole set is small.
 **Execution is asynchronous.** A call returns a statement ID with `PENDING`; the result arrives from
 `poll_sql_result`. A cold warehouse takes a minute or so, and that is a wait, not a failure.
 
+What you group by is what decides how many rows come back, and a `LIMIT` will not save you: it cuts
+the answer short rather than making it smaller. Grouping the query above by product and SKU returns
+roughly a dozen rows for a whole period. Adding `usage_date`, to see the trend rather than the
+total, returns one row per driver per day instead — 71 rows for a single week in a small account,
+and several hundred over a month.
+
+So ask for the period total first, and only then ask for a trend, and only on the one scope that
+earned the attention. To break the total down by tag, job or warehouse, run a second query that
+groups by those columns. Never fetch the individual usage rows and add them up afterwards: that is
+the shape that gets truncated, and a truncated sum is wrong without announcing it.
+
 Every packaged query therefore: aggregates in SQL, bounds its period to the confirmed scope,
 orders by the measure that matters, and carries `LIMIT 100` or tighter. System tables also refuse
 insufficiently selective queries outright — `System Table query returned too much data` is a
 missing predicate, not an outage.
 
-## Billing origin is not SKU
+## Telling a service apart from the price it bills on
 
 `billing_origin_product` says **what generated the cost**. `sku_name` says **how it is priced**.
 Different dimensions. Many services have no SKU of their own and bill through another service's.
@@ -140,30 +175,35 @@ Join on `sku_name` to get a price. Group by `billing_origin_product` to understa
 by SKU alone and Vector Search disappears into the serving line, while Predictive Optimization hides
 inside serverless jobs — which is exactly how a background service escapes an assessment.
 
+The names below are stems. A live `sku_name` carries a tier prefix and usually a region suffix, so
+the stem `ALL_PURPOSE_SERVERLESS_COMPUTE` appears in the data as
+`PREMIUM_ALL_PURPOSE_SERVERLESS_COMPUTE_EU_WEST`. Match with `LIKE` or on the stem's position within
+the name, never on equality.
+
 Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment — verify live):
 
 | `billing_origin_product` | `sku_name`(s) | Mechanics |
 |---|---|---|
-| `ALL_PURPOSE` | `ALL_PURPOSE_COMPUTE`, `..._(PHOTON)` | Classic cluster DBU |
+| `ALL_PURPOSE` | `ALL_PURPOSE_COMPUTE`, `ALL_PURPOSE_COMPUTE_(PHOTON)` | Classic cluster DBU |
 | `INTERACTIVE` | `ALL_PURPOSE_SERVERLESS_COMPUTE`, `MODEL_TRAINING` | Serverless interactive; GPU work on the training SKU |
-| `JOBS` | `JOBS_COMPUTE`, `..._(PHOTON)`, `JOBS_SERVERLESS_COMPUTE` | Classic or serverless jobs |
+| `JOBS` | `JOBS_COMPUTE`, `JOBS_COMPUTE_(PHOTON)`, `JOBS_SERVERLESS_COMPUTE` | Classic or serverless jobs |
 | `SQL` | `SQL_COMPUTE`, `SQL_PRO_COMPUTE`, `SERVERLESS_SQL_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Warehouse compute; JOBS_SERVERLESS for DLT-backed streaming tables and MVs |
-| `DLT` | `DLT_CORE/PRO/ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Classic DLT on DLT SKUs; serverless DLT on JOBS_SERVERLESS |
-| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, `ANTHROPIC/OPENAI/GEMINI_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own |
+| `DLT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Classic DLT on DLT SKUs; serverless DLT on JOBS_SERVERLESS |
+| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, `ANTHROPIC_MODEL_SERVING`, `OPENAI_MODEL_SERVING`, `GEMINI_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own |
 | `VECTOR_SEARCH` | `SERVERLESS_REAL_TIME_INFERENCE` + `JOBS_SERVERLESS_COMPUTE` | **Dual billing**: endpoint serving plus background index sync |
-| `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE` + `DATABRICKS_STORAGE` + maintenance | **Triple component**: compute, storage in DSUs, background jobs |
+| `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE`, `DATABRICKS_STORAGE`, plus background maintenance on `JOBS_SERVERLESS_COMPUTE` | **Triple component**: compute, storage in DSUs, background jobs |
 | `APPS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Lakehouse Apps |
 | `PREDICTIVE_OPTIMIZATION` | `JOBS_SERVERLESS_COMPUTE` | Background service, per catalog/schema |
 | `DATA_QUALITY_MONITORING` | `JOBS_SERVERLESS_COMPUTE` | **Renamed** from `LAKEHOUSE_MONITORING` (~Feb 2026); old value now legacy |
 | `AI_FUNCTIONS` | `SERVERLESS_REAL_TIME_INFERENCE` | Only `ai_parse_document`, `ai_extract`, `ai_classify`. **`ai_query` bills under `MODEL_SERVING`** as batch inference |
 | `AI_GATEWAY`, `AGENT_EVALUATION` | `SERVERLESS_REAL_TIME_INFERENCE` | Own origin values, inference SKU |
 | `DATA_CLASSIFICATION`, `FINE_GRAINED_ACCESS_CONTROL`, `BASE_ENVIRONMENTS` | `JOBS_SERVERLESS_COMPUTE` | Background platform services |
-| `ONLINE_TABLES`, `LAKEFLOW_CONNECT` | `DLT_*_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Bill through the pipeline underneath |
+| `ONLINE_TABLES`, `LAKEFLOW_CONNECT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Bill through the pipeline underneath |
 | `AI_RUNTIME` | `ALL_PURPOSE_SERVERLESS_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Serverless GPU pool |
 | `FOUNDATION_MODEL_TRAINING` | `MODEL_TRAINING` | Fine-tuning |
 | `NOTEBOOKS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Distinct origin from `INTERACTIVE` |
 | `CLEAN_ROOM` | `CLEAN_ROOMS_COLLABORATOR` | Flat per-DAY rate, not a DBU rate — never price it per hour |
-| `NETWORKING` | Egress and connectivity SKUs | Per-GB by route; per-hour for private endpoints |
+| `NETWORKING` | `INTERNET_EGRESS_*`, `DATABRICKS_INTER_CONTINENTAL_EGRESS_*`, `PUBLIC_CONNECTIVITY_DATA_PROCESSED` | Per-GB by route; per-hour for private endpoints |
 | `GENIE` | `GENIE` (from 2026-07-06) | Metered DBUs; underlying SQL compute still billed on top |
 
 Other origins to expect: `DEFAULT_STORAGE`, `AGENT_BRICKS`, `DATA_SHARING`,
@@ -175,30 +215,46 @@ Newer attribution surfaces worth using: `usage_type`, `product_features` (`jobs_
 subfields including `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`, `notebook_id`,
 `app_name`, `database_instance_id`, `budget_policy_id`.
 
-## Attribution
+## Tying a cost to the scope that caused it
 
-**Check for a native identifier before offering a method.** `usage_metadata` carries the object's
-own identity on the billing record — `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`,
-`app_name`, `notebook_id`, `database_instance_id` — and where one covers the scope, that is native
-attribution: the platform has already done the work. Query for it first, offer it first, and label
-it native.
+**Check for a native identifier before offering a method.** `system.billing.usage` has a column
+called `usage_metadata`, a struct whose subfields name the object that produced each record. Read a
+subfield with dot notation:
 
-Tags, name matching and a user-supplied object list are what you fall back to when no native
-identifier covers the scope. Offering them alongside native as equal choices invites the user to
-pick a weaker method than the evidence supports, and the label follows the method rather than the
-evidence: a native mapping recorded as manual weakens every figure downstream of it, because
-confidence ranks the shortlist and the portfolio rule leans on those labels.
+```sql
+SELECT usage_metadata.job_id, sum(usage_quantity)
+FROM system.billing.usage
+WHERE usage_metadata.job_id IS NOT NULL
+GROUP BY ALL
+```
 
-Resolve scope before aggregation, and keep the populations apart:
+The subfields worth reaching for are `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`,
+`app_name`, `notebook_id` and `database_instance_id`, among some fifty in total. Where one of them
+covers the scope you are assessing, that is native attribution and the platform has already done the
+work for you. Query for it first, offer it first, and label it native.
+
+Three weaker methods exist for when no subfield of `usage_metadata` covers the scope: the
+`custom_tags` column on the same table, matching objects by name, and a list of objects the user
+supplies by hand. Do not offer these alongside a native identifier as though the choice were even —
+a user given four options will sometimes pick a worse one than the evidence supports.
+
+Label each mapping by the method that produced it, not by how confident it feels. Recording a native
+mapping as manual weakens every figure built on it, because the confidence label decides where an
+opportunity ranks in the shortlist, and the portfolio calculation reads those labels when it decides
+which savings may be added together.
+
+Decide which objects belong to the scope before aggregating anything, and report the four
+populations separately rather than as one total:
 
 | Population | Meaning |
 |---|---|
-| **Native** | Tag or `usage_metadata` identifier ties the record to the scope directly |
-| **Manual** | User-confirmed mapping from an object to the scope |
-| **Inferred** | Claimed without tag evidence — weakest, and labelled as such |
-| **Unallocated** | Matched nothing. Stays visible; never redistributed silently |
+| **Native** | A `usage_metadata` subfield or a `custom_tags` entry names the object directly on the billing record |
+| **Manual** | The user confirmed that a named object belongs to the scope |
+| **Inferred** | The object was matched by name or convention, with nothing on the record to confirm it. The weakest, and always labelled |
+| **Unallocated** | Spend inside the period that matched no object. Report it as its own line; never spread it across the others |
 
-Caveats that change what a number means. Preserve them into the output:
+Each situation below breaks attribution in a way the query cannot detect. Where one applies to the
+scope, say so in the assessment rather than reporting the figure as though it were clean:
 
 | Situation | Consequence |
 |---|---|
@@ -221,9 +277,11 @@ Reserved keys that must not be used as custom tags: `Vendor`, `ClusterId`, `Clus
 Tags cannot be applied retroactively to historical billing records. A tagging improvement is a
 prerequisite that improves future attribution, never a saving.
 
-Shared resources need proportional allocation. For a warehouse serving several teams, weight the
-warehouse cost by query execution time from `system.query.history`, and state the method and its
-coverage — queries without a team tag are unallocated, not free.
+A resource serving several teams has to be split between them rather than assigned to one. For a
+SQL warehouse, divide its cost in proportion to query execution time per team, taken from
+`system.query.history`. Then report two things alongside the split: that execution time was the
+basis for it, and what share of the queries carried no team tag. Those untagged queries are
+unallocated spend, not free spend.
 
 ## Cost bases and FOCUS vocabulary
 
