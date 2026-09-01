@@ -1,37 +1,47 @@
 # Map workspaces to Azure
 
-Azure Databricks bills through Azure. Joining cloud cost back to Databricks objects runs through
-each workspace's **managed resource group** — the resource group Databricks creates and fills with
-the VMs, disks, public IPs and NAT a workspace consumes. Without that key, Azure cost is a lump sum
-you cannot attribute.
+Do this only if you want billed cost rather than list cost, or want to see the Azure resources a
+workspace consumes on its own — the NAT gateway, public IP and disks that Databricks never reports.
+Everything else in this skill works without it.
 
-## Requirements
+Azure bills those resources into a **managed resource group**, one per workspace, and nothing in the
+Databricks system tables names it. This runbook produces that mapping and grants the access that
+makes the figures readable.
 
-- **Azure CLI.** macOS: `brew install azure-cli`. Windows: `winget install Microsoft.AzureCLI`.
-  Linux: `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`.
-- **A subscription selected, not just a tenant.** `az login` can leave you at tenant scope, and the
-  cost commands then return nothing without reporting a failure.
-- **Cost Management Reader** on every subscription in the map, or a role that contains it. Resource
-  Graph needs only read access to the workspaces; cost figures need this as well.
+## 1. Install the Azure CLI and sign in
 
-Prove both before assessing anything:
+macOS:
+
+```sh
+brew install azure-cli
+```
+
+Windows:
+
+```powershell
+winget install Microsoft.AzureCLI
+```
+
+Linux:
+
+```sh
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+Then sign in and select a subscription. Signing in can leave you at tenant scope, where the cost
+commands return nothing and report no failure.
+
+```sh
+az login
+```
 
 ```sh
 az account show --query "{sub:name, id:id, user:user.name}" -o table
-
-az rest --method post \
-  --url "https://management.azure.com/subscriptions/<subscription-id>/providers/Microsoft.CostManagement/query?api-version=2024-08-01" \
-  --body '{"type":"ActualCost","timeframe":"MonthToDate","dataset":{"granularity":"None","aggregation":{"total":{"name":"Cost","function":"Sum"}}}}'
 ```
 
-The first must name a subscription. The second must return a number. A `403` means the role is
-missing. A `429` means throttling — wait a minute and repeat; it is not a permission failure.
+**Passes when** the output names a subscription rather than showing nothing.
 
-**What skipping this costs.** Every figure stays labelled list cost. That is honest, and it is
-permanent: a billed figure cannot be added to a finished assessment, because the reasoning was built
-on the plane that answered. Recovering one means running the assessment again.
-
-## The Databricks half
+## 2. List the workspaces from Databricks
 
 ```sql
 SELECT workspace_id, workspace_name, workspace_url, status
@@ -39,19 +49,20 @@ FROM system.access.workspaces_latest
 ORDER BY create_time
 ```
 
-Note what this table does **not** carry: any Azure resource ID, subscription or resource group. It
-lists workspaces and nothing about where they live. The Azure half has to come from Azure.
+This table names workspaces and nothing about where they live in Azure — no resource id, no
+subscription, no resource group. Step 3 supplies that half.
 
 Cancelled workspaces disappear from this table, so a workspace that billed earlier in the period may
-not appear at all. Reconcile against `system.billing.usage` grouped by `workspace_id` rather than
-assuming the inventory is complete.
+be missing entirely. Compare against `system.billing.usage` grouped by `workspace_id` before
+treating the list as complete.
 
-## The Azure half
-
-Resource Graph queries every subscription you can read, in one call:
+## 3. List the same workspaces from Azure
 
 ```sh
 az extension add --name resource-graph
+```
+
+```sh
 az graph query -q "resources
   | where type =~ 'microsoft.databricks/workspaces'
   | project name,
@@ -61,30 +72,36 @@ az graph query -q "resources
             resourceGroup, subscriptionId, tenantId, location" -o table
 ```
 
-`properties.workspaceId` is the join key: it equals `workspace_id` in the system tables. Match on
-that rather than on name — workspace names are not unique across subscriptions, and `workspaceUrl`
-changes if a workspace moves.
+Join the two lists on `workspaceId`, which equals `workspace_id` from step 2. Match on that rather
+than on name: workspace names are not unique across subscriptions, and the URL changes if a
+workspace moves.
 
-Without Azure access, the portal shows the same facts one workspace at a time: **Overview →
-Managed Resource Group**, with the subscription in the breadcrumb.
+Never guess a managed resource group from its name. The default looks like
+`databricks-rg-<workspace>-<hash>`, but whoever created the workspace can set it to anything, and in
+the first estate mapped this way one workspace used a short custom name matching no convention at
+all. Read the property.
 
-## Verify before using it
+**Passes when** every workspace from step 2 appears with a managed resource group. A workspace
+missing here sits in a subscription you cannot read, so the map is incomplete rather than short.
 
-Count both sides. The workspaces returned by Resource Graph must reconcile with those in
-`system.access.workspaces_latest`; a shortfall means a workspace sits in a subscription the caller
-cannot read, and the map is incomplete rather than small.
+## 4. Get cost-reader access on each subscription
 
-Do not infer a managed resource group from its name. The default is
-`databricks-rg-<workspace>-<hash>`, but it can be set to anything at creation — in the first estate
-mapped this way, one workspace used a short custom name matching no convention at all. Read the
-property; never pattern-match it.
+Ask for **Cost Management Reader** on every subscription holding a workspace in the map, or once at
+a management group covering them all. Step 3 needed only read access to the workspaces; reading cost
+needs this as well.
 
-## What the map is for
+Confirm it works before relying on it:
 
-It sizes the access request. One cost-reader grant is needed per subscription holding a workspace in
-scope, or one at a management group covering them all. Record which subscriptions were granted and
-which were not — an ungranted subscription is reported as list-price only, never quietly dropped.
+```sh
+az rest --method post \
+  --url "https://management.azure.com/subscriptions/<subscription-id>/providers/Microsoft.CostManagement/query?api-version=2024-08-01" \
+  --body '{"type":"ActualCost","timeframe":"MonthToDate","dataset":{"granularity":"None","aggregation":{"total":{"name":"Cost","function":"Sum"}}}}'
+```
 
-The map also exposes regional structure. A workspace whose SKUs carry a different region suffix from
-your metastore bills into the same account while its runtime detail stays invisible to your queries.
-Name that workspace in the map so the gap is a known boundary rather than a surprise.
+**Passes when** the response contains a number.
+
+A `403` means the role has not been granted. A `429` means the API is throttling you — wait a minute
+and run it again, because throttling is not a permission failure and reads like one.
+
+Record which subscriptions were granted and which were not. A workspace in an ungranted subscription
+is reported as list cost only, and saying so is better than quietly leaving it out.
