@@ -1,28 +1,44 @@
 # Smoke check: prove the evidence path
 
-One job, one week, two independent sources that must agree. The cheapest end-to-end proof that the
-credential, the warehouse, the transport and the system tables all work together.
+This runbook proves that the skill can read what it needs to read. You take one job, look at one
+week of its history, and ask two parts of Databricks what that job cost. The two answers come from
+sources that know nothing about each other, so when the answers agree you have shown that the
+credential, the warehouse, the connection and the system tables are all working together.
 
-Five checks, in order. Do not move on until each one passes. A half-passed smoke check is worse than
-none, because every later figure inherits the doubt without carrying the warning.
+Work through the five checks in order and do not move on until a check passes. A smoke check that
+half passed is worse than no smoke check at all, because every figure the skill later produces
+inherits the doubt without carrying a warning about it.
 
-**This file is used twice, at two different points in the setup sequence.**
+**You will open this runbook twice, at two different points in the setup.**
 
-**Check 1 comes first, before anything else exists.** Run it as yourself, a workspace admin, in the
-SQL editor or the CLI. It answers a question that has nothing to do with this skill: does this
-workspace have system tables with rows in them? There is no point building an identity to read data
-that is not there. This is step 1 of [`getting-started.md`](getting-started.md).
+**Check 1 comes first, before you have built anything.** Run check 1 as yourself, using a workspace
+admin login, in the SQL editor or through the CLI. Check 1 asks a question about the workspace
+rather than about the skill: do the system tables exist and do they contain data? Building an
+identity to read tables that turn out to be empty wastes an hour. Check 1 is step 1 of
+[`getting-started.md`](getting-started.md).
 
-**Checks 2 to 5 come last**, once the principal, the warehouse and the connection all exist. Run
-them *as the principal, through the MCP connection* — that combination is what is being tested, and
-running them as yourself proves only that you can read. This is step 4 of `getting-started.md`.
+**Checks 2 to 5 come last,** once the service principal, the warehouse and the connection all
+exist. Run those four checks as the principal, through the MCP connection, because the combination
+of all four pieces is what you are testing. Running the same queries as yourself would prove only
+that you can read the tables. Checks 2 to 5 are step 4 of [`getting-started.md`](getting-started.md).
+
+Running a query through the MCP connection means asking Claude Code to run it. Start a session in
+the directory holding `.mcp.json`, confirm with `/mcp` that `databricks-sql` is connected, then paste
+the query and ask for it to be run. Claude sends the query to Databricks over the connection, waits
+for the statement to finish, and shows the rows in the conversation. The query executes as the
+service principal, because the token in the connection belongs to the principal rather than to you —
+which is exactly why these four checks test the setup and not your own access.
+
+Only reads will run this way. `.claude/settings.json` denies the read-write tool, so a query that
+tried to change anything would be refused before it reached Databricks. Every query below is a
+`SELECT`, so the question never arises.
 
 ## Check 1 — the schemas carry rows
 
-*Run as yourself, before the principal exists.*
+*Run this check as yourself, before the service principal exists.*
 
-Before building anything, confirm there is anything to read. One query covers all five sources the
-skill depends on.
+Confirm that the workspace holds data worth reading before you build anything to read it with. A
+single query covers all five sources the skill depends on.
 
 ```sql
 SELECT 'billing.usage' AS source, count(*) AS row_count,
@@ -42,24 +58,32 @@ SELECT 'access.workspaces_latest', count(*), cast(min(create_time) AS string), c
 FROM system.access.workspaces_latest
 ```
 
-**Passes when** five rows come back, each with a count above zero and a `latest` within the last day
-or two.
+**Passes when** the query returns five rows, `billing.usage` carries a count above zero, and the
+`latest` dates are recent.
 
-Read `latest` as carefully as the count. A figure several days old means the feed has stalled, not
-that the schema is missing.
+Only `billing.usage` must contain rows. A workspace that bills anything at all produces billing
+records, so a count of zero there means the schema has been switched on but has not finished
+backfilling. Wait a few hours and run check 1 again.
 
-Zero on `query.history` is often genuine — nobody ran SQL on a warehouse in the window — so widen to
-90 days before treating it as a gap. Zero on `billing.usage` never is: the schema is enabled but not
-yet backfilled, so check again in a few hours.
+The other four sources may legitimately be empty, and a count of zero tells you about the workspace
+rather than about the setup. A workspace where nobody has created a job leaves `lakeflow.jobs`
+empty. A workspace running only serverless compute leaves `compute.clusters` empty. A workspace
+where nobody has run SQL on a warehouse this month leaves `query.history` empty — widen the window
+to 90 days before drawing any conclusion from that one.
 
-Databricks enables these schemas centrally. If one is genuinely empty, the escalation is Databricks
-rather than a local admin, because the customer-facing enable API refuses them.
+Read the `latest` dates as carefully as you read the counts. A date several days old means the feed
+into that table has stalled, which matters more than a low count and is easy to miss.
+
+Databricks switches these schemas on centrally, so if a schema is genuinely missing rather than
+merely empty, raise the problem with Databricks rather than with a local administrator. The
+customer-facing enable API refuses to touch them.
 
 ## Check 2 — find a job that ran at least twice
 
-*Checks 2 to 5 run as the principal, through the MCP connection.*
+*Run checks 2 to 5 as the principal, through the MCP connection.*
 
-The reconciliation compares a *rate* across runs, so one run is not enough. This finds candidates.
+Check 5 compares a rate across several runs of the same job, so a job that ran only once will not
+serve. The query below lists the jobs that ran often enough to use.
 
 ```sql
 SELECT job_id, count(DISTINCT run_id) AS runs,
@@ -70,14 +94,16 @@ GROUP BY job_id HAVING count(DISTINCT run_id) >= 2
 ORDER BY runs DESC
 ```
 
-**Passes when** at least one job comes back. Take its `job_id` into checks 3 and 4.
+**Passes when** the query returns at least one job. Carry that `job_id` into checks 3, 4 and 5.
 
-If nothing comes back, the workspace ran no job twice this week. Widen the window rather than
-picking a single-run job — a rate you cannot compare tests nothing.
+If the query returns nothing, no job in this workspace ran twice during the past week. Widen the
+window rather than settling for a job that ran once, because a rate you cannot compare against
+anything tests nothing.
 
 ## Check 3 — price that job's cost from billing
 
-The first of the two independent sources. Substitute the `job_id` from check 2.
+This query is the first of the two independent sources. Substitute the `job_id` you took from
+check 2.
 
 ```sql
 SELECT u.usage_date, u.sku_name, round(u.usage_quantity, 4) AS quantity,
@@ -95,15 +121,16 @@ WHERE u.usage_metadata.job_id = '<job-id>' AND u.usage_date > current_date() - 7
 ORDER BY u.usage_start_time
 ```
 
-**Passes when** every row carries a non-null `list_cost_usd`.
+**Passes when** every row carries a `list_cost_usd` that is not null.
 
-A null price means the join found no valid row for that SKU, unit and moment — the figure is
-unpriced rather than free. The `currency_code` filter is not optional: without it a SKU published in
-several currencies returns one row per currency and the cost multiplies silently.
+A null price means the join found no price row valid for that SKU, that unit and that moment, so
+the usage is unpriced rather than free. Keep the `currency_code` filter: a SKU published in several
+currencies returns one row per currency without it, and the cost silently multiplies.
 
 ## Check 4 — list the same job's runs from the timeline
 
-The second source, which knows nothing about billing.
+This query is the second source. The run timeline records what the scheduler did and knows nothing
+about what anything cost.
 
 ```sql
 SELECT run_id, min(period_start_time) AS started, max(period_end_time) AS ended,
@@ -113,12 +140,13 @@ WHERE job_id = '<job-id>' AND period_start_time > current_timestamp() - INTERVAL
 GROUP BY run_id ORDER BY started
 ```
 
-**Passes when** it returns the runs check 2 promised, with start and end times that bracket the
-usage rows from check 3.
+**Passes when** the query returns the runs that check 2 counted, and the start and end times
+bracket the usage rows from check 3.
 
 ## Check 5 — the two sources agree
 
-The one that matters. Matching totals can agree by coincidence; a stable rate cannot.
+This is the check the other four exist to make possible. Two totals can match by coincidence, but
+two sources rarely produce the same rate by accident.
 
 ```sql
 WITH runs AS (
@@ -140,25 +168,29 @@ GROUP BY r.run_id, r.started, r.ended
 ORDER BY r.started
 ```
 
-**Passes when** `dbu_per_hour` is roughly constant across runs — same compute, same rate, whatever
-the run lengths.
+**Passes when** `dbu_per_hour` stays roughly constant from run to run. The same compute charges the
+same rate whatever the run lengths, so a stable rate means the billing rows and the run records are
+describing the same work.
 
-A run with null `dbus` had no billing row overlap. That is not automatically a failure; the two
-sections below say when it is.
+A run whose `dbus` is null had no billing row overlapping it. That is not automatically a failure —
+the two sections below explain when a gap is expected and when a gap is a real problem.
 
 ## When a mismatch is not a fault
 
-**Billing lag.** A run that finished minutes ago has no usage row yet. Any statement about current
-cost must say how fresh the billing data is.
+**Billing lags behind the work.** A run that finished minutes ago has no usage row yet. Whenever the
+skill states a current cost, it also has to state how fresh the billing data behind that cost is.
 
-**Window mismatch.** `usage_date > current_date() - 7` starts at midnight; `current_timestamp() -
-INTERVAL 7 DAYS` starts at this time of day. The two disagree by up to a day, and the missing run
-looks like missing cost. State the window, and use the same one on both sides.
+**The two windows do not start at the same moment.** `usage_date > current_date() - 7` begins at
+midnight, while `current_timestamp() - INTERVAL 7 DAYS` begins at whatever time of day you run the
+query. The two windows can disagree by up to a day, and a run that falls into the gap looks like
+missing cost. State the window you used, and use the same window on both sides of the comparison.
 
 ## When it genuinely fails
 
-A job with cost but no run record is not a bug. `system.billing.usage` is global while `lakeflow`,
-`compute` and `query` are regional, so a job running outside your metastore's region bills here and
-is invisible here.
+A job that has cost but no run record is not a bug in the setup. `system.billing.usage` covers the
+whole account, while `lakeflow`, `compute` and `query` only cover your metastore's region. A job
+running in another region therefore bills into the tables you can see and leaves no trace in the
+tables that would explain it.
 
-Report that scope as cost-without-detail rather than guessing.
+When that happens, report the scope as cost without detail rather than guessing at what produced
+the cost.

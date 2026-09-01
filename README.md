@@ -17,17 +17,17 @@ is a Markdown proposal a human reviews and decides on.
 
 ## Status
 
-**Implemented.** `SKILL.md` and `references/` are the package, and they are authoritative. What
+**Implemented.** [`SKILL.md`](SKILL.md) and `references/` are the package, and they are authoritative. What
 each file governs:
 
 | Path | What it governs |
 |---|---|
-| `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, object settings, tool and reference routing |
-| `references/data-sources.md` | Evidence semantics, precedence, attribution, pricing joins |
-| `references/freshness.md` | Dated vendor facts, with a review date |
-| `references/opportunity-catalog.md` | Practice taxonomy, price baseline, scope routing |
+| [`SKILL.md`](SKILL.md) | Scope gate, workflow, authorization boundary, claim gates, object settings, tool and reference routing |
+| [`references/data-sources.md`](references/data-sources.md) | Evidence semantics, precedence, attribution, pricing joins |
+| [`references/freshness.md`](references/freshness.md) | Dated vendor facts, with a review date |
+| [`references/opportunity-catalog.md`](references/opportunity-catalog.md) | Practice taxonomy, price baseline, scope routing |
 | `references/opportunities/` | Optimization practices, one file per scope type |
-| `references/proposal-contract.md` | Calculation contract, decision card, artifact structure |
+| [`references/proposal-contract.md`](references/proposal-contract.md) | Calculation contract, decision card, artifact structure |
 
 All four behavioural witnesses in Section 10 have been run against recorded controls. The clearest
 is the scope gate: without the skill the same request produced twenty unrequested queries and a set

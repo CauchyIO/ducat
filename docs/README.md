@@ -10,11 +10,11 @@ last section.
 
 | File | What it is | Read it when |
 |---|---|---|
-| `getting-started.md` | The setup sequence, in order, with what each step achieves | **Start here** if you are standing this up |
-| `create-read-only-principal.md` | Runbook for the identity the skill connects as | Setting up a new workspace |
-| `connect-mcp-server.md` | Runbook for wiring the client to Databricks | After the principal exists |
-| `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
-| `map-workspaces-to-azure.md` | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
+| [`getting-started.md`](getting-started.md) | The setup sequence, in order, with what each step achieves | **Start here** if you are standing this up |
+| [`create-read-only-principal.md`](create-read-only-principal.md) | Runbook for the identity the skill connects as | Setting up a new workspace |
+| [`connect-mcp-server.md`](connect-mcp-server.md) | Runbook for wiring the client to Databricks | After the principal exists |
+| [`smoke-check.md`](smoke-check.md) | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
+| [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md) | How to join workspaces to their Azure subscriptions and managed resource groups | Before requesting Azure cost access, or when attributing cloud cost |
 
 Session transcripts from validation runs are **not here and not committed**. They capture whole
 sessions including credentials in cleartext, so they stay in a gitignored `transcripts/` at the
@@ -22,15 +22,15 @@ repository root; the findings travel in the Linear issue instead.
 
 ## What you can change, and where
 
-**`SKILL.md` — the policy layer.** Nine invariants govern everything the skill will and will not do.
+**[`SKILL.md`](../SKILL.md) — the policy layer.** Nine invariants govern everything the skill will and will not do.
 The consequential ones: scope is confirmed before any tool runs; a broad driver scan needs separate
 confirmation and returns candidates rather than conclusions; cost bases are never blurred; a cheaper
 design counts as a saving only when the workload's required outcomes survive; and the skill stops at
 an approved design rather than implementing it. Loosen an invariant here and every downstream
 document changes meaning.
 
-**The setup runbooks — the access layer.** `create-read-only-principal.md` and
-`connect-mcp-server.md` carry the decisions; `smoke-check.md` and `map-workspaces-to-azure.md` prove
+**The setup runbooks — the access layer.** [`create-read-only-principal.md`](create-read-only-principal.md) and
+[`connect-mcp-server.md`](connect-mcp-server.md) carry the decisions; [`smoke-check.md`](smoke-check.md) and [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md) prove
 and extend them. Each setup decision is a lever: how wide the read grant is
 (catalog-level by default, which includes audit logs; a tighter per-schema grant needs an account
 admin, and the runbook carries both), how long the
@@ -44,12 +44,12 @@ If the question is *what counts as evidence* or *what counts as a saving*, the a
 `references/`, not here. That folder has its own guide at `references/README.md`, which enumerates
 each lever in full. In short:
 
-- **`data-sources.md`** — the evidence precedence ladder, the four cost bases, the attribution
+- **[`data-sources.md`](../references/data-sources.md)** — the evidence precedence ladder, the four cost bases, the attribution
   populations (native, manual, inferred, unallocated) and the rule that unallocated cost stays
   visible. Change these and you change what the skill is allowed to claim.
-- **`opportunity-catalog.md`** and **`opportunities/`** — the practice taxonomy, a dated price
+- **[`opportunity-catalog.md`](../references/opportunity-catalog.md)** and **`opportunities/`** — the practice taxonomy, a dated price
   baseline, and one file per scope type. The prices carry an as-of date and lose to a live query;
   the ratios beneath them survive price drift and usually decide the case.
-- **`proposal-contract.md`** — which figures may be reported at all, how savings are calculated,
+- **[`proposal-contract.md`](../references/proposal-contract.md)** — which figures may be reported at all, how savings are calculated,
   the rule that overlapping opportunities are a portfolio rather than a sum, the confidence levels,
   and the shape of the decision card a human signs off.

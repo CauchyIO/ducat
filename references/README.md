@@ -1,23 +1,23 @@
 # References
 
-These files are runtime instructions, not background reading. `SKILL.md` routes to them after the
-scope is confirmed — `data-sources.md` during collection, `opportunity-catalog.md` once the scope
-type is known, `proposal-contract.md` before anything is written down.
+These files are runtime instructions, not background reading. [`SKILL.md`](../SKILL.md) routes to them after the
+scope is confirmed — [`data-sources.md`](data-sources.md) during collection, [`opportunity-catalog.md`](opportunity-catalog.md) once the scope
+type is known, [`proposal-contract.md`](proposal-contract.md) before anything is written down.
 
 This is where the criteria live. A client who wants to change what the skill claims, or what counts
 as a saving, changes something here. See `docs/README.md` for the design and setup documents.
 
 | File | Governs | Read it when |
 |---|---|---|
-| `data-sources.md` | What counts as evidence, and what a figure means | A number is disputed, or attribution looks wrong |
-| `freshness.md` | Vendor facts that drift, with a distillation date and a review date | Preflight, and whenever a product behaves unexpectedly |
-| `opportunity-catalog.md` | The practice taxonomy, the price baseline, and the route to a scope | Deciding what to propose |
+| [`data-sources.md`](data-sources.md) | What counts as evidence, and what a figure means | A number is disputed, or attribution looks wrong |
+| [`freshness.md`](freshness.md) | Vendor facts that drift, with a distillation date and a review date | Preflight, and whenever a product behaves unexpectedly |
+| [`opportunity-catalog.md`](opportunity-catalog.md) | The practice taxonomy, the price baseline, and the route to a scope | Deciding what to propose |
 | `opportunities/` | One file per scope type — job, warehouse, serving, team, background service, app | After the scope is confirmed |
-| `proposal-contract.md` | What may be reported, and how it is calculated | Writing or reviewing a proposal |
+| [`proposal-contract.md`](proposal-contract.md) | What may be reported, and how it is calculated | Writing or reviewing a proposal |
 
 ## The levers, file by file
 
-**`data-sources.md`**
+**[`data-sources.md`](data-sources.md)**
 
 - **The precedence ladder.** Five rungs, live reads at the top, explicitly limited estimates at the
   bottom. A higher rung wins any disagreement. Reorder this and you change which source the skill
@@ -29,7 +29,7 @@ as a saving, changes something here. See `docs/README.md` for the design and set
 - **Query shape**: aggregation, row caps, and the currency and validity conditions that stop a join
   from silently doubling a cost.
 
-**`opportunity-catalog.md`**
+**[`opportunity-catalog.md`](opportunity-catalog.md)**
 
 - **The practice taxonomy**, which every recommendation must trace back to.
 - **The reference prices**, carried with an as-of date. They are a sanity check and lose to a live
@@ -40,7 +40,7 @@ as a saving, changes something here. See `docs/README.md` for the design and set
   loads per assessment; adding an opportunity to the wrong file means it is never considered. The
   catalogue also states what to do for a scope type none of them covers.
 
-**`proposal-contract.md`**
+**[`proposal-contract.md`](proposal-contract.md)**
 
 - **Which figures may be reported at all.** Gross saving, net saving, steady-state rate, payback
   where material, a range where an input is uncertain, and a confidence level. Nothing else is

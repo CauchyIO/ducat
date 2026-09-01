@@ -11,7 +11,7 @@ already happened here.
 inside a file swept up by `git add -A`. The fix was rotation, because deleting a pushed
 secret does not unpublish it.
 
-**Estate identifiers, in the package a client reads** — `SKILL.md`, `references/`, `docs/`
+**Estate identifiers, in the package a client reads** — [`SKILL.md`](SKILL.md), `references/`, `docs/`
 and the configuration beside them. A workspace id in a working note is nobody's problem.
 The same id in a runbook is what a client sees, and the runbooks are clean today only
 because someone grepped them by hand.
@@ -45,7 +45,7 @@ The output names the file, the line and the rule.
 
 - **A credential must be rotated**, not merely deleted. It is already on this machine and
   may be in the history.
-- **An estate identifier belongs in `environment.local.md`**, which is gitignored, with a
+- **An estate identifier belongs in [`environment.local.md`](environment.local.md)**, which is gitignored, with a
   placeholder such as `<workspace-id>` where it was.
 - **A deliberate example** needs `check-allow` on the line, and a sentence nearby saying why
   the example is safe to publish.
