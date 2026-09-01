@@ -11,7 +11,6 @@ last section.
 | File | What it is | Read it when |
 |---|---|---|
 | `getting-started.md` | The setup sequence, in order, with what each step achieves | **Start here** if you are standing this up |
-| `skill-spec.md` | The original design proposal, kept for its reasoning and no longer maintained | You want to know why the skill was built the way it was |
 | `create-read-only-principal.md` | Runbook for the identity the skill connects as | Setting up a new workspace |
 | `connect-mcp-server.md` | Runbook for wiring the client to Databricks | After the principal exists |
 | `smoke-check.md` | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |

@@ -17,11 +17,10 @@ is a Markdown proposal a human reviews and decides on.
 
 ## Status
 
-**Implemented.** `SKILL.md` and `references/` are the package, and they are authoritative.
-[`docs/skill-spec.md`](docs/skill-spec.md) is the original proposal it grew from — kept for the
-reasoning, no longer maintained. The package derives from it:
+**Implemented.** `SKILL.md` and `references/` are the package, and they are authoritative. What
+each file governs:
 
-| Path | Derived from |
+| Path | What it governs |
 |---|---|
 | `SKILL.md` | Scope gate, workflow, authorization boundary, claim gates, object settings, tool and reference routing |
 | `references/data-sources.md` | Evidence semantics, precedence, attribution, pricing joins |
@@ -84,7 +83,6 @@ databricks-cost-optimizer/
 ├── docs/                           ← how it was designed and how to connect it
 │   ├── README.md                   ← what each document is for
 │   ├── getting-started.md          ← the setup sequence, in order
-│   ├── skill-spec.md
 │   ├── create-read-only-principal.md
 │   ├── connect-mcp-server.md
 │   ├── smoke-check.md

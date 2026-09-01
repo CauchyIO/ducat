@@ -226,8 +226,9 @@ CLAUDE.md
 # Validation logs
 # Session transcripts from validation runs — whole sessions, credentials included
 transcripts/
-# Design decision records — dated internal reasoning, kept local
+# Design decision records and the original spec — internal reasoning, kept local
 docs/decisions/
+docs/skill-spec.md
 
 # Personal working notes — never committed
 personal-notes.md
