@@ -178,8 +178,9 @@ invoice-level completeness while doing so.
 
 Where two sources disagree, the higher rung wins:
 
-1. live read-only Databricks SQL, APIs, CLI;
-2. live read-only Azure Cost Management, Resource Graph, pricing APIs;
+1. live read-only Databricks system tables, queried as SQL;
+2. live read-only Azure Cost Management, Resource Graph and pricing APIs, reached through the Azure
+   CLI;
 3. current official Databricks and Microsoft documentation;
 4. user-provided exports;
 5. explicitly limited estimates.
