@@ -1,28 +1,77 @@
 # Connect Claude Code to the Databricks SQL MCP server
 
-The skill reads evidence through the Databricks-managed SQL MCP server, at
-`https://<workspace-hostname>/api/2.0/mcp/sql`. The feature is in Public Preview, verified working
-2026-08-24. It exposes three tools: `execute_sql` (reads and writes), `execute_sql_read_only`, and
-`poll_sql_result`. Queries run asynchronously — a call returns `PENDING` with a statement ID, and
-the poller returns the rows.
+The skill reads evidence through the Databricks-managed SQL MCP server at
+`https://<workspace-hostname>/api/2.0/mcp/sql`. Queries run asynchronously: a call returns `PENDING`
+with a statement ID, and a second call returns the rows.
 
-Build the read-only principal first: `create-read-only-principal.md`.
+Build the read-only principal first — [`create-read-only-principal.md`](create-read-only-principal.md).
+This runbook assumes `dbsp` works and `WORKSPACE_URL` is exported.
 
-## Credential
+## 1. Mint a token
 
 Claude Code's MCP client sends a static bearer header, so the credential must be long-lived. An
-OAuth access token lasts an hour, and the OAuth app route needs an account admin. A personal access
-token minted by the principal *for itself* needs neither:
+OAuth access token lasts an hour; a personal access token minted by the principal for itself lasts
+as long as you ask.
 
 ```sh
 dbsp tokens create --json '{"lifetime_seconds":7776000,"comment":"cost-optimizer mcp"}'
 ```
 
-This works because the principal holds `CAN_USE` on tokens. The value prints once.
+The value prints once. This is a **different credential** from the `dose` secret stored in step 6 of
+[`create-read-only-principal.md`](create-read-only-principal.md): same identity, two credentials,
+because this client needs a static token and that one mints hourly ones.
 
-## Configuration
+## 2. Store the token
 
-`.mcp.json` carries no secret and no workspace identity — both arrive from the environment:
+The prompt echoes nothing and asks twice. **What to paste is the `token_value` field from the output
+above** — the string beginning `dapi`, not the `token_id` beside it, and not a passphrase of your
+own.
+
+macOS:
+
+```sh
+security add-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w
+```
+
+Linux:
+
+```sh
+secret-tool store --label="databricks cost optimizer token" service databricks-cost-optimizer-pat account "$USER"
+```
+
+Windows, PowerShell:
+
+```powershell
+Set-Secret -Name databricks-cost-optimizer-pat
+```
+
+Confirm the store holds what you meant:
+
+```sh
+security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w | cut -c1-4
+```
+
+That should print `dapi`.
+
+## 3. Export the two variables
+
+Claude Code reads these from the environment of the process that launched it, so they must be set in
+the shell you start it from — not in your shell profile, which would make them global and permanent.
+
+```sh
+export DATABRICKS_MCP_URL="https://$WORKSPACE_URL/api/2.0/mcp/sql"
+```
+
+```sh
+export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
+```
+
+## 4. Take the two configuration files
+
+Copy both from this repository rather than retyping them.
+
+`.mcp.json` defines the server. It carries no secret and no workspace identity — both arrive from
+the variables you just exported.
 
 ```json
 {
@@ -36,113 +85,39 @@ This works because the principal holds `CAN_USE` on tokens. The value prints onc
 }
 ```
 
-`.claude/settings.json` carries the deny rules. Two groups, and the second matters more than it
-looks.
+`.claude/settings.json` denies the tools the skill must not use: the read-write MCP tool
+`execute_sql`, and the Databricks CLI, which the skill never needs because it reads everything as
+SQL. It allows `execute_sql_read_only` and `poll_sql_result`.
 
-**The MCP tool.** Deny `mcp__databricks-sql__execute_sql`, allow only `execute_sql_read_only` and
-`poll_sql_result`, so the boundary holds at the tool surface as well as at the grant.
+## 5. Verify
 
-**The command line.** Deny every Databricks CLI command that mutates — roughly 130 rules, one per
-service and verb: `Bash(databricks apps delete:*)`, `Bash(databricks jobs update:*)`,
-`Bash(databricks database delete-database-instance:*)`, `Bash(databricks bundle destroy:*)`, and so
-on. Read verbs — `list`, `get`, `describe`, `get-effective` — stay allowed, because the skill and
-these runbooks depend on them.
+Start Claude Code from the directory holding `.mcp.json`, in the shell where you exported the
+variables. Approve the project server when prompted.
 
-The second group exists because the first was never the exposed path. The assessment principal holds
-`SELECT` and `CAN_USE` and cannot write whatever tool it reaches for; Unity Catalog refuses it. The
-CLI in the same session is authenticated as *you*, and on 2026-08-28 a session used it to stop a
-running app and a database instance after being told to proceed. Every write in that incident, and
-in the one that followed it, went through the command line. Denying only the MCP tool enforces the
-path that was never going to work.
-
-**Provisioning is not exempt; it is not the agent's job.** Creating the service principal, minting
-its secret, granting `SELECT`, and setting warehouse permissions are all denied here, and all
-appear in [`create-read-only-principal.md`](create-read-only-principal.md). Run them yourself, in
-your own terminal, outside a session. That is the separation: a person provisions, an agent
-assesses. Letting a session do the provisioning is how one workspace ended up with three service
-principals sharing a name.
-
-**Two doors the service-and-verb rules do not close on their own**, both found by using them:
-
-- `databricks api post /api/2.0/apps/<name>/stop` does what `databricks apps stop <name>` does, and
-  matches none of the per-service rules. The four `databricks api` write verbs are denied.
-- `dbsp` is the shell wrapper these runbooks define for the principal. `dbsp apps stop` is the same
-  program under a different first word. The whole wrapper is denied, which costs nothing: setup is a
-  person's work in a person's terminal.
-
-What no list can close is an alias someone invents. Anyone can write `d() { databricks "$@"; }` and
-no static rule will see it. That is the honest limit of this control: it governs *your* credentials,
-where the defence is convention with a cost attached. The principal's boundary is different in kind
-— Unity Catalog refuses its writes whatever anyone types.
-
-Copy the file from this repository rather than retyping it; the rule list is long and a missing
-entry is invisible until it matters. A rule added while a session is running takes a moment to be
-picked up — test it twice before believing it does not work.
-
-Store the token in the OS keychain and export both variables into the shell you launch from.
-Not your shell profile: that makes them global and permanent — every shell on the machine, every
-project, long after the engagement ends.
-
-The first command prompts for a value and echoes nothing. **What to paste is the `token_value` from
-the `tokens create` output above** — the string beginning `dapi`, not the `token_id` beside it, and
-not a passphrase of your own. It asks twice. Note this is a *different* credential from the `dose`
-secret held under `databricks-cost-optimizer-sp`: same identity, two credentials, because this
-client sends a static bearer token while an OAuth secret mints tokens that expire hourly.
-
-```sh
-security add-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w
-export DATABRICKS_MCP_URL="https://<workspace-hostname>/api/2.0/mcp/sql"
-export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
+```
+/mcp
 ```
 
-Confirm the keychain holds the token rather than something else:
+**Passes when** `databricks-sql` is listed as connected with three tools. Then run the checks in
+[`smoke-check.md`](smoke-check.md).
+
+The server picks a warehouse the caller may use, and the principal has `CAN_USE` on exactly one, so
+you do not choose one here.
+
+## Potential causes of failure
+
+### Wrong credential
+Check the credential first. An empty or malformed bearer token surfaces as a generic connection
+error naming nothing.
 
 ```sh
-security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w | cut -c1-4
+echo "len=${#DATABRICKS_SP_TOKEN}  starts=${DATABRICKS_SP_TOKEN:0:4}"
 ```
 
-That should print `dapi`.
+Expect a length around 38 and `dapi`. A length of 0 means the store lookup failed. A length of 1
+means a stray character reached the prompt — delete the entry, add it again, and paste the token
+alone.
 
-Claude Code reads these from the environment of the process that launched it, so start it from a
-shell where both are set. Approve the project server once, then `/mcp` should report `connected`
-with three tools.
-
-### Where the variables live
-
-Two constraints, whichever route you take. They are scoped to this work rather than to your
-account. And no secret is written to disk — the export reads the keychain, so the value exists only
-in the running process.
-
-For one session, exporting in the shell you launch from satisfies all three and leaves nothing
-behind.
-
-For repeated use, a project-scoped `.envrc` read by [direnv](https://direnv.net) is better: the same
-two lines, active only inside that directory, gone when you leave it.
-
-```sh
-# .envrc — a keychain lookup, not a credential
-export DATABRICKS_MCP_URL="https://<workspace-hostname>/api/2.0/mcp/sql"
-export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
-```
-
-`direnv allow` once, and note what the file holds: a command that fetches the token, never the token
-itself. Paste a literal value there instead and the pre-commit check refuses the commit — the
-credential rules apply to every file, not only to the package.
-
-## Warehouse selection
-
-The Databricks docs pin a warehouse with a `_meta.warehouse_id` parameter, reachable only from agent
-code, not from a client's MCP config. It does not matter: the server picks a warehouse the caller
-may use, and the principal has `CAN_USE` on exactly one. Selection is deterministic by permission.
-
-## When it fails
-
-Check the credential before anything else — an empty or malformed bearer token surfaces as a generic
-connection error, naming nothing.
-
-```sh
-echo "len=${#DATABRICKS_SP_TOKEN}"; echo "${DATABRICKS_SP_TOKEN:0:4}"    # expect 38 and dapi
-```
-
-A one-character value means a stray shell comment reached the keychain prompt. Delete the entry,
-re-add it, and paste the token alone.
+### MCP server missing
+If the server is missing from `/mcp` entirely, you started Claude Code somewhere other than the
+directory holding `.mcp.json`, or in a shell where the variables were not set.
