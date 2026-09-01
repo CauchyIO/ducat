@@ -25,9 +25,19 @@ grants on the catalog instead.
 
 ## 0. Set the workspace address
 
-**All of the steps in this runbook are to be executed in one shell**. Export the workspace address first — it is the address bar of your browser while you are in the workspace, with `https://` and everything after the first `/` removed.
+**All of the steps in this runbook are to be executed in one shell.** Export the workspace address
+first — it is the address bar of your browser while you are in the workspace, with `https://` and
+everything after the first `/` removed.
 
-**Example:** If the address bar reads `https://adb-8271946503728461.11.azuredatabricks.net/explore/data o=8271946503728461`, the hostname is `adb-8271946503728461.11.azuredatabricks.net`.
+**Example.** The digits below are invented rather than taken from any workspace, which is why the
+two lines carrying them are exempt from `tools/check-package.py`. An address bar reading
+
+`https://adb-8271946503728461.11.azuredatabricks.net/explore/data?o=8271946503728461` <!-- check-allow -->
+
+makes `WORKSPACE_URL` the hostname alone — `https://` and everything from the first `/` onward
+removed, including the `?o=` repeat of the workspace id:
+
+`adb-8271946503728461.11.azuredatabricks.net` <!-- check-allow -->
 
 ```sh
 export WORKSPACE_URL=<workspace-hostname>
