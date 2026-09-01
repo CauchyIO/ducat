@@ -28,6 +28,10 @@ Linux:
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
 
+That last command installs the Debian and Ubuntu package. For any other distribution, and if any of
+these give trouble, Microsoft documents the alternatives
+[here](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+
 Then sign in and select a subscription. Signing in can leave you at tenant scope, where the cost
 commands return nothing and report no failure.
 
@@ -39,9 +43,13 @@ az login
 az account show --query "{sub:name, id:id, user:user.name}" -o table
 ```
 
-**Passes when** the output names a subscription rather than showing nothing.
+**Passes when** the output names a subscription rather than showing nothing. The `id` column is the
+`<subscription-id>` step 4 asks for.
 
 ## 2. List the workspaces from Databricks
+
+One query lists every workspace the metastore knows about. This is the half of the map that Azure
+cannot supply:
 
 ```sql
 SELECT workspace_id, workspace_name, workspace_url, status
@@ -57,6 +65,9 @@ be missing entirely. Compare against `system.billing.usage` grouped by `workspac
 treating the list as complete.
 
 ## 3. List the same workspaces from Azure
+
+Resource Graph returns the other half — subscription, resource group and managed resource group per
+workspace — for every subscription you can read. The extension is needed only once:
 
 ```sh
 az extension add --name resource-graph
@@ -105,3 +116,9 @@ and run it again, because throttling is not a permission failure and reads like 
 
 Record which subscriptions were granted and which were not. A workspace in an ungranted subscription
 is reported as list cost only, and saying so is better than quietly leaving it out.
+
+## What else the map shows
+
+A workspace whose SKUs carry a different region suffix from your metastore bills into the same
+account while its runtime detail stays invisible to your queries. Name that workspace in the map, so
+the gap is a known boundary rather than a surprise when its cost turns out to be unexplainable.
