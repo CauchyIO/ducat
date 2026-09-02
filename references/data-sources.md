@@ -248,8 +248,8 @@ populations separately rather than as one total:
 
 | Population | Meaning |
 |---|---|
-| **Native** | A `usage_metadata` subfield or a `custom_tags` entry names the object directly on the billing record |
-| **Manual** | The user confirmed that a named object belongs to the scope |
+| **Native** | A platform-generated `usage_metadata` subfield names the object directly on the billing record |
+| **Manual** | A human asserted that a named object belongs to the scope — either by confirming it, or by tagging the object so the assertion is carried on the billing record itself as a `custom_tags` entry |
 | **Inferred** | The object was matched by name or convention, with nothing on the record to confirm it. The weakest, and always labelled |
 | **Unallocated** | Spend inside the period that matched no object. Report it as its own line; never spread it across the others |
 
