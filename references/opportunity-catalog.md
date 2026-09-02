@@ -1,8 +1,8 @@
 # Opportunity catalog
 
 What every scope needs — the practice taxonomy and the price baseline — plus the route to the one
-scope file that applies. The scope files live in `opportunities/`; load the one you are routed to,
-and any further file that one names.
+scope file that applies. The scope files live in `opportunities/`; load only the one you are
+routed to, and any further file that one names.
 
 Distilled 2026-08-21 from the Databricks cost component matrix, the Databricks cost tracking guide,
 the 2026-07-01 pricing reassessment findings, and the FinOps Framework (see `NOTICE.md`).
