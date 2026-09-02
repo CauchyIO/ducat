@@ -1,7 +1,8 @@
 # Opportunity catalog
 
 What every scope needs — the practice taxonomy and the price baseline — plus the route to the one
-scope file that applies. The scope files live in `opportunities/`; load exactly one.
+scope file that applies. The scope files live in `opportunities/`; load the one you are routed to,
+and any further file that one names.
 
 Distilled 2026-08-21 from the Databricks cost component matrix, the Databricks cost tracking guide,
 the 2026-07-01 pricing reassessment findings, and the FinOps Framework (see `NOTICE.md`).
@@ -112,6 +113,13 @@ Read exactly one, chosen by the confirmed scope. Reading a second means the scop
 | A team or workstream | `opportunities/team-or-workstream.md` | 
 | A background platform service | `opportunities/background-service.md` |
 | A Databricks App | `opportunities/app.md` |
+
+**The one exception is a dependency the chosen file names.** A scope file may tell you that
+another object has to be accounted for and name the file covering it — only where that object
+bills on its own line. Open each file it names, and take from each only the levers it was named
+for, not its framing, its attribution rules, or its other opportunities. The permission does not
+chain: a file named by that second file was not named by the first. Say in the proposal which
+files were opened and why.
 
 **A scope that matches none of these is not a licence to improvise.** Do not ask the user which
 practice lens to apply — routing is this skill's job, and the question arrives at the worst moment,

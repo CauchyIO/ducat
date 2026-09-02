@@ -37,6 +37,11 @@ So where both are in scope, sequence matters and the saving is not the sum: stop
 what makes the dependency's setting worth changing. Compute the target state with both applied,
 per `proposal-contract.md`.
 
+Where the backing store is a SQL warehouse, open `sql-warehouse.md` for its auto-stop and sizing
+levers. Where it is a serving endpoint or a Lakebase instance, open `serving-or-vector-search.md`
+for its scale-to-zero and sizing levers. Those two are the named second files, and nothing else in
+either applies to an app assessment.
+
 ## Attribution
 
 `usage_metadata.app_name` carries the app's name on every usage record, so attribution is **native**
