@@ -21,8 +21,8 @@ harness: Claude Code
   - Machine link written to the gitignored `.awow/anchor.json` (never committed).
   - Anchored-repo PR: `AGENTS.md` connector, project-scope plugin enable, `context/mission.md`,
     `.awow/` gitignore entry.
-  - Anchor PR: stands up `context/knowledge-sources/` (the anchor had no catalog) with this repo's
-    OKF record and index entry.
+  - Anchor PR: adds this repo's OKF record to the anchor's existing
+    `context/knowledge-sources/` catalog, beside `system-tables-os.md`.
 - [x] 1. Board — inherited from the anchor. The anchor's `context/tooling/board.md` specifies the
       single Cauchyio Linear board; this repo adds no board spec of its own.
   - `context/board-scope.md` deliberately skipped: one board, nothing to disambiguate.
@@ -38,3 +38,5 @@ teams, extras.
 - `context/do-not-propose.md` declined — the repo's boundaries are enforced in `SKILL.md`.
 - The anchor has no `context/tooling/knowledge-sources.md`; routing falls back to the copy shipped
   with the awow plugin. Add one to the anchor only to diverge from that contract.
+- The anchor's catalog still uses the pre-rename `spoke:` key on `system-tables-os.md`. This repo's
+  record uses the current `anchored:` key; both stay readable.
