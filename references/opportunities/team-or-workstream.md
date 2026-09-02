@@ -11,10 +11,16 @@ is what invites the dispute you were asked to settle.
 | Opportunity | Evidence to establish it | Trade-off to state |
 |---|---|---|
 | Idle all-purpose compute | Clusters running without commands; auto-termination absent or long | Interactive convenience |
-| Warehouse auto-stop and sizing | As in the warehouse section, scoped to the team's warehouses | Shared warehouses need proportional splitting first |
+| Shorten warehouse auto-stop | Idle minutes between last query and stop, across the period, for each warehouse the team uses | Cold-start latency on the next query |
+| Resize the team's warehouses | Query duration distribution, queue time, spill and concurrency, for those same warehouses | Slower large queries; queueing at peak |
 | Consolidate duplicated compute | Multiple clusters or warehouses with the same purpose and low utilization | Team autonomy; migration effort |
 | Enforce tagging and usage policies | Unallocated share; tag coverage over time | **Not a saving.** It is a prerequisite that improves future attribution — say so explicitly |
 | Move chargeback to the defensible portion | The native and manual populations, with the inferred and unallocated shown beside them | Charging back less than the true figure until attribution improves |
+
+A warehouse that the team shares with another team has to be split before either lever above is
+costed. Split it proportionally, by execution time from `query_tags`, and label the result a
+modeled allocation rather than a measured cost. Queries carrying no tag stay unallocated, and are
+never spread silently across teams.
 
 Deliver the allocation map itself. It is reusable as the team's showback definition and is often
 worth more than the savings figure.

@@ -145,7 +145,9 @@ is not a baseline — return to the attribution boundary rather than building on
 
 Apply only practices relevant to the confirmed scope. Read `references/opportunity-catalog.md` for
 the practice taxonomy and price baseline, then exactly one file from `references/opportunities/`,
-chosen by the confirmed scope. Reading a second scope file means the scope was not confirmed.
+chosen by the confirmed scope. That file may name the scope file of a dependency it cannot cost
+alone; open each file it names, and take only the levers it named them for. Reading any scope file
+besides the first file and the ones it named means the scope was not confirmed.
 
 Present a quantified shortlist as decision cards. The user selects what deserves a deep dive.
 Unselected items stay observations, not recommendations.
