@@ -220,6 +220,9 @@ __marimo__/
 # Claude
 CLAUDE.md
 
+# awow machine-local anchor link — never committed
+.awow/
+
 # Local environment notes, never committed
 /environment.local.md
 

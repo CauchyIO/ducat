@@ -9,5 +9,8 @@
       "mcp__databricks-sql__execute_sql_read_only",
       "mcp__databricks-sql__poll_sql_result"
     ]
+  },
+  "enabledPlugins": {
+    "awow@awow": true
   }
 }
