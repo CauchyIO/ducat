@@ -20,6 +20,9 @@ the 2026-07-01 pricing reassessment findings, and FOCUS v1.4 (see `NOTICE.md`).
 
 ## Precedence
 
+**Canonical.** This ladder is defined here and nowhere else. `SKILL.md` states the obligation to
+follow it and points here; when the ordering changes, it changes here and the pointer inherits it.
+
 One ordering governs every evidence plane. Higher rung wins a disagreement:
 
 1. live read-only Databricks system tables, queried as SQL;
