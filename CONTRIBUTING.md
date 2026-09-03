@@ -45,7 +45,7 @@ The output names the file, the line and the rule.
 
 - **A credential must be rotated**, not merely deleted. It is already on this machine and
   may be in the history.
-- **An estate identifier belongs in [`environment.local.md`](environment.local.md)**, which is gitignored, with a
+- **An estate identifier belongs in `environment.local.md`**, which is gitignored, with a
   placeholder such as `<workspace-id>` where it was.
 - **A deliberate example** needs `check-allow` on the line, and a sentence nearby saying why
   the example is safe to publish.
