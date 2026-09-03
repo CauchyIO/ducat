@@ -42,10 +42,10 @@ as a saving, changes something here. See `docs/README.md` for the design and set
 
 **[`proposal-contract.md`](proposal-contract.md)**
 
-- **Which figures may be reported at all.** Gross saving, net saving, steady-state rate, payback
-  where material, a range where an input is uncertain, and a confidence level. Nothing else is
-  reported as a number, because every extra derived figure is one more thing a reader can carry into
-  a budget conversation you are not in.
+- **Which figures may be reported at all.** Measured evidence — baseline cost, cost components,
+  attribution populations, unallocated spend — and the savings figures computed from the formula
+  inputs. Anything further derived is not reported as a number, because every extra derived figure
+  is one more thing a reader can carry into a budget conversation you are not in.
 - **The savings formulas**, including when payback must be withheld.
 - **The portfolio rule.** Overlapping changes claim the same hours, so a selected portfolio is
   computed together against one baseline rather than summed. Relax this and totals inflate.
