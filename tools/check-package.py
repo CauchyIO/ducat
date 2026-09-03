@@ -50,10 +50,31 @@ IDENT_RX = [(n, re.compile(p)) for n, p in IDENTIFIERS]
 
 
 def in_package(path: str) -> bool:
+    """Reports whether a path falls inside the package a client reads.
+
+    Args:
+        path: A file path, as it appears in the repository (e.g. from `git ls-files`).
+
+    Returns:
+        True if `path` is one of `PACKAGE_ROOTS` or sits under one of them.
+    """
     return any(path == r or path.startswith(r) for r in PACKAGE_ROOTS)
 
 
 def scan(path: str) -> list[str]:
+    """Scans one file for credentials, and for estate identifiers if it is in-package.
+
+    Credential rules apply to every file. Identifier rules apply only when
+    `in_package(path)` is true, per the file-level docstring's scope split. A line
+    containing `check-allow` is exempted from every rule.
+
+    Args:
+        path: The file to scan.
+
+    Returns:
+        One `"{path}:{line}: {rule_name}: {match}"` string per match found, in file
+        order. Empty if the file cannot be read as UTF-8 text, or if nothing matched.
+    """
     try:
         text = Path(path).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
@@ -75,6 +96,15 @@ def scan(path: str) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
+    """Scans every given file and reports findings to stderr.
+
+    Args:
+        argv: File paths to scan, typically `sys.argv[1:]`. `SELF` and non-file paths
+            are skipped.
+
+    Returns:
+        0 if nothing was found, 1 if any credential or estate identifier was found.
+    """
     paths = [p for p in argv if p != SELF and Path(p).is_file()]
     findings = [f for p in paths for f in scan(p)]
 
