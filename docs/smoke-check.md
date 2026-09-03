@@ -112,7 +112,7 @@ SELECT u.usage_date, u.sku_name, round(u.usage_quantity, 4) AS quantity,
        round(u.usage_quantity * lp.pricing.effective_list.default, 4) AS list_cost_usd,
        u.usage_start_time, u.usage_end_time
 FROM system.billing.usage u
-JOIN system.billing.list_prices lp
+LEFT JOIN system.billing.list_prices lp
   ON  lp.cloud         = u.cloud
   AND lp.sku_name      = u.sku_name
   AND lp.usage_unit    = u.usage_unit
@@ -126,8 +126,10 @@ ORDER BY u.usage_start_time
 **Passes when** every row carries a `list_cost_usd` that is not null.
 
 A null price means the join found no price row valid for that SKU, that unit and that moment, so
-the usage is unpriced rather than free. Keep the `currency_code` filter: a SKU published in several
-currencies returns one row per currency without it, and the cost silently multiplies.
+the usage is unpriced rather than free. The `LEFT JOIN` is what lets such a row appear at all —
+under an inner join it would vanish and this check could never fail. Keep the `currency_code`
+filter, and keep it in the `ON` clause: a SKU published in several currencies returns one row per
+currency without it, and the cost silently multiplies.
 
 ## Check 4 — list the same job's runs from the timeline
 

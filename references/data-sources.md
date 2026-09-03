@@ -76,9 +76,11 @@ SELECT
   u.billing_origin_product,
   u.sku_name,
   sum(u.usage_quantity)                                     AS dbus,
-  sum(u.usage_quantity * lp.pricing.effective_list.default) AS list_cost
+  sum(u.usage_quantity * lp.pricing.effective_list.default) AS list_cost,
+  sum(CASE WHEN lp.pricing.effective_list.default IS NULL
+           THEN u.usage_quantity ELSE 0 END)                AS unpriced_quantity
 FROM system.billing.usage u
-JOIN system.billing.list_prices lp
+LEFT JOIN system.billing.list_prices lp
   ON  lp.cloud         = u.cloud
   AND lp.sku_name      = u.sku_name
   AND lp.usage_unit    = u.usage_unit
@@ -88,13 +90,19 @@ JOIN system.billing.list_prices lp
 WHERE u.usage_date >= :period_start
   AND u.usage_date <  :period_end
 GROUP BY ALL
-ORDER BY list_cost DESC
+ORDER BY list_cost DESC NULLS FIRST
 LIMIT 50
 ```
 
 Compose your own version of this query rather than copying it, and keep all three conditions in the
 `ON` clause. Each one is doing a job, and dropping any of them produces a total that looks
 reasonable and is wrong.
+
+The join is a `LEFT JOIN` deliberately. Tightening a join loses rows as readily as it inflates them:
+under an inner join, a usage record matching no price row does not appear as zero — it leaves the
+result entirely, and the total prints normally without it. Keep every condition in the `ON` clause
+for the same reason. Moving any of them to a later `WHERE` filters on the price table after the
+join and quietly restores the inner-join behaviour.
 
 **Condition 1 — the three join keys identify which price applies.**
 
@@ -116,8 +124,12 @@ AND lp.currency_code = :currency
 
 `list_prices` holds one row per currency for every price period, so an account that publishes in
 more than one currency will match each usage record two or three times over. The cost then doubles
-or triples without anything failing, which is why the filter belongs in the join rather than in a
-later `WHERE`.
+or triples without anything failing.
+
+The filter belongs in the join rather than in a later `WHERE`, and under a left join that placement
+is what separates the two failures. In the `ON` clause, usage carrying no price in this currency
+survives as an unpriced row you can count. In a `WHERE`, it is dropped, and the total prints without
+it.
 
 **Condition 3 — the validity window matches usage to the price that applied at the time.**
 
@@ -134,6 +146,18 @@ $0.350, and is now $0.300 — three rows, so every usage record for it would be 
 The same window is what stops you pricing an old period at today's rate. A price change inside the
 period being assessed is a real feature of that period, not an inconvenience to smooth over: valuing
 2018 usage at the current rate would overstate it by 17%.
+
+**Coverage — report what the join could not price.**
+
+Report `unpriced_quantity` beside every cost figure and name the SKUs it came from. Unpriced usage
+is usage whose price this query could not find, never usage that was free; missing records prove
+nothing.
+
+Where nothing prices at all, treat the query as failed rather than reporting a zero-cost finding.
+The usual cause is `:currency`: an account publishing only in EUR returns no priced rows when
+queried in USD. One estate priced Databricks usage in USD while Azure reported EUR, which is exactly
+the situation that produces it. Any SKU absent from `list_prices` for the period — new, renamed, or
+a region variant the table does not carry — drops out the same way.
 
 ## Executing through the MCP server
 
@@ -319,6 +343,7 @@ Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedT
   and coverage for every figure.
 - Join published prices on cloud, SKU, and validity interval. Real SKU names carry tier and region
   (`PREMIUM_ALL_PURPOSE_SERVERLESS_COMPUTE_US_EAST`), so match the region you are actually pricing.
+  Left-join and report the unpriced remainder; an inner join hides it.
 - Query every region relevant to an Azure price counterfactual.
 - Classic compute cost is DBU plus VM plus material ancillary cost. Serverless SKUs bundle the VM —
   adding a VM line to a serverless workload double-counts it.

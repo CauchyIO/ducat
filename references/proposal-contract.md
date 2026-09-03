@@ -17,8 +17,8 @@ artifact. Read this when quantifying opportunities and writing the handoff.
 
 Three categories of figure, and the closing restriction applies only to the third.
 
-**Measured evidence** — baseline cost, cost components, the four attribution populations, and
-unallocated spend. Reportable, each carrying its source, period, currency and cost basis per
+**Measured evidence** — baseline cost, cost components, the four attribution populations,
+unallocated spend, and usage the price join could not cover. Reportable, each carrying its source, period, currency and cost basis per
 `data-sources.md`.
 
 **Formula inputs and results** — current platform cost, target platform cost, incremental

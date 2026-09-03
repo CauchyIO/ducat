@@ -27,7 +27,8 @@ as a saving, changes something here. See `docs/README.md` for the design and set
   unallocated cost stays visible rather than being redistributed. This is the lever most likely to
   be challenged, because it makes an uncomfortable number impossible to hide.
 - **Query shape**: aggregation, row caps, and the currency and validity conditions that stop a join
-  from silently doubling a cost.
+  from silently doubling a cost — and the left join that stops it silently dropping usage it cannot
+  price.
 
 **[`opportunity-catalog.md`](opportunity-catalog.md)**
 
