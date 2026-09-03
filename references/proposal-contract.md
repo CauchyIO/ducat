@@ -15,8 +15,19 @@ artifact. Read this when quantifying opportunities and writing the handoff.
 
 ## Which figures may be reported
 
-Gross saving, net saving, steady-state net rate, payback where material, a range or sensitivity
-where a material input is uncertain, and a confidence level. Nothing else is reported as a number.
+Three categories of figure, and the closing restriction applies only to the third.
+
+**Measured evidence** — baseline cost, cost components, the four attribution populations, and
+unallocated spend. Reportable, each carrying its source, period, currency and cost basis per
+`data-sources.md`.
+
+**Formula inputs and results** — current platform cost, target platform cost, incremental
+operating cost, one-time change cost, and the figures computed from them: gross saving, net
+saving, steady-state net rate, payback where material, a range or sensitivity where a material
+input is uncertain, and a confidence level.
+
+**Anything further derived** — ratios, percentages, annualized multiples, per-unit extrapolations.
+Not reported as a number unless this file names it.
 
 The restriction exists because every additional derived figure is another thing a reader can take
 out of context into a budget conversation you will not be in.
