@@ -201,9 +201,10 @@ a snapshot says what a setting *was* during it. A live API returns only what it 
 | Job | `system.lakeflow.jobs` | Trigger and cron expression, paused, timeout, health rules, run-as |
 | Pipeline | `system.lakeflow.pipelines` | Pipeline configuration over time |
 
-Not carried: cluster-policy contents behind `policy_id`, task-level compute mapping, retry and
-concurrency limits, and notification configuration. Ask the user to confirm any of these rather
-than inferring them, and mark the recommendation as resting on a confirmed setting.
+Not carried: Photon, cluster-policy contents behind `policy_id`, task-level compute mapping, retry
+and concurrency limits, and notification configuration. Of these only Photon has another route —
+`product_features.is_photon`, below. Ask the user to confirm the rest rather than inferring them,
+and mark the recommendation as resting on a confirmed setting.
 
 **The usage record is itself an evidence source.** Every row in `system.billing.usage` carries
 `usage_metadata`, `product_features` and `identity_metadata` beside the cost, and those columns
