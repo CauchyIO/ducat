@@ -25,17 +25,26 @@ from pathlib import Path
 
 SELF = "tools/check-package.py"
 
-PACKAGE_ROOTS = ("SKILL.md", "README.md", "NOTICE.md", ".mcp.json",
-                 "references/", "docs/", ".claude/")
+PACKAGE_ROOTS = (
+    "SKILL.md",
+    "README.md",
+    "NOTICE.md",
+    ".mcp.json",
+    "references/",
+    "docs/",
+    ".claude/",
+)
 
 CREDENTIALS = [
     ("databricks-token", r"\bdapi[0-9a-f]{32}\b"),
     ("databricks-oauth-secret", r"\bdose[0-9a-f]{32}\b"),
     ("private-key", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     ("json-web-token", r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
-    ("assigned-secret",
-     r"(?i)\b(client[_-]?secret|password|api[_-]?key|access[_-]?token)\b\s*[:=]\s*"
-     r"[\"']?[A-Za-z0-9+/_.~-]{20,}"),
+    (
+        "assigned-secret",
+        r"(?i)\b(client[_-]?secret|password|api[_-]?key|access[_-]?token)\b\s*[:=]\s*"
+        r"[\"']?[A-Za-z0-9+/_.~-]{20,}",
+    ),
 ]
 
 IDENTIFIERS = [

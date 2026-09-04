@@ -135,8 +135,7 @@ def check_links(path: str, text: str) -> list[str]:
 
 
 def check_routing(paths: list[str]) -> list[str]:
-    """Flags a scope file the routing table does not name, or a name it does that
-    does not exist.
+    """Flags a scope file the routing table does not name, or a routed name that does not exist.
 
     Whole-repo, not per-file: runs once, when `ROUTING_TABLE` is among the given
     paths, rather than once per path in `scan`.
@@ -164,9 +163,7 @@ def check_routing(paths: list[str]) -> list[str]:
             f"routing table — it will never be considered"
         )
     for name in sorted(routed - existing):
-        findings.append(
-            f"{ROUTING_TABLE}: routes to opportunities/{name}, which does not exist"
-        )
+        findings.append(f"{ROUTING_TABLE}: routes to opportunities/{name}, which does not exist")
     return findings
 
 
@@ -188,9 +185,7 @@ def scan(path: str) -> list[str]:
     except (OSError, UnicodeDecodeError):
         return []
     return (
-        check_review_dates(path, text)
-        + check_price_staleness(path, text)
-        + check_links(path, text)
+        check_review_dates(path, text) + check_price_staleness(path, text) + check_links(path, text)
     )
 
 

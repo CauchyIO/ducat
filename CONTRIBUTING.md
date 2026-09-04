@@ -50,6 +50,24 @@ The output names the file, the line and the rule.
 - **A deliberate example** needs `check-allow` on the line, and a sentence nearby saying why
   the example is safe to publish.
 
+## Working on the scripts
+
+The scripts have no dependencies and need no environment to run. Changing them does: the
+formatter, linter, type checker and test runner are pinned in `pyproject.toml` and
+`uv.lock`, and [uv](https://docs.astral.sh/uv/) installs them.
+
+```sh
+uv sync
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy
+uv run pytest
+```
+
+`pyproject.toml` is configuration, not a package. It has no build system and nothing in
+it is installed except the tools. The scripts keep running by shebang, exactly as the
+hook and CI run them.
+
 ## Still open
 
 The checker knows the credential shapes this project actually handles — Databricks tokens
