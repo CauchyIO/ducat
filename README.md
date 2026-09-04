@@ -88,11 +88,14 @@ databricks-cost-optimizer/
 │   ├── smoke-check.md
 │   └── map-workspaces-to-azure.md
 ├── tools/
-│   └── check-package.py            ← refuses credentials and estate identifiers
-├── .githooks/pre-commit            ← runs it before a commit leaves the machine
-├── .github/workflows/checks.yml    ← runs it again on push, as a backstop
+│   ├── check-package.py            ← refuses credentials and estate identifiers
+│   └── check-consistency.py        ← catches stale dates, prices, and broken routing
+├── .githooks/pre-commit            ← runs both before a commit leaves the machine
+├── .github/workflows/checks.yml    ← runs them again on push, as a backstop
 ├── .mcp.json
 ├── .claude/settings.json
+├── pyproject.toml
+├── uv.lock
 ├── README.md
 ├── CONTRIBUTING.md
 ├── NOTICE.md
