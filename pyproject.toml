@@ -1,0 +1,54 @@
+# Tool configuration and development dependencies for the two scripts in tools/.
+#
+# This is not a package. There is no build-system section on purpose: the skill is
+# markdown, and tools/check-package.py and tools/check-consistency.py are stdlib-only
+# scripts that run by shebang from the commit hook and from CI. Nothing here changes
+# that. What this file provides is one place for the lint, type and test settings and
+# one lock file for the versions of the tools that read them.
+#
+# Set up with `uv sync`. See CONTRIBUTING.md.
+
+[project]
+name = "databricks-cost-optimizer"
+version = "0"
+description = "Tooling configuration for the databricks-cost-optimizer skill. Not a distributable package."
+# The scripts are run by the runner's own python3 in CI (ubuntu-latest ships 3.12), so
+# that is the floor they must keep working on.
+requires-python = ">=3.12"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14",
+    "pytest>=8.3",
+    "ruff>=0.9",
+]
+
+[tool.uv]
+# Belt and braces: even with no build-system, say explicitly that the project itself
+# is never built or installed into the environment.
+package = false
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade — keep the syntax at the requires-python floor
+    "B",   # bugbear
+    "D",   # pydocstyle — the team convention is Google-style docstrings
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+files = ["tools"]
+strict = true
+python_version = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
