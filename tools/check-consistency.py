@@ -43,10 +43,31 @@ ROUTED_NAME_RX = re.compile(r"opportunities/([\w-]+\.md)")
 
 
 def _line_of(text: str, offset: int) -> int:
+    """Converts a character offset into a 1-indexed line number.
+
+    Args:
+        text: The full text the offset was found in.
+        offset: A character offset into `text`, e.g. from `re.Match.start()`.
+
+    Returns:
+        The 1-indexed line number containing `offset`.
+    """
     return text.count("\n", 0, offset) + 1
 
 
 def check_review_dates(path: str, text: str) -> list[str]:
+    """Flags every `Review by YYYY-MM-DD` claim in `text` that has passed.
+
+    A dated claim that survives its review date is not thereby confirmed — it is
+    unreviewed, per `references/freshness.md`. This check makes that day visible.
+
+    Args:
+        path: The file `text` was read from, used only for the finding message.
+        text: The file's full contents.
+
+    Returns:
+        One finding string per expired review date, empty if none have expired.
+    """
     findings = []
     for m in REVIEW_BY_RX.finditer(text):
         due = date.fromisoformat(m.group(1))
@@ -59,6 +80,15 @@ def check_review_dates(path: str, text: str) -> list[str]:
 
 
 def check_price_staleness(path: str, text: str) -> list[str]:
+    """Flags a price-baseline re-verification older than `PRICE_STALENESS_DAYS`.
+
+    Args:
+        path: The file `text` was read from, used only for the finding message.
+        text: The file's full contents.
+
+    Returns:
+        One finding string per stale re-verification date, empty if none are stale.
+    """
     findings = []
     for m in REVERIFIED_RX.finditer(text):
         verified = date.fromisoformat(m.group(1))
@@ -73,6 +103,20 @@ def check_price_staleness(path: str, text: str) -> list[str]:
 
 
 def check_links(path: str, text: str) -> list[str]:
+    """Flags every relative markdown link in `text` that does not resolve on disk.
+
+    URL-scheme targets (`http:`, `mailto:`, ...) and pure in-page anchors
+    (`[text](#section)`) are skipped; only the file portion of a link with a
+    fragment (`path.md#section`) is checked.
+
+    Args:
+        path: The file `text` was read from. Link targets resolve relative to its
+            parent directory.
+        text: The file's full contents.
+
+    Returns:
+        One finding string per link that does not resolve, empty if all do.
+    """
     findings = []
     base = Path(path).parent
     for m in LINK_RX.finditer(text):
@@ -91,7 +135,21 @@ def check_links(path: str, text: str) -> list[str]:
 
 
 def check_routing(paths: list[str]) -> list[str]:
-    """Whole-repo, not per-file: runs once when the routing table is among the given paths."""
+    """Flags a scope file the routing table does not name, or a name it does that
+    does not exist.
+
+    Whole-repo, not per-file: runs once, when `ROUTING_TABLE` is among the given
+    paths, rather than once per path in `scan`.
+
+    Args:
+        paths: The full set of files this run was invoked with. Used only to decide
+            whether `ROUTING_TABLE` is in scope for this run.
+
+    Returns:
+        One finding string per unrouted or dangling scope file. Empty if the routing
+        table is not in `paths`, `OPPORTUNITIES_DIR` does not exist, or the two sets
+        match exactly.
+    """
     if str(ROUTING_TABLE) not in paths or not OPPORTUNITIES_DIR.is_dir():
         return []
 
@@ -113,6 +171,18 @@ def check_routing(paths: list[str]) -> list[str]:
 
 
 def scan(path: str) -> list[str]:
+    """Runs every per-file check against one file.
+
+    Applies `check_review_dates`, `check_price_staleness`, and `check_links` in
+    turn. `check_routing` is whole-repo and is not run here; `main` runs it once.
+
+    Args:
+        path: The file to scan.
+
+    Returns:
+        The combined findings from every per-file check, in check order. Empty if
+        the file cannot be read as UTF-8 text, or if nothing was found.
+    """
     try:
         text = Path(path).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
@@ -125,6 +195,15 @@ def scan(path: str) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
+    """Runs every check against the given files and reports findings to stderr.
+
+    Args:
+        argv: File paths to scan, typically `sys.argv[1:]`. `SELF` and non-file paths
+            are skipped.
+
+    Returns:
+        0 if nothing was found, 1 if any check produced a finding.
+    """
     paths = [p for p in argv if p != SELF and Path(p).is_file()]
     findings = [f for p in paths for f in scan(p)]
     findings += check_routing(paths)
