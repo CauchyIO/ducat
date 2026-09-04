@@ -36,7 +36,7 @@ never enabled.
 Run it by hand any time:
 
 ```sh
-git ls-files -z | xargs -0 ./tools/check-package.py
+git ls-files -z | xargs -0 uv run tools/check-package.py
 ```
 
 ## When it fails
@@ -52,9 +52,8 @@ The output names the file, the line and the rule.
 
 ## Working on the scripts
 
-The scripts have no dependencies and need no environment to run. Changing them does: the
-formatter, linter, type checker and test runner are pinned in `pyproject.toml` and
-`uv.lock`, and [uv](https://docs.astral.sh/uv/) installs them.
+Everything runs through [uv](https://docs.astral.sh/uv/): the scripts themselves, and the
+formatter, linter, type checker and test runner pinned in `pyproject.toml` and `uv.lock`.
 
 ```sh
 uv sync
@@ -65,8 +64,8 @@ uv run pytest
 ```
 
 `pyproject.toml` is configuration, not a package. It has no build system and nothing in
-it is installed except the tools. The scripts keep running by shebang, exactly as the
-hook and CI run them.
+it is installed except the tools. The scripts import only the standard library; `uv run`
+is the one way to invoke them, from the hook, from CI and by hand.
 
 ## Still open
 

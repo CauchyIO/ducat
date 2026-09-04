@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Catch the silent failures check-package.py does not.
 
 check-package.py guards one failure mode: leakage. This script guards a different one —
@@ -18,8 +17,8 @@ or a table row, never by rotating a credential. That is a different failure mode
 check-package.py's, per CONTRIBUTING.md's "Still open" note on keeping the two separate.
 
 Usage:
-    tools/check-consistency.py FILE [FILE ...]
-    git ls-files -z '*.md' | xargs -0 tools/check-consistency.py
+    uv run tools/check-consistency.py FILE [FILE ...]
+    git ls-files -z '*.md' | xargs -0 uv run tools/check-consistency.py
 """
 
 import re

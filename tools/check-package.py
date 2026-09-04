@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Refuse credentials and one estate's identifiers before they leave the machine.
 
 Two rule groups, deliberately different in scope.
@@ -12,8 +11,8 @@ Identifiers are matched by shape, never by value. A checker holding a list of th
 forbids would be the leak it exists to prevent, and it would only ever protect one estate.
 
 Usage:
-    tools/check-package.py FILE [FILE ...]
-    git ls-files -z | xargs -0 tools/check-package.py
+    uv run tools/check-package.py FILE [FILE ...]
+    git ls-files -z | xargs -0 uv run tools/check-package.py
 
 A line containing `check-allow` is skipped. Use it for a deliberate example, and say in
 the surrounding prose why the example is safe.
