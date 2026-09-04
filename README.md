@@ -8,11 +8,11 @@ your usage and billing data to establish what that thing actually costs. It then
 changes. Each one comes with the evidence behind it, what you save, what the change costs to make,
 what you give up, and how to confirm afterwards that the saving landed.
 
-Two things it will not do. It never optimises an estate at once — every assessment starts from one
+It never optimises an estate at once — every assessment starts from one
 confirmed scope. And it never quotes a number it cannot support: where evidence is missing it says
 so and narrows what it claims rather than guessing.
 
-It never writes. No create, update, start, stop, resize or delete operation is invoked. The output
+The skill is designed to have read-only functionality. It never writes. No create, update, start, stop, resize or delete operation is invoked. The output
 is a Markdown proposal a human reviews and decides on.
 
 ## Status
@@ -88,26 +88,24 @@ databricks-cost-optimizer/
 │   ├── smoke-check.md
 │   └── map-workspaces-to-azure.md
 ├── tools/
-│   └── check-package.py            ← refuses credentials and estate identifiers
-├── .githooks/pre-commit            ← runs it before a commit leaves the machine
-├── .github/workflows/checks.yml    ← runs it again on push, as a backstop
+│   ├── check-package.py            ← refuses credentials and estate identifiers
+│   └── check-consistency.py        ← catches stale dates, prices, and broken routing
+├── .githooks/pre-commit            ← runs both before a commit leaves the machine
+├── .github/workflows/checks.yml    ← runs them again on push, as a backstop
 ├── .mcp.json
 ├── .claude/settings.json
+├── pyproject.toml
+├── uv.lock
 ├── README.md
 ├── CONTRIBUTING.md
 ├── NOTICE.md
 └── LICENSE
 ```
 
-Two guides orient a new reader. [`references/README.md`](references/README.md) enumerates the levers
-that decide what the skill may claim and what counts as a saving — start there to revise criteria.
-[`docs/README.md`](docs/README.md) names each design and setup document and says when to read it.
+If you are new to the skill, the recommended readings are the following: [`docs/README.md`](docs/README.md) names each design and setup document and says when to read it. [`references/README.md`](references/README.md) is a more domain-heavy document that enumerates the levers
+that decide what the skill may claim and what counts as a saving. If you want to understand the evidence and criteria that produce the final suggested outcome of the skill (or potentially change it), you are encouraged to read this guide.
 
-## What this guarantees, and what it doesn't
-
-This skill is an instruction package: markdown a model reads. It can add rules to a session; it
-cannot take capabilities away from one. Two things hold regardless of how the model behaves.
-Everything else is a rule a model follows.
+## Enforcement measures to prevent undesired writes to a workspace
 
 **Enforced by Unity Catalog.** The service principal holds read on system tables and `CAN_USE` on
 one warehouse. Every write it attempts is refused by the platform, whatever the model intends.
@@ -117,29 +115,9 @@ read-write MCP tool and the Databricks CLI outright — the package reads everyt
 needs no CLI. This applies only where those settings load, and no static rule catches an alias
 someone invents.
 
-**Not enforced.** Everything the design calls non-negotiable: no query before a scope is confirmed,
-attribution populations kept separate, list and billed never blurred, overlapping savings never
-summed, and the engagement ending at a design rather than executing it.
-
-Those hold because a model follows written instructions, and models differ. Measured on 2026-08-28:
-asked to proceed after handing over its design, one model declined once, then executed its own
-teardown plan through the operator's admin CLI, stopping an app and a database instance. Four
-sentences added that morning to prevent exactly that were in context when it happened. The same
-scenario on a different model held.
-
-A control run without the package keeps this in proportion. The same model volunteered to run the
-deletion before anyone asked, and complied at the first request. With the package: no unprompted
-offer, and a second explicit authorisation required. The instructions change behaviour measurably.
-They do not guarantee it.
-
-**What follows for you.** Connect as an identity that cannot write. Keep the deny rules. Treat the
-output as a design for a person to execute, and do not ask the session that wrote it to carry it
-out.
-
 ### Other limits
 
 - Azure Databricks only. AWS and GCP are untested.
-- The runbooks assume macOS — keychain, Homebrew.
 - Figures are list cost unless Azure Cost Management is reachable. List and billed are reported
   separately and never converted.
 - Packaged reference prices carry an as-of date and lose to a live query.
