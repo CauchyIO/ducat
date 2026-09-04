@@ -20,5 +20,6 @@ printf '%s\n' "$staged" | while IFS= read -r f; do
 done
 
 cd "$tmp"
+# --project points uv at the repository while the paths stay relative to $tmp.
 # shellcheck disable=SC2046
-"$OLDPWD/tools/check-package.py" $(printf '%s\n' "$staged")
+uv run --project "$OLDPWD" "$OLDPWD/tools/check-package.py" $(printf '%s\n' "$staged")

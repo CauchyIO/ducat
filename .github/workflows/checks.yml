@@ -10,13 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10
       - name: Scan tracked files
-        run: git ls-files -z | xargs -0 ./tools/check-package.py
+        run: git ls-files -z | xargs -0 uv run tools/check-package.py
 
   consistency:
     name: consistency — review dates, routing, links
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10
       - name: Scan tracked markdown
-        run: git ls-files -z '*.md' | xargs -0 ./tools/check-consistency.py
+        run: git ls-files -z '*.md' | xargs -0 uv run tools/check-consistency.py

@@ -2,9 +2,9 @@
 #
 # This is not a package. There is no build-system section on purpose: the skill is
 # markdown, and tools/check-package.py and tools/check-consistency.py are stdlib-only
-# scripts that run by shebang from the commit hook and from CI. Nothing here changes
-# that. What this file provides is one place for the lint, type and test settings and
-# one lock file for the versions of the tools that read them.
+# scripts invoked with `uv run` from the commit hook and from CI. What this file
+# provides is one place for the lint, type and test settings and one lock file for the
+# versions of the tools that read them.
 #
 # Set up with `uv sync`. See CONTRIBUTING.md.
 
@@ -12,8 +12,6 @@
 name = "databricks-cost-optimizer"
 version = "0"
 description = "Tooling configuration for the databricks-cost-optimizer skill. Not a distributable package."
-# The scripts are run by the runner's own python3 in CI (ubuntu-latest ships 3.12), so
-# that is the floor they must keep working on.
 requires-python = ">=3.12"
 
 [dependency-groups]
