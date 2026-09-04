@@ -1,35 +1,37 @@
 """Tests for tools/check-consistency.py, the checker for silent staleness in the package."""
 
+from datetime import timedelta
 from pathlib import Path
 
 import pytest
 
 
 def test_expired_review_date_is_flagged(check_consistency, today):
-    """A review date before today is flagged; today itself and future dates are not."""
-    text = "Review by 2026-09-03\nReview by 2026-09-04\nReview by 2027-01-01\n"
+    """A review date before today is flagged; today itself and future dates are not.
+
+    Dates are offsets from the pinned `today`, never literals, so the test means the same
+    thing whatever the pinned date is.
+    """
+    yesterday, tomorrow = today - timedelta(days=1), today + timedelta(days=1)
+    text = f"Review by {yesterday}\nReview by {today}\nReview by {tomorrow}\n"
     findings = check_consistency.check_review_dates("f.md", text)
     assert len(findings) == 1
-    assert findings[0].startswith("f.md:1:")
+    assert findings[0].startswith(f"f.md:1: review date {yesterday} has passed")
 
 
 def test_findings_carry_the_right_line_number(check_consistency, today):
     """A finding below the first line reports the line it is actually on."""
-    text = "fine\n\nstill fine\nReview by 2020-01-01\n"
+    expired = today - timedelta(days=1)
+    text = f"fine\n\nstill fine\nReview by {expired}\n"
     findings = check_consistency.check_review_dates("f.md", text)
     assert len(findings) == 1
-    assert findings[0].startswith("f.md:4: review date 2020-01-01 has passed")
+    assert findings[0].startswith(f"f.md:4: review date {expired} has passed")
 
 
-@pytest.mark.parametrize(
-    ("verified", "flagged"),
-    [
-        ("2026-06-06", False),  # exactly 90 days
-        ("2026-06-05", True),  # 91 days
-    ],
-)
-def test_price_staleness_limit(check_consistency, today, verified, flagged):
+@pytest.mark.parametrize(("days_ago", "flagged"), [(90, False), (91, True)])
+def test_price_staleness_limit(check_consistency, today, days_ago, flagged):
     """A price baseline is stale on day 91 and not on day 90."""
+    verified = today - timedelta(days=days_ago)
     text = f"re-verified against live `list_prices` on {verified}\n"
     findings = check_consistency.check_price_staleness("f.md", text)
     assert bool(findings) is flagged
@@ -86,9 +88,10 @@ def test_main_exit_codes(check_consistency, today, tmp_path: Path, monkeypatch, 
     """Exit 0 when every file is current, 1 with the finding on stderr when one is not."""
     monkeypatch.chdir(tmp_path)
     clean = tmp_path / "clean.md"
-    clean.write_text("Review by 2027-01-01\n")
+    clean.write_text(f"Review by {today + timedelta(days=1)}\n")
     stale = tmp_path / "stale.md"
-    stale.write_text("Review by 2020-01-01\n")
+    expired = today - timedelta(days=1)
+    stale.write_text(f"Review by {expired}\n")
     assert check_consistency.main([str(clean)]) == 0
     assert check_consistency.main([str(clean), str(stale)]) == 1
-    assert "review date 2020-01-01 has passed" in capsys.readouterr().err
+    assert f"review date {expired} has passed" in capsys.readouterr().err
