@@ -82,7 +82,7 @@ is a prompt to check the region before doubting the query.
 | `SERVERLESS_SQL_COMPUTE` | Premium | 0.55–1.09 | Regional |
 | `DLT_CORE / PRO / ADVANCED_COMPUTE` | — | 0.30 / 0.38 / 0.54 | Tier-based, not regional; India West 0.97 / — / 1.75 |
 | `SERVERLESS_REAL_TIME_INFERENCE` | — | 0.07–0.12 | Regional |
-| `ANTHROPIC / OPENAI / GEMINI_MODEL_SERVING` | — | 0.105 / 0.07 / 0.07 | Foundation model pricing is now published per 1M tokens; re-derive before quoting |
+| `ANTHROPIC / OPENAI / GEMINI_MODEL_SERVING` | — | 0.105 / 0.07 / 0.07 per DBU | Serving bills per DBU, never per token — pay-per-token endpoints are a separate SKU family. Verified against live `list_prices` 2026-09-03 |
 | `MODEL_TRAINING` | — | 0.40–1.11 | Regional; floor corrected 2026-08-28 |
 | `DATABASE_SERVERLESS_COMPUTE` | — | 0.26–0.45 effective | ~50% promotional; expect change at GA |
 | `DATABRICKS_STORAGE` | — | 0.023–0.041 per DSU | |

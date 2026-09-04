@@ -213,7 +213,7 @@ Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment â€
 | `JOBS` | `JOBS_COMPUTE`, `JOBS_COMPUTE_(PHOTON)`, `JOBS_SERVERLESS_COMPUTE` | Classic or serverless jobs |
 | `SQL` | `SQL_COMPUTE`, `SQL_PRO_COMPUTE`, `SERVERLESS_SQL_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Warehouse compute; JOBS_SERVERLESS for DLT-backed streaming tables and MVs |
 | `DLT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Classic DLT on DLT SKUs; serverless DLT on JOBS_SERVERLESS |
-| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, `ANTHROPIC_MODEL_SERVING`, `OPENAI_MODEL_SERVING`, `GEMINI_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own |
+| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, `ANTHROPIC_MODEL_SERVING`, `OPENAI_MODEL_SERVING`, `GEMINI_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own. All four bill per DBU â€” pay-per-token endpoints are a different SKU family |
 | `VECTOR_SEARCH` | `SERVERLESS_REAL_TIME_INFERENCE` + `JOBS_SERVERLESS_COMPUTE` | **Dual billing**: endpoint serving plus background index sync |
 | `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE`, `DATABRICKS_STORAGE`, plus background maintenance on `JOBS_SERVERLESS_COMPUTE` | **Triple component**: compute, storage in DSUs, background jobs |
 | `APPS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Lakehouse Apps |
