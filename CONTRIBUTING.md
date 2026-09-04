@@ -31,7 +31,9 @@ This is the one that matters. CI reports a credential faster; the hook is what s
 reaching the remote at all.
 
 **In CI**, on every push and pull request, as the backstop for a machine where the hook was
-never enabled.
+never enabled. That workflow also runs the consistency checker, and a second one runs the
+test suite under `tests/`, so a change to either script that breaks its own contract
+fails there too.
 
 Run it by hand any time:
 

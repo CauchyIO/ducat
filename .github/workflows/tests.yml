@@ -1,0 +1,19 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    name: pytest on the tools scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+      - name: Run the suite
+        # --locked refuses to run if uv.lock is out of date with pyproject.toml,
+        # so CI can never quietly test against versions nobody committed.
+        run: uv run --locked pytest
