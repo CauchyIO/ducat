@@ -280,7 +280,9 @@ Four prohibitions the diagram implies and the assessment must honour:
 - **Documentation yields no quantity at all.** It explains a mechanism; it never sizes one.
 - **An export supports nothing outside its own period and grain**, and carries both as labels.
 - **Target-state cost is modeled by definition.** Nothing measures a change that has not happened,
-  so a saving is modeled or directional on that side however strong the present-state evidence is.
+  so the target-state basis is always modeled, however strong the present-state evidence is. This
+  is a cost-basis rule, not the confidence label — see `proposal-contract.md`'s Confidence section
+  for how directly-observed present-state evidence still earns Measured.
 
 With no live route at all, name the exports that would restore one — billable usage for the period,
 the jobs and clusters inventory, and the workspace's own usage dashboard — rather than asking the

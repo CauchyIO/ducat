@@ -84,11 +84,15 @@ arithmetic error.
 
 ## Confidence
 
+The label grades the evidence behind the opportunity, not whether a target-state counterfactual
+exists — every saving has one, so its presence discriminates nothing. `SKILL.md`'s rule that
+target-state cost is modeled by definition governs the cost basis; it does not set this label.
+
 | Level | Means |
 |---|---|
-| **Measured** | Directly supported by billed cost and observed workload evidence |
-| **Modeled** | Calculated from measured usage and an explicit target-state counterfactual |
-| **Directional** | Incomplete telemetry, attribution, or pricing prevents reliable quantification |
+| **Measured** | Present-state baseline and driver observed directly in billed cost and workload telemetry, with the change's effect following from that observation |
+| **Modeled** | The target state turns on an assumption not directly observed |
+| **Directional** | Telemetry, attribution, or pricing gaps prevent reliable quantification |
 
 Confidence describes evidence quality, not enthusiasm. A large directional value does not outrank a
 smaller measured one, and ordering a shortlist by value alone quietly implies it does — order by
