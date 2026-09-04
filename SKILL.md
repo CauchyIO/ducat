@@ -178,21 +178,8 @@ invoice-level completeness while doing so.
 
 ## Evidence precedence
 
-Where two sources disagree, the higher rung wins:
-
-1. live read-only Databricks system tables, queried as SQL;
-2. live read-only Azure Cost Management, Resource Graph and pricing APIs, reached through the Azure
-   CLI;
-3. current official Databricks and Microsoft documentation;
-4. user-provided exports;
-5. explicitly limited estimates.
-
-Two planes sit outside the ladder. **Business constraints** come from the user and have no fallback —
-required outcomes, risk tolerance, ownership, and feasibility cannot be read from any system.
-**Packaged practice material**, including this skill's references, seeds the analysis but never
-outranks rungs 1 to 3 on a mutable vendor fact. Prices, SKU names, product terminology, and feature
-availability are never timeless. Record the source and as-of date wherever such a fact affects a
-recommendation.
+Where two sources disagree, the higher rung wins. `references/data-sources.md` defines the ladder
+and what sits outside it; this is the obligation to follow it.
 
 ## Object settings
 
