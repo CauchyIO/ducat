@@ -62,6 +62,7 @@ flowchart TD
   BASE --> REPLAY{{Replay baseline}}
   REPLAY -->|disagreement| ATTR
   REPLAY -->|agreed| SHORT[Shortlist opportunities<br/>as decision cards]
+  SHORT -->|baseline moved| REPLAY
   SHORT --> SEL{{Select opportunities}}
   SEL -->|authorises recommendation| PORT[Quantify as portfolio<br/>interactions, not a sum]
   PORT --> HAND[Produce design handoff]
@@ -141,6 +142,12 @@ Calculate the current baseline, then replay it to the user before discussing any
 Resolve material scope or attribution disagreement before continuing. A baseline the user disputes
 is not a baseline — return to the attribution boundary rather than building on it.
 
+**The replay re-arms whenever the baseline moves.** Evidence found after the gate changes the number
+the user agreed to — a dependency that turns out to carry its own cost, an object the boundary
+should have included. Savings measured against a baseline nobody accepted are unarguable in
+precisely the way the replay exists to prevent. Put the revised total back, say what moved it and by
+how much, and agree the boundary again before continuing.
+
 ### 4. Opportunity selection
 
 Apply only practices relevant to the confirmed scope. Read `references/opportunity-catalog.md` for
@@ -194,10 +201,22 @@ a snapshot says what a setting *was* during it. A live API returns only what it 
 | Job | `system.lakeflow.jobs` | Trigger and cron expression, paused, timeout, health rules, run-as |
 | Pipeline | `system.lakeflow.pipelines` | Pipeline configuration over time |
 
-Not carried: Photon — read `product_features.is_photon` on the usage record instead — cluster-policy
-contents behind `policy_id`, task-level compute mapping, retry and concurrency limits, and
-notification configuration. Ask the user to confirm any of these rather than inferring them, and
-mark the recommendation as resting on a confirmed setting.
+Not carried: cluster-policy contents behind `policy_id`, task-level compute mapping, retry and
+concurrency limits, and notification configuration. Ask the user to confirm any of these rather
+than inferring them, and mark the recommendation as resting on a confirmed setting.
+
+**The usage record is itself an evidence source.** Every row in `system.billing.usage` carries
+`usage_metadata`, `product_features` and `identity_metadata` beside the cost, and those columns
+describe the object that incurred it — `job_run_id`, `app_name`, `compute_size`, `is_photon`,
+`run_as`. They are written by the billing pipeline rather than by a workspace's dimension tables,
+so they survive where those tables do not: a workspace outside this metastore's region returns
+nothing at all from `system.lakeflow.jobs`, and its usage rows are still there, still carrying one
+`job_run_id` per run.
+
+Check the rows you have already queried before reporting that something cannot be observed.
+Under-claiming reads as rigour and is not — a limitation asserted where the evidence exists spends
+exactly the credibility the claim gates are there to protect, and a reader who catches one has no
+reason to believe the next one.
 
 **Configuration is intent; the timeline is behaviour.** Corroborate every setting against
 `system.lakeflow.job_run_timeline` or `system.compute.node_timeline` before recommending a change to
@@ -205,6 +224,9 @@ it. Observed in a live workspace: 15 of 16 scheduled jobs were paused, yet 6 of 
 ran 21 times in 30 days — pausing stops the trigger, not the job. Meanwhile jobs with no trigger at
 all produced most of the week's runs, orchestrated from outside Databricks. A recommendation drawn
 from the schedule alone would have been wrong about nearly every job.
+
+Where the timeline tables do not cover the workspace, `usage_metadata.job_run_id` still counts runs
+— less detail than the timeline, but a count rather than a silence.
 
 **A null is not a zero.** These columns were added over time and populate from a row's `change_time`
 forward, so an object untouched since before a field shipped reads null where a value exists. Judge
