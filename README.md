@@ -99,6 +99,7 @@ databricks-cost-optimizer/
 ├── .claude/settings.json
 ├── pyproject.toml
 ├── uv.lock
+├── Makefile                        ← named targets for install, checks and tests
 ├── README.md
 ├── CONTRIBUTING.md
 ├── NOTICE.md
