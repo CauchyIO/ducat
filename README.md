@@ -104,6 +104,8 @@ databricks-cost-optimizer/
 ├── Makefile                        ← named targets for install, checks and tests
 ├── README.md
 ├── CONTRIBUTING.md
+├── SECURITY.md                     ← how to report a vulnerability privately
+├── CODE_OF_CONDUCT.md
 ├── NOTICE.md
 └── LICENSE
 ```
@@ -134,7 +136,8 @@ someone invents.
 
 One check guards this repository: no credential in any file, and no identifier from one
 estate in the package a client reads. [`CONTRIBUTING.md`](CONTRIBUTING.md) says what runs,
-how to enable the hook, and what to do when it fails.
+how to enable the hook, and what to do when it fails. A security problem goes through the
+private channel in [`SECURITY.md`](SECURITY.md), never a public issue.
 
 ## Licence
 
