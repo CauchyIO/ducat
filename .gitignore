@@ -220,6 +220,14 @@ __marimo__/
 # Claude
 CLAUDE.md
 
+# awow — agent working files, kept local for the same reason as CLAUDE.md above.
+# The anchor link in .awow/anchor.json is a machine-local path and was never committable;
+# the rest is kept out by choice, so this repo carries no agent-tooling surface.
+/.awow/
+/AGENTS.md
+/context/
+/setup-progress.md
+
 # Local environment notes, never committed
 /environment.local.md
 
