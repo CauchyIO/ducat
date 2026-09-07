@@ -12,7 +12,7 @@ Four checks, all mechanical and deterministic:
       or a routed filename that does not exist.
     - A relative markdown link that does not resolve to a file on disk.
 
-Kept in its own script and its own CI job on purpose: this is fixable by editing a date
+Kept in its own script and its own hook on purpose: this is fixable by editing a date
 or a table row, never by rotating a credential. That is a different failure mode from
 check-package.py's, per CONTRIBUTING.md's "Still open" note on keeping the two separate.
 
