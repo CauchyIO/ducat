@@ -41,8 +41,9 @@ reaching the remote at all. The same hook runs the consistency checker on staged
 and ruff and mypy on staged Python, so a commit that would fail CI fails here first.
 
 **In CI**, on every push and pull request, as the backstop for a machine where the hook was
-never installed. One workflow runs both scripts over every tracked file; a second runs the
-test suite under `tests/`.
+never installed. One workflow runs the whole hook set over every tracked file — the same
+`.pre-commit-config.yaml` the hook reads, so the two cannot check different things; a second
+runs the test suite under `tests/`.
 
 Run everything by hand any time:
 

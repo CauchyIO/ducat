@@ -1,0 +1,28 @@
+# The backstop for a machine where the commit hook was never installed.
+#
+# One step, running the whole of .pre-commit-config.yaml over every tracked file, so CI
+# and the hook cannot check different things: a hook added there is covered here without
+# anyone editing this file. Naming ruff and mypy as separate steps would mean pinning
+# their versions a second time, and the two pins would drift.
+name: checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pre-commit:
+    name: format, lint, types, leakage and staleness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+      - name: Run every hook over every tracked file
+        # --locked refuses to run if uv.lock is out of date with pyproject.toml, so CI
+        # can never quietly check against tool versions nobody committed.
+        # --show-diff-on-failure prints what ruff would have rewritten: the formatting
+        # and lint hooks fix in place, so without it a failure says only that the file
+        # changed, not how.
+        run: uv run --locked pre-commit run --all-files --show-diff-on-failure
