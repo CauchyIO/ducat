@@ -21,7 +21,9 @@ forbids would be the leak it exists to prevent, and would protect exactly one es
 
 `tools/check-consistency.py` catches the quieter failure: an expired review date, a stale
 price baseline, a scope file the routing table does not name, or a link that no longer
-resolves. None of those produce a symptom. Each yields a clean run and a wrong assessment.
+resolves. It also refuses a reference file that has lost the dated sentence the first two
+checks read, so rewording that sentence fails the run rather than silently ending the
+checking. None of those produce a symptom. Each yields a clean run and a wrong assessment.
 
 ## When it runs
 

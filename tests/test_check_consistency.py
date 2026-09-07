@@ -1,7 +1,8 @@
 """Tests for tools/check-consistency.py, the checker for silent staleness in the package."""
 
-from datetime import timedelta
+from datetime import date, timedelta
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -84,9 +85,88 @@ def test_routing_needs_the_opportunities_directory(check_consistency, tmp_path: 
     assert check_consistency.check_routing(["references/opportunity-catalog.md"]) == []
 
 
+def _write_required_files(root: Path, review: str, reverified: str) -> None:
+    """Writes the two files `REQUIRED_MARKERS` names, carrying the given sentences.
+
+    Args:
+        root: Directory to write the `references/` tree under.
+        review: Full contents of `references/freshness.md`.
+        reverified: Full contents of `references/opportunity-catalog.md`.
+    """
+    references = root / "references"
+    references.mkdir(parents=True, exist_ok=True)
+    (references / "freshness.md").write_text(review)
+    (references / "opportunity-catalog.md").write_text(reverified)
+
+
+def test_required_markers_are_silent_when_both_are_present(
+    check_consistency: ModuleType, today: date, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Both sentences intact is the ordinary case and produces nothing."""
+    monkeypatch.chdir(tmp_path)
+    _write_required_files(
+        tmp_path,
+        review=f"# Freshness\n\n**Distilled {today}. Review by {today}.**\n",
+        reverified=f"**As of {today}, re-verified against live `list_prices` on {today}.**\n",
+    )
+    assert check_consistency.check_required_markers() == []
+
+
+def test_rewording_the_review_sentence_is_a_finding(
+    check_consistency: ModuleType, today: date, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A freshness file whose review phrase was reworded away is flagged, not passed.
+
+    This is the case no other test can reach: `check_review_dates` sees no date, so it
+    has nothing to report, and the run would otherwise be green.
+    """
+    monkeypatch.chdir(tmp_path)
+    _write_required_files(
+        tmp_path,
+        review=f"# Freshness\n\nPlease revisit this by {today}.\n",
+        reverified=f"**As of {today}, re-verified against live `list_prices` on {today}.**\n",
+    )
+    findings = check_consistency.check_required_markers()
+    assert len(findings) == 1
+    assert findings[0].startswith('references/freshness.md: carries no "Review by')
+
+
+def test_rewording_the_reverification_sentence_is_a_finding(
+    check_consistency: ModuleType, today: date, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A price baseline whose re-verification phrase was reworded away is flagged."""
+    monkeypatch.chdir(tmp_path)
+    _write_required_files(
+        tmp_path,
+        review=f"# Freshness\n\n**Review by {today}.**\n",
+        reverified=f"**As of {today}, checked against list_prices on {today}.**\n",
+    )
+    findings = check_consistency.check_required_markers()
+    assert len(findings) == 1
+    assert findings[0].startswith('references/opportunity-catalog.md: carries no "re-verified')
+
+
+def test_required_markers_flag_a_file_that_is_gone(
+    check_consistency: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A renamed or deleted reference is a finding, which is why the check is unconditional.
+
+    Anchoring on the scanned paths, the way `check_routing` does, could never catch this:
+    a file that no longer exists is never among them.
+    """
+    monkeypatch.chdir(tmp_path)
+    findings = check_consistency.check_required_markers()
+    assert len(findings) == 2
+    assert all("cannot be read" in f for f in findings)
+
+
 def test_main_exit_codes(check_consistency, today, tmp_path: Path, monkeypatch, capsys):
     """Exit 0 when every file is current, 1 with the finding on stderr when one is not."""
     monkeypatch.chdir(tmp_path)
+    # This test is about what a per-file finding does to the exit code. The required-file
+    # check runs on every invocation and would fail from a directory that has no
+    # references/ tree, which is every tmp_path; its own tests cover it above.
+    monkeypatch.setattr(check_consistency, "REQUIRED_MARKERS", {})
     clean = tmp_path / "clean.md"
     clean.write_text(f"Review by {today + timedelta(days=1)}\n")
     stale = tmp_path / "stale.md"
