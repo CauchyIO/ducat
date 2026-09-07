@@ -1,7 +1,7 @@
 # Contributing
 
-One check runs on this repository, and it exists because both failures it prevents have
-already happened here.
+Two checks run on this repository. The first exists because both failures it prevents
+have already happened here.
 
 ## What runs
 
@@ -19,26 +19,35 @@ because someone grepped them by hand.
 Identifiers are matched by shape, never by value. A checker holding the list of ids it
 forbids would be the leak it exists to prevent, and would protect exactly one estate.
 
+`tools/check-consistency.py` catches the quieter failure: an expired review date, a stale
+price baseline, a scope file the routing table does not name, or a link that no longer
+resolves. None of those produce a symptom. Each yields a clean run and a wrong assessment.
+
 ## When it runs
 
-**Before the commit**, as a hook. Enable it once per clone:
+**Before the commit**, as a [pre-commit](https://pre-commit.com/) hook. Set it up once per
+clone:
 
 ```sh
-git config core.hooksPath .githooks
+uv sync
+uv run pre-commit install
 ```
 
+If the clone was set up before September 2026 with `git config core.hooksPath .githooks`,
+unset that first. `pre-commit install` refuses to run while it is set.
+
 This is the one that matters. CI reports a credential faster; the hook is what stops it
-reaching the remote at all.
+reaching the remote at all. The same hook runs the consistency checker on staged markdown,
+and ruff and mypy on staged Python, so a commit that would fail CI fails here first.
 
 **In CI**, on every push and pull request, as the backstop for a machine where the hook was
-never enabled. That workflow also runs the consistency checker, and a second one runs the
-test suite under `tests/`, so a change to either script that breaks its own contract
-fails there too.
+never installed. One workflow runs both scripts over every tracked file; a second runs the
+test suite under `tests/`.
 
-Run it by hand any time:
+Run everything by hand any time:
 
 ```sh
-git ls-files -z | xargs -0 uv run tools/check-package.py
+uv run pre-commit run --all-files
 ```
 
 ## When it fails
@@ -59,9 +68,7 @@ formatter, linter, type checker and test runner pinned in `pyproject.toml` and `
 
 ```sh
 uv sync
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy
+uv run pre-commit run --all-files
 uv run pytest
 ```
 

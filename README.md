@@ -91,7 +91,7 @@ databricks-cost-optimizer/
 │   ├── check-package.py            ← refuses credentials and estate identifiers
 │   └── check-consistency.py        ← catches stale dates, prices, and broken routing
 ├── tests/                          ← pytest suite for both scripts
-├── .githooks/pre-commit            ← runs both before a commit leaves the machine
+├── .pre-commit-config.yaml         ← runs both before a commit leaves the machine
 ├── .github/workflows/
 │   ├── leakage-and-staleness.yml   ← runs both again on push, as a backstop
 │   └── tests.yml                   ← runs the suite on push

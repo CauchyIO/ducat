@@ -1,0 +1,40 @@
+# Every hook runs through uv, so uv.lock is the only place a tool version is pinned and
+# the hook, CI and a by-hand run cannot disagree.
+#
+# Install once per clone:  uv run pre-commit install
+#
+# pre-commit hands each hook the staged files only, with unstaged changes stashed, so a
+# partially staged file is checked as the version that would actually be committed.
+repos:
+  - repo: local
+    hooks:
+      - id: check-package
+        name: refuse credentials and estate identifiers
+        entry: uv run --locked tools/check-package.py
+        language: system
+        # Every staged file, whatever its type: a credential can land in any of them.
+
+      - id: check-consistency
+        name: refuse expired review dates, stale prices, broken routing and links
+        entry: uv run --locked tools/check-consistency.py
+        language: system
+        types: [markdown]
+
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --locked ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --locked ruff format
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: mypy
+        entry: uv run --locked mypy
+        language: system
+        pass_filenames: false
+        files: ^tools/.*\.py$
