@@ -31,9 +31,13 @@ checking. None of those produce a symptom. Each yields a clean run and a wrong a
 clone:
 
 ```sh
-uv sync
-uv run pre-commit install
+make install
+make hooks
 ```
+
+For anyone without `make`, that is `uv sync --locked` and then `uv run pre-commit install`.
+`--locked` refuses to install from a lock that has drifted from `pyproject.toml`, rather
+than quietly rewriting it; `uv lock` is the deliberate fix.
 
 If the clone was set up before September 2026 with `git config core.hooksPath .githooks`,
 unset that first. `pre-commit install` refuses to run while it is set.
@@ -60,8 +64,11 @@ runs the test suite under `tests/`.
 Run everything by hand any time:
 
 ```sh
-uv run pre-commit run --all-files
+make check
 ```
+
+That is the same `uv run --locked pre-commit run --all-files --show-diff-on-failure` that CI
+runs, so a clean `make check` means a green check.
 
 ## When it fails
 
@@ -80,10 +87,15 @@ Everything runs through [uv](https://docs.astral.sh/uv/): the scripts themselves
 formatter, linter, type checker and test runner pinned in `pyproject.toml` and `uv.lock`.
 
 ```sh
-uv sync
-uv run pre-commit run --all-files
-uv run pytest
+make install # uv sync --locked
+make hooks   # uv run --locked pre-commit install
+make check   # uv run --locked pre-commit run --all-files --show-diff-on-failure
+make test    # uv run --locked pytest
+make all     # check, then test
+make clean   # remove the tool caches; keeps .venv
 ```
+
+`make` on its own lists the targets and runs nothing.
 
 `pyproject.toml` is configuration, not a package. It has no build system and nothing in
 it is installed except the tools. The scripts import only the standard library; `uv run`
