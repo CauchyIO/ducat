@@ -42,6 +42,16 @@ This is the one that matters. CI reports a credential faster; the hook is what s
 reaching the remote at all. The same hook runs the consistency checker on staged markdown,
 and ruff and mypy on staged Python, so a commit that would fail CI fails here first.
 
+**Weekly**, `tools/check-upstream.py` asks whether an upstream source the reference files were
+distilled from has moved. Each source's published signal is pinned in that script — a content
+commit id for a `learn.microsoft.com` article, a release tag for the FOCUS spec — and compared
+against the live one. It is not a commit hook: it reaches the network, and committing must never
+depend on a third party being reachable. A moved source opens a GitHub issue on this repository —
+one issue, commented on thereafter, since a source stays moved until somebody re-distils it. A
+source that cannot be read fails the run instead, so a network hiccup never masquerades as a
+re-read somebody owes. Sources that publish no signal are named in the script as such, so their
+absence stays visible.
+
 **In CI**, on every push and pull request, as the backstop for a machine where the hook was
 never installed. One workflow runs the whole hook set over every tracked file — the same
 `.pre-commit-config.yaml` the hook reads, so the two cannot check different things; a second

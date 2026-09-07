@@ -21,7 +21,8 @@ below carry an as-of date precisely because they expire.
 ## Practice taxonomy
 
 The FinOps Framework, by the FinOps Foundation, used under CC BY 4.0. Distilled to identifiers,
-titles, and URLs.
+titles, and URLs. **Review by 2026-11-19.** The Framework is published as a live site with no
+version or changelog, so nothing can detect it moving; this date is the only prompt to re-read it.
 
 **Domains**
 

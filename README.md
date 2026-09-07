@@ -89,12 +89,14 @@ databricks-cost-optimizer/
 │   └── map-workspaces-to-azure.md
 ├── tools/
 │   ├── check-package.py            ← refuses credentials and estate identifiers
-│   └── check-consistency.py        ← catches stale dates, prices, and broken routing
+│   ├── check-consistency.py        ← catches stale dates, prices, and broken routing
+│   └── check-upstream.py           ← catches an upstream source that has moved
 ├── tests/                          ← pytest suite for both scripts
 ├── .pre-commit-config.yaml         ← runs every check before a commit leaves the machine
 ├── .github/workflows/
 │   ├── checks.yml                  ← runs every check again on push, as a backstop
-│   └── tests.yml                   ← runs the suite on push
+│   ├── tests.yml                   ← runs the suite on push
+│   └── upstream-sources.yml        ← asks weekly whether a source moved
 ├── .mcp.json
 ├── .claude/settings.json
 ├── pyproject.toml
