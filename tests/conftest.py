@@ -35,6 +35,12 @@ def check_consistency() -> ModuleType:
     return _load("check-consistency")
 
 
+@pytest.fixture(scope="session")
+def check_upstream() -> ModuleType:
+    """The upstream-source drift checker, loaded once for the whole run."""
+    return _load("check-upstream")
+
+
 @pytest.fixture
 def today(check_consistency: ModuleType, monkeypatch: pytest.MonkeyPatch) -> date:
     """Pin the script's notion of today so date arithmetic is stable."""
