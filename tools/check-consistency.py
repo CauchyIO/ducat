@@ -4,13 +4,14 @@ check-package.py guards one failure mode: leakage. This script guards a differen
 a stale vendor fact or a misrouted scope file that produces no error, no missing output,
 and no visible symptom, and corrupts a recommendation exactly because nobody notices.
 
-Four checks, all mechanical and deterministic:
+Five checks, all mechanical and deterministic:
 
     - An expired review date (`Review by YYYY-MM-DD`) anywhere in the package.
     - A price baseline whose re-verification has gone stale past PRICE_STALENESS_DAYS.
     - A scope file in references/opportunities/ that the routing table does not name,
       or a routed filename that does not exist.
     - A relative markdown link that does not resolve to a file on disk.
+    - A reference file that has lost the dated sentence the first two checks read.
 
 Kept in its own script and its own hook on purpose: this is fixable by editing a date
 or a table row, never by rotating a credential. That is a different failure mode from
@@ -39,6 +40,17 @@ REVERIFIED_RX = re.compile(r"re-verified against live `list_prices` on (\d{4}-\d
 LINK_RX = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 SCHEME_RX = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")  # http:, https:, mailto:, ...
 ROUTED_NAME_RX = re.compile(r"opportunities/([\w-]+\.md)")
+
+# The files the package obliges to carry a dated marker, and the shape each must hold.
+# SKILL.md and references/README.md already say these two files carry these dates; this
+# is that obligation written where it can be enforced.
+REQUIRED_MARKERS: dict[Path, tuple[re.Pattern[str], str]] = {
+    Path("references/freshness.md"): (REVIEW_BY_RX, "Review by YYYY-MM-DD"),
+    Path("references/opportunity-catalog.md"): (
+        REVERIFIED_RX,
+        "re-verified against live `list_prices` on YYYY-MM-DD",
+    ),
+}
 
 
 def _line_of(text: str, offset: int) -> int:
@@ -166,11 +178,49 @@ def check_routing(paths: list[str]) -> list[str]:
     return findings
 
 
+def check_required_markers() -> list[str]:
+    """Flags a reference file that has lost the dated marker it is required to carry.
+
+    `check_review_dates` and `check_price_staleness` judge the dates they find. Neither
+    can say anything about a date that is not there: reword the sentence around it and
+    the regex matches nothing, both checks report nothing, and the run is green with the
+    staleness they exist to catch still unmeasured. This check asserts the marker is
+    present at all, which turns a rewording into an error rather than a pass.
+
+    Whole-repo and unconditional, unlike `check_routing`: a check that ran only when its
+    file was among the scanned paths could never fire for a file that was deleted or
+    renamed, which is one of the ways the marker goes missing. Paths are relative to the
+    repository root, which is where the hook, CI and a by-hand run all invoke from.
+
+    Returns:
+        One finding per required file that cannot be read or holds no match, in path
+        order. Empty when every file in `REQUIRED_MARKERS` carries its marker.
+    """
+    findings = []
+    for path, (pattern, shape) in sorted(REQUIRED_MARKERS.items()):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            findings.append(
+                f'{path}: required to carry "{shape}", but the file cannot be read — if '
+                f"it moved, move its entry in {SELF}'s REQUIRED_MARKERS with it"
+            )
+            continue
+        if not pattern.search(text):
+            findings.append(
+                f'{path}: carries no "{shape}" — the sentence holding the date was '
+                f"reworded or removed, and the staleness check it feeds now passes on "
+                f"a file it is no longer reading"
+            )
+    return findings
+
+
 def scan(path: str) -> list[str]:
     """Runs every per-file check against one file.
 
     Applies `check_review_dates`, `check_price_staleness`, and `check_links` in
-    turn. `check_routing` is whole-repo and is not run here; `main` runs it once.
+    turn. `check_routing` and `check_required_markers` are whole-repo and are not run
+    here; `main` runs each once.
 
     Args:
         path: The file to scan.
@@ -201,6 +251,7 @@ def main(argv: list[str]) -> int:
     paths = [p for p in argv if p != SELF and Path(p).is_file()]
     findings = [f for p in paths for f in scan(p)]
     findings += check_routing(paths)
+    findings += check_required_markers()
 
     if not findings:
         print(f"check-consistency: {len(paths)} files, nothing to report")
