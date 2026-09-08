@@ -14,7 +14,7 @@ OAuth access token lasts an hour; a personal access token minted by the principa
 as long as you ask.
 
 ```sh
-dbsp tokens create --json '{"lifetime_seconds":7776000,"comment":"cost-optimizer mcp"}'
+dbsp tokens create --json '{"lifetime_seconds":7776000,"comment":"ducat mcp"}'
 ```
 
 The value prints once. This is a **different credential** from the `dose` secret stored in step 6 of
@@ -30,25 +30,25 @@ own.
 macOS:
 
 ```sh
-security add-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w
+security add-generic-password -a "$USER" -s ducat-pat -w
 ```
 
 Linux:
 
 ```sh
-secret-tool store --label="databricks cost optimizer token" service databricks-cost-optimizer-pat account "$USER"
+secret-tool store --label="ducat token" service ducat-pat account "$USER"
 ```
 
 Windows (PowerShell):
 
 ```powershell
-Set-Secret -Name databricks-cost-optimizer-pat
+Set-Secret -Name ducat-pat
 ```
 
 Confirm the store holds what you meant:
 
 ```sh
-security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w | cut -c1-4
+security find-generic-password -a "$USER" -s ducat-pat -w | cut -c1-4
 ```
 
 That should print `dapi`.
@@ -63,7 +63,7 @@ export DATABRICKS_MCP_URL="https://$WORKSPACE_URL/api/2.0/mcp/sql"
 ```
 
 ```sh
-export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-pat -w)"
+export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s ducat-pat -w)"
 ```
 
 ## 4. Take the two configuration files

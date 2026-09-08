@@ -9,9 +9,9 @@
 # Set up with `uv sync`. See CONTRIBUTING.md.
 
 [project]
-name = "databricks-cost-optimizer"
+name = "ducat"
 version = "0"
-description = "Tooling configuration for the databricks-cost-optimizer skill. Not a distributable package."
+description = "Tooling configuration for ducat, the Databricks Usage Cost Assessment Tool skill. Not a distributable package."
 requires-python = ">=3.12"
 
 [dependency-groups]

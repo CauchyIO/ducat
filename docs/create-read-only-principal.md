@@ -55,7 +55,7 @@ This should print the workspace URL value that you assigned.
 
 ```sh
 databricks service-principals create \
-  --json '{"displayName":"sp-databricks-cost-optimizer","active":true}'
+  --json '{"displayName":"sp-ducat","active":true}'
 ```
 
 The output contains two fields you need, and they are easy to confuse. `applicationId` is the OAuth
@@ -175,7 +175,7 @@ prompt echoes nothing and asks twice.
 Store it. The command says `add-generic-password`, but security calls everything it stores a password — here that means the `dose` secret from step 5:
 
 ```sh
-security add-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w
+security add-generic-password -a "$USER" -s ducat-sp -w
 ```
 
 Then define the wrapper:
@@ -186,7 +186,7 @@ dbsp() {
   DATABRICKS_AUTH_TYPE="oauth-m2m" \
   DATABRICKS_HOST="https://$WORKSPACE_URL" \
   DATABRICKS_CLIENT_ID="$SP" \
-  DATABRICKS_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w)" \
+  DATABRICKS_CLIENT_SECRET="$(security find-generic-password -a "$USER" -s ducat-sp -w)" \
   databricks "$@"
 }
 ```
@@ -197,7 +197,7 @@ Store it with `secret-tool`, from `libsecret-tools`. This one reads the secret f
 rather than prompting twice:
 
 ```sh
-secret-tool store --label="databricks cost optimizer" service databricks-cost-optimizer-sp account "$USER"
+secret-tool store --label="ducat" service ducat-sp account "$USER"
 ```
 
 Then define the wrapper:
@@ -208,7 +208,7 @@ dbsp() {
   DATABRICKS_AUTH_TYPE="oauth-m2m" \
   DATABRICKS_HOST="https://$WORKSPACE_URL" \
   DATABRICKS_CLIENT_ID="$SP" \
-  DATABRICKS_CLIENT_SECRET="$(secret-tool lookup service databricks-cost-optimizer-sp account "$USER")" \
+  DATABRICKS_CLIENT_SECRET="$(secret-tool lookup service ducat-sp account "$USER")" \
   databricks "$@"
 }
 ```
@@ -219,7 +219,7 @@ Store it with the `Microsoft.PowerShell.SecretManagement` and `SecretStore` modu
 first if you have not:
 
 ```powershell
-Set-Secret -Name databricks-cost-optimizer-sp
+Set-Secret -Name ducat-sp
 ```
 
 Then define the wrapper:
@@ -229,7 +229,7 @@ function dbsp {
   $env:DATABRICKS_AUTH_TYPE     = "oauth-m2m"
   $env:DATABRICKS_HOST          = "https://$env:WORKSPACE_URL"
   $env:DATABRICKS_CLIENT_ID     = $env:SP
-  $env:DATABRICKS_CLIENT_SECRET = Get-Secret -Name databricks-cost-optimizer-sp -AsPlainText
+  $env:DATABRICKS_CLIENT_SECRET = Get-Secret -Name ducat-sp -AsPlainText
   databricks @args
 }
 ```
@@ -242,19 +242,19 @@ you want to run a command as yourself again.
 Before relying on it, check the store holds what you meant. macOS:
 
 ```sh
-security find-generic-password -a "$USER" -s databricks-cost-optimizer-sp -w | cut -c1-4
+security find-generic-password -a "$USER" -s ducat-sp -w | cut -c1-4
 ```
 
 Linux:
 
 ```sh
-secret-tool lookup service databricks-cost-optimizer-sp account "$USER" | cut -c1-4
+secret-tool lookup service ducat-sp account "$USER" | cut -c1-4
 ```
 
 Windows (PowerShell):
 
 ```powershell
-(Get-Secret -Name databricks-cost-optimizer-sp -AsPlainText).Substring(0,4)
+(Get-Secret -Name ducat-sp -AsPlainText).Substring(0,4)
 ```
 
 That should print `dose`. Anything else — a stray character, a pasted comment, the `id` instead of

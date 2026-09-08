@@ -1,4 +1,8 @@
-# databricks-cost-optimizer
+<p align="center">
+  <img src="assets/cauchy.svg" alt="Cauchy" width="64">
+</p>
+
+# DUCAT: Databricks Usage Cost Assessment Tool
 
 A read-only agent skill that works out what a specific Azure Databricks workload costs today, then
 designs a way to make it cost less.
@@ -60,18 +64,18 @@ package itself, copy or symlink this repository into your skills directory, keep
 name:
 
 ```sh
-ln -s "$PWD" ~/.claude/skills/databricks-cost-optimizer
+ln -s "$PWD" ~/.claude/skills/ducat
 ```
 
 ## Invoke
 
-Explicitly as `$databricks-cost-optimizer`, or through automatic discovery when a request matches
+Explicitly as `$ducat`, or through automatic discovery when a request matches
 the skill's description.
 
 ## Layout
 
 ```text
-databricks-cost-optimizer/
+ducat/
 ├── SKILL.md
 ├── references/                     ← what the skill reads at runtime
 │   ├── README.md                   ← the criteria, and how to change them
@@ -92,11 +96,14 @@ databricks-cost-optimizer/
 │   ├── check-consistency.py        ← catches stale dates, prices, and broken routing
 │   └── check-upstream.py           ← catches an upstream source that has moved
 ├── tests/                          ← pytest suite for both scripts
+├── assets/                         ← the Cauchy logo the README shows
 ├── .pre-commit-config.yaml         ← runs every check before a commit leaves the machine
-├── .github/workflows/
-│   ├── checks.yml                  ← runs every check again on push, as a backstop
-│   ├── tests.yml                   ← runs the suite on push
-│   └── upstream-sources.yml        ← asks weekly whether a source moved
+├── .github/
+│   ├── CODE_OF_CONDUCT.md          ← adapted from the Contributor Covenant
+│   └── workflows/
+│       ├── checks.yml              ← runs every check again on push, as a backstop
+│       ├── tests.yml               ← runs the suite on push
+│       └── upstream-sources.yml    ← asks weekly whether a source moved
 ├── .mcp.json
 ├── .claude/settings.json
 ├── pyproject.toml
@@ -105,7 +112,6 @@ databricks-cost-optimizer/
 ├── README.md
 ├── CONTRIBUTING.md
 ├── SECURITY.md                     ← how to report a vulnerability privately
-├── CODE_OF_CONDUCT.md
 ├── NOTICE.md
 └── LICENSE
 ```
