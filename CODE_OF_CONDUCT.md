@@ -21,9 +21,10 @@ reasonably be considered inappropriate.
 
 ## Enforcement
 
-Report abusive or unacceptable behaviour privately to the maintainers through the channel
-described in [SECURITY.md](SECURITY.md). Maintainers are responsible for clarifying these
-standards and will take fair corrective action in response to any behaviour they deem
-inappropriate.
+Report abusive or unacceptable behaviour to the maintainers at
+[pablo@cauchy.io](mailto:pablo@cauchy.io). Every report is handled privately and reviewed
+by a maintainer who is not the subject of it. Maintainers are responsible for clarifying
+these standards and will take fair corrective action in response to any behaviour they
+deem inappropriate.
 
 This code of conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/).
