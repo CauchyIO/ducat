@@ -1,11 +1,11 @@
 ---
 name: ducat
-description: Assess what a specific Azure Databricks scope costs today and design a way to make it cost less, from read-only usage and billing evidence. Use whenever someone asks why a Databricks job, pipeline, SQL warehouse, serving endpoint, team, or workstream costs what it does, wants a chargeback or showback figure defended, is chasing an unexplained Databricks cost increase, or asks to reduce, optimize, rightsize, or justify Databricks spend — including when they name only a symptom ("our nightly pipeline got expensive", "finance is disputing this number") rather than asking for an optimization.
+description: Assess what a specific Databricks scope costs today and design a way to make it cost less, from read-only usage and billing evidence. Use whenever someone asks why a Databricks job, pipeline, SQL warehouse, serving endpoint, team, or workstream costs what it does, wants a chargeback or showback figure defended, is chasing an unexplained Databricks cost increase, or asks to reduce, optimize, rightsize, or justify Databricks spend — including when they name only a symptom ("our nightly pipeline got expensive", "finance is disputing this number") rather than asking for an optimization.
 ---
 
 # DUCAT: Databricks Usage Cost Assessment Tool
 
-Establish what one confirmed Azure Databricks scope costs today, then design a way to make it cost
+Establish what one confirmed Databricks scope costs today, then design a way to make it cost
 less. Every proposed change is quantified against the measured baseline, and what evidence cannot
 support is not reported as a saving.
 

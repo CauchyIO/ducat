@@ -4,8 +4,8 @@
 
 # DUCAT: Databricks Usage Cost Assessment Tool
 
-A read-only agent skill that works out what a specific Azure Databricks workload costs today, then
-designs a way to make it cost less.
+A read-only [Claude Code](https://claude.com/claude-code) skill that works out what a specific
+Databricks workload costs today, then designs a way to make it cost less.
 
 You point it at one thing — a job, a pipeline, a SQL warehouse, a team's workload — and it reads
 your usage and billing data to establish what that thing actually costs. It then proposes concrete
@@ -18,6 +18,12 @@ so and narrows what it claims rather than guessing.
 
 The skill is designed to have read-only functionality. It never writes. No create, update, start, stop, resize or delete operation is invoked. The output
 is a Markdown proposal a human reviews and decides on.
+
+**Claude Code only, for the time being.** The package itself is Markdown — `SKILL.md` and
+`references/` — and nothing in it is structurally tied to one harness. Everything around it is
+Claude Code's: the skills directory it installs into, the `.mcp.json` that connects it to
+Databricks, and the `.claude/settings.json` that denies the tools it must not use. No other
+harness has been tried.
 
 ## Status
 
@@ -60,8 +66,8 @@ measures a change that has not happened yet.
 
 The skill needs a read-only identity and a connection before it can read anything;
 [`docs/getting-started.md`](docs/getting-started.md) walks the whole sequence. To install the
-package itself, copy or symlink this repository into your skills directory, keeping the directory
-name:
+package itself, copy or symlink this repository into Claude Code's skills directory, keeping the
+directory name:
 
 ```sh
 ln -s "$PWD" ~/.claude/skills/ducat
@@ -69,8 +75,8 @@ ln -s "$PWD" ~/.claude/skills/ducat
 
 ## Invoke
 
-Explicitly as `$ducat`, or through automatic discovery when a request matches
-the skill's description.
+At the Claude Code prompt, explicitly as `$ducat`, or through automatic discovery when a request
+matches the skill's description.
 
 ## Layout
 
@@ -104,8 +110,8 @@ ducat/
 │       ├── checks.yml              ← runs every check again on push, as a backstop
 │       ├── tests.yml               ← runs the suite on push
 │       └── upstream-sources.yml    ← asks weekly whether a source moved
-├── .mcp.json
-├── .claude/settings.json
+├── .mcp.json                       ← Claude Code's connection to the Databricks SQL MCP server
+├── .claude/settings.json           ← Claude Code's tool denials, see below
 ├── pyproject.toml
 ├── uv.lock
 ├── Makefile                        ← named targets for install, checks and tests
@@ -132,6 +138,7 @@ someone invents.
 ### Other limits
 
 - Azure Databricks only. AWS and GCP are untested.
+- Claude Code only. Other agent harnesses are untested.
 - Figures are list cost unless Azure Cost Management is reachable. List and billed are reported
   separately and never converted.
 - Packaged reference prices carry an as-of date and lose to a live query.
