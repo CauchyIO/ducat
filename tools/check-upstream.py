@@ -33,7 +33,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Literal
 
-USER_AGENT = "databricks-cost-optimizer-upstream-check"
+USER_AGENT = "ducat-upstream-check"
 TIMEOUT_SECONDS = 30
 
 # learn.microsoft.com serves the content commit of every article in its head. Pin that,
