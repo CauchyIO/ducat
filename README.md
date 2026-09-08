@@ -5,7 +5,7 @@
 # DUCAT: Databricks Usage Cost Assessment Tool
 
 A read-only [Claude Code](https://claude.com/claude-code) skill that works out what a specific
-Azure Databricks workload costs today, then designs a way to make it cost less.
+Databricks workload costs today, then designs a way to make it cost less.
 
 You point it at one thing — a job, a pipeline, a SQL warehouse, a team's workload — and it reads
 your usage and billing data to establish what that thing actually costs. It then proposes concrete
