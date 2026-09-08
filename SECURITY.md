@@ -27,4 +27,5 @@ and an estate identifier in the package a client reads. See [CONTRIBUTING.md](CO
 
 ## Supported versions
 
-There are no releases. Only the latest `main` receives security fixes.
+A tagged release is a snapshot and is not patched. Only the latest `main` receives
+security fixes.
