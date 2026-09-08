@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/cauchy.svg" alt="Cauchy" width="64">
+  <img src="assets/ducat-lockup.svg" alt="Ducat" width="256">
 </p>
 
 # DUCAT: Databricks Usage Cost Assessment Tool
