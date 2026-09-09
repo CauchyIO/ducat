@@ -1,5 +1,6 @@
 {
   "name": "ducat",
+  "description": "Read-only Databricks cost tooling from Cauchy, distributed as Claude Code plugins.",
   "owner": {
     "name": "Cauchy",
     "email": "pablo@cauchy.io"
