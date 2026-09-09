@@ -125,10 +125,11 @@ which transport, and what bounds what the session can do. A route is chosen once
 on it is not a request for the other one, and changing route mid-assessment means returning to this
 step and choosing again, never switching in place.
 
-On the personal-account route every direct `databricks` call is meant to prompt the user. If one is
-refused with no prompt, the session is running in a mode that cannot ask, and the refusal is the
-boundary working as designed: say so, name what the user can run themselves, and stop. Never reach
-the CLI another way — a script, another interpreter, a different shape of the same command.
+On the personal-account route every direct `databricks` call is meant to prompt the user, in any
+session mode. If one is refused with no prompt, a rule in force denies the CLI outright, and the
+refusal is the boundary working as designed: say so, name what the user can run themselves, and
+stop. Never reach the CLI another way — a script, another interpreter, a different shape of the
+same command.
 
 ### 2. Scope gate
 
