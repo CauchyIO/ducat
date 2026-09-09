@@ -66,12 +66,34 @@ measures a change that has not happened yet.
 
 The skill needs a read-only identity and a connection before it can read anything;
 [`docs/getting-started.md`](docs/getting-started.md) walks the whole sequence. To install the
-package itself, copy or symlink this repository into Claude Code's skills directory, keeping the
-directory name:
+package itself, copy or symlink this repository into a skills directory, keeping the directory
+name. Which directory decides where the skill loads.
+
+**For yourself, everywhere.** Claude Code reads `~/.claude/skills/` in every local session, whatever
+project you are in:
 
 ```sh
 ln -s "$PWD" ~/.claude/skills/ducat
 ```
+
+**For one repository.** Claude Code reads `.claude/skills/` in the directory it starts in and in
+every parent up to the repository root, so the skill loads in that repository and nowhere else. Run
+this from the repository you want it in, with `/path/to/ducat` the clone you are reading now:
+
+```sh
+ln -s /path/to/ducat .claude/skills/ducat
+```
+
+A symlink stays personal: it points at a clone that exists on one machine, so it reaches nobody
+else even if `.claude/` is committed. To give a team the skill from the repository itself, copy the
+package in and commit it, then everyone who clones has it:
+
+```sh
+cp -R /path/to/ducat .claude/skills/ducat
+```
+
+That copy is a fork the moment this repository moves on, so prefer it where the version matters
+more than staying current.
 
 ## Invoke
 
