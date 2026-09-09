@@ -107,7 +107,9 @@ connected, and whether the two variables are set. Then put the choice to the use
 When the service-principal route is available, present it as the recommended default and the
 personal-account route as the alternative. When the service-principal route is unavailable, say so,
 and narrow the choice to the personal-account route or stopping here. Whenever the personal-account
-route is on offer, the prompt carries this warning, marked as one and not softened:
+route is on offer, the question itself carries this warning in full, marked as one and not softened
+— never condensed into an option's description, and no less prominent when the service principal is
+available and recommended than when it is the only route left:
 
 > ⚠️ **Warning:** On this route the session runs as you, through the Databricks CLI, with every
 > privilege your account holds. If your account can create, resize or delete compute, so can this
