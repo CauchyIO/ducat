@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "ducat": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/CauchyIO/ducat.git",
+        "ref": "plugin"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ducat@ducat": true
+  }
+}

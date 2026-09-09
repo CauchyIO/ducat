@@ -83,6 +83,10 @@ The `#plugin` suffix is not optional. The plugin lives on the `plugin` branch, a
 `/plugin` shows whether it is installed and enabled; `/mcp` shows whether `databricks-sql` is
 connected.
 
+To put DUCAT in front of a whole team, a committed project setting registers the marketplace and
+enables the plugin, leaving each person one install command:
+[`docs/install-for-a-team.md`](docs/install-for-a-team.md).
+
 ## Versions and updates
 
 `plugin.json` declares a `version`, and Claude Code treats that string as the plugin's identity. A

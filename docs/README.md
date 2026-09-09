@@ -10,6 +10,7 @@ Two kinds of documents exist. `docs/` explains **how the skill was designed, how
 | [`getting-started.md`](getting-started.md) | The setup sequence, in order, with what each step achieves | **Start here** if you are setting this up for the first time |
 | [`create-read-only-principal.md`](create-read-only-principal.md) | Runbook for creating the read-only service principal the skill logs in with | Setting up a new workspace |
 | [`connect-mcp-server.md`](connect-mcp-server.md) | Runbook for wiring the client to Databricks | After the principal exists |
+| [`install-for-a-team.md`](install-for-a-team.md) | What the committed project setting does, and the one command each teammate still runs | Rolling DUCAT out to more than one person |
 | [`smoke-check.md`](smoke-check.md) | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
 | [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md) | How to reach billed cost and the Azure resources a workspace consumes on its own | Only if list cost is not enough |
 
