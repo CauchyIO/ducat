@@ -131,9 +131,15 @@ that decide what the skill may claim and what counts as a saving. If you want to
 one warehouse. Every write it attempts is refused by the platform, whatever the model intends.
 
 **Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies the
-read-write MCP tool and the Databricks CLI outright — the package reads everything through SQL and
-needs no CLI. This applies only where those settings load, and no static rule catches an alias
-someone invents.
+read-write MCP tool outright, and `dbsp`, the service-principal wrapper, since that identity's
+route is the MCP server. It does not deny `databricks`: on the personal-account route the CLI is
+the transport, and `databricks` is listed under `ask`, so every direct call prompts the user after
+the route warning in `SKILL.md`, in auto mode as well: an `ask` rule overrides auto mode for that
+command. The skill is told to stop on a promptless refusal, which means a deny rule is in force,
+rather than work around it. A permission rule carries no reason text, which
+is why the warning lives in the prompt. This applies only where those settings load, and it sees
+only the command string: a script that shells out to the CLI passes it unseen, which is why on this
+route the user's own permissions, and nothing else, are the boundary.
 
 ### Other limits
 
