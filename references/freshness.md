@@ -15,6 +15,13 @@ Verified 2026-08-28: five of six sampled families matched exactly after five mon
 wrong, and every range turned out to exclude one region. Drift is not the only way a baseline goes
 wrong; a range that was never wide enough ages just as badly and looks healthier while doing it.
 
+Verified 2026-09-09: every SKU stem named in `data-sources.md` was matched against
+`system.billing.list_prices` and `system.billing.usage`. Twenty-one of twenty-two resolved. `GENIE`
+existed in neither table under that name — the billed SKU is `GENIE_FREE_USAGE`, present in usage
+from 2026-07-20 and absent from `list_prices` entirely. The model-serving vendor SKUs and the
+networking egress families had both grown past what the table listed. A name that was never right
+fails the same way as one that has drifted, and neither is visible without running the query.
+
 Confirmed drift as of 2026-07-01. Treat every item as re-checkable, not settled:
 
 - **"Serverless budget policies" are now "serverless usage policies."** The mechanism and the
@@ -24,7 +31,8 @@ Confirmed drift as of 2026-07-01. Treat every item as re-checkable, not settled:
 - **Monitoring's origin changed** to `DATA_QUALITY_MONITORING`.
 - **`ai_query` bills under `MODEL_SERVING`**, not `AI_FUNCTIONS`.
 - **Genie moved to pay-as-you-go on 2026-07-06** with its own metered DBUs, 150 free per identified
-  user per month, and no free allowance for service principals.
+  user per month, and no free allowance for service principals. The SKU seen in
+  `system.billing.usage` is `GENIE_FREE_USAGE`, not `GENIE`, and it has no `list_prices` row.
 - **Lakebase snapshot storage became billable 2026-06-01.**
 - **The Standard tier is being retired** — Azure auto-upgrades to Premium on 2026-10-01. Flag
   Standard-tier prices as sunsetting rather than quoting them as durable.
