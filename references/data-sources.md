@@ -216,7 +216,7 @@ Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment �
 | `JOBS` | `JOBS_COMPUTE`, `JOBS_COMPUTE_(PHOTON)`, `JOBS_SERVERLESS_COMPUTE` | Classic or serverless jobs |
 | `SQL` | `SQL_COMPUTE`, `SQL_PRO_COMPUTE`, `SERVERLESS_SQL_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Warehouse compute; JOBS_SERVERLESS for DLT-backed streaming tables and MVs |
 | `DLT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Classic DLT on DLT SKUs; serverless DLT on JOBS_SERVERLESS |
-| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, `ANTHROPIC_MODEL_SERVING`, `OPENAI_MODEL_SERVING`, `GEMINI_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own. All four bill per DBU — pay-per-token endpoints are a different SKU family |
+| `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, plus one SKU per foundation-model vendor: `ANTHROPIC_`, `OPENAI_`, `GEMINI_`, `DEEPSEEK_`, `MOONSHOT_`, `THINKING_MACHINES_` and `ZHIPU_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own. All bill per DBU — pay-per-token endpoints are a different SKU family. The vendor list grows; enumerate it rather than trusting this one |
 | `VECTOR_SEARCH` | `SERVERLESS_REAL_TIME_INFERENCE` + `JOBS_SERVERLESS_COMPUTE` | **Dual billing**: endpoint serving plus background index sync |
 | `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE`, `DATABRICKS_STORAGE`, plus background maintenance on `JOBS_SERVERLESS_COMPUTE` | **Triple component**: compute, storage in DSUs, background jobs |
 | `APPS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Lakehouse Apps |
@@ -230,12 +230,28 @@ Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment �
 | `FOUNDATION_MODEL_TRAINING` | `MODEL_TRAINING` | Fine-tuning |
 | `NOTEBOOKS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Distinct origin from `INTERACTIVE` |
 | `CLEAN_ROOM` | `CLEAN_ROOMS_COLLABORATOR` | Flat per-DAY rate, not a DBU rate — never price it per hour |
-| `NETWORKING` | `INTERNET_EGRESS_*`, `DATABRICKS_INTER_CONTINENTAL_EGRESS_*`, `PUBLIC_CONNECTIVITY_DATA_PROCESSED` | Per-GB by route; per-hour for private endpoints |
-| `GENIE` | `GENIE` (from 2026-07-06) | Metered DBUs; underlying SQL compute still billed on top |
+| `NETWORKING` | `INTERNET_EGRESS_*`, `INTER_REGION_EGRESS_*`, `DATABRICKS_INTER_AZ_EGRESS`, `DATABRICKS_INTER_CONTINENTAL_EGRESS_*`, `PUBLIC_CONNECTIVITY_DATA_PROCESSED`, `PRIVATE_CONNECTIVITY_*` | Per-GB by route; per-hour for private endpoints |
+| `GENIE` | `GENIE_FREE_USAGE` | Metered DBUs; underlying SQL compute still billed on top. Carries no `list_prices` row — see below |
 
 Other origins to expect: `DEFAULT_STORAGE`, `AGENT_BRICKS`, `DATA_SHARING`,
 `EXTERNAL_COMPATIBILITY`. Enumerate what is actually present rather than assuming this list is
 closed — always start a scan with `SELECT DISTINCT billing_origin_product`.
+
+### Usage that carries no price
+
+A `LEFT JOIN` to `list_prices` returns null for two different situations, and they are not the same
+finding. A SKU may have no published price at all, or the join may have missed a row that exists —
+wrong tier, wrong region, wrong currency, or a validity window that does not cover the usage.
+
+`GENIE_FREE_USAGE` is the first kind on the evidence available: it carries DBU quantities in
+`system.billing.usage`, `freshness.md` records Genie's 150 free DBUs per identified user per month,
+and no row for it exists in `list_prices` at any tier or region.
+
+Report the two apart. Usage that is unpriced by design belongs in the baseline at zero with the
+allowance named, because a reader who sees it missing will ask. An unmatched join is missing
+evidence, and bounds what may be claimed exactly as the claim gates describe. What neither may do is
+disappear: a SKU dropped from the total takes its quantity with it, and the baseline is quietly
+wrong rather than visibly incomplete.
 
 Newer attribution surfaces worth using: `usage_type`, `product_features` (`jobs_tier`, `sql_tier`,
 `dlt_tier`, `is_serverless`, `is_photon`, `serving_type`), `identity_metadata`, and `usage_metadata`
