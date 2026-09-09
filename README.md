@@ -73,9 +73,12 @@ them without a secret touching disk.
 To install the plugin, add the repository as a marketplace and install from it, at the Claude Code prompt:
 
 ```
-/plugin marketplace add CauchyIO/ducat
+/plugin marketplace add https://github.com/CauchyIO/ducat.git#plugin
 /plugin install ducat@ducat
 ```
+
+The `#plugin` suffix is not optional. The plugin lives on the `plugin` branch, and the
+`CauchyIO/ducat` shorthand resolves to the default branch, which does not carry the manifest.
 
 `/plugin` shows whether it is installed and enabled; `/mcp` shows whether `databricks-sql` is
 connected.
@@ -83,9 +86,10 @@ connected.
 ## Versions and updates
 
 `plugin.json` declares a `version`, and Claude Code treats that string as the plugin's identity. A
-first install takes whatever sits on `main` at that moment and labels it with that version. An
-existing install picks up changes only once the version is bumped, so pushing to `main` on its own
-reaches nobody who already installed. There are no release tags: `main` is the release.
+first install takes whatever sits on the `plugin` branch at that moment and labels it with that
+version. An existing install picks up changes only once the version is bumped, so pushing to the
+branch on its own reaches nobody who already installed. There are no release tags: the `plugin`
+branch is the release.
 
 Auto-update is off by default for a marketplace like this one, so updating is something you ask for.
 Refresh the marketplace at the Claude Code prompt:
