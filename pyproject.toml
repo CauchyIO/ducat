@@ -1,6 +1,6 @@
 # Tool configuration and development dependencies for the two scripts in tools/.
 #
-# This is not a package. There is no build-system section on purpose: the skill is
+# This is not a package. There is no build-system section on purpose: the plugin is
 # markdown, and tools/check-package.py and tools/check-consistency.py are stdlib-only
 # scripts invoked with `uv run` from the commit hook and from CI. What this file
 # provides is one place for the lint, type and test settings and one lock file for the
@@ -11,7 +11,7 @@
 [project]
 name = "ducat"
 version = "0"
-description = "Tooling configuration for ducat, the Databricks Usage Cost Assessment Tool skill. Not a distributable package."
+description = "Tooling configuration for the DUCAT Claude Code plugin. Not a Python package."
 requires-python = ">=3.12"
 
 [dependency-groups]
@@ -44,7 +44,7 @@ select = [
 convention = "google"
 
 [tool.mypy]
-files = ["tools"]
+files = ["tools", "hooks"]
 strict = true
 python_version = "3.12"
 

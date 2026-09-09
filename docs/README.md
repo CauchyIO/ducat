@@ -1,9 +1,9 @@
 # Documentation
 
-This guide covers all of the documentation located in the `docs/` directory. The `README.md` in the repository root covers the skill itself, what it does, and how to install it.
+This guide covers all of the documentation located in the `docs/` directory. The `README.md` in the repository root covers the plugin itself, what it does, and how to install it.
 
 Two kinds of documents exist. `docs/` explains **how the skill was designed, how to set it up, and how to connect it**.
-`references/`, at the repository root beside this folder, holds what the skill actually reads at runtime: the rules that decide what counts as evidence and what counts as a saving. Those are the rules a client is most likely to dispute. If you need to read or change them, see the last section of this document.
+`skills/ducat/references/`, beside the skill it serves, holds what the skill actually reads at runtime: the rules that decide what counts as evidence and what counts as a saving. Those are the rules a client is most likely to dispute. If you need to read or change them, see the last section of this document.
 
 | File | What it is | Read it when |
 |---|---|---|
@@ -17,7 +17,7 @@ Session transcripts from validation runs are **not here and not committed**. A t
 
 ## What you can change, and where
 
-**[`SKILL.md`](../SKILL.md) — the policy layer.** Nine invariants govern everything the skill will and will not do.
+**[`SKILL.md`](../skills/ducat/SKILL.md) — the policy layer.** Nine invariants govern everything the skill will and will not do.
 The consequential ones: scope is confirmed before any tool runs; a broad driver scan needs separate
 confirmation and returns candidates rather than conclusions; cost bases are never blurred; a cheaper
 design counts as a saving only when the workload's required outcomes survive; and the skill stops at
@@ -36,9 +36,10 @@ along with the reason it was left open.
 ## Where the analytical criteria live
 
 If the question is *what counts as evidence* or *what counts as a saving*, the answer is in
-`references/`, not here. That folder has its own guide at `references/README.md`, which enumerates
+`skills/ducat/references/`, not here. That folder has its own guide at
+[`references/README.md`](../skills/ducat/references/README.md), which enumerates
 each lever in full. In short:
 
-- **[`data-sources.md`](../references/data-sources.md)** — the evidence precedence ladder, the four cost bases, the attribution populations (native, manual, inferred, unallocated) and the rule that unallocated cost stays visible. Change these and you change what the skill is allowed to claim.
-- **[`opportunity-catalog.md`](../references/opportunity-catalog.md)** and **`opportunities/`** — the practice taxonomy, a dated price baseline, and one file per scope type. The prices carry an as-of date and lose to a live query; the ratios beneath them survive price drift and usually decide the case.
-- **[`proposal-contract.md`](../references/proposal-contract.md)** — which figures may be reported at all, how savings are calculated, the rule that overlapping opportunities are a portfolio rather than a sum, the confidence levels, and the shape of the decision card a human signs off.
+- **[`data-sources.md`](../skills/ducat/references/data-sources.md)** — the evidence precedence ladder, the four cost bases, the attribution populations (native, manual, inferred, unallocated) and the rule that unallocated cost stays visible. Change these and you change what the skill is allowed to claim.
+- **[`opportunity-catalog.md`](../skills/ducat/references/opportunity-catalog.md)** and **`opportunities/`** — the practice taxonomy, a dated price baseline, and one file per scope type. The prices carry an as-of date and lose to a live query; the ratios beneath them survive price drift and usually decide the case.
+- **[`proposal-contract.md`](../skills/ducat/references/proposal-contract.md)** — which figures may be reported at all, how savings are calculated, the rule that overlapping opportunities are a portfolio rather than a sum, the confidence levels, and the shape of the decision card a human signs off.

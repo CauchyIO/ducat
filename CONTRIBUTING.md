@@ -11,7 +11,7 @@ have already happened here.
 inside a file swept up by `git add -A`. The fix was rotation, because deleting a pushed
 secret does not unpublish it.
 
-**Estate identifiers, in the package a client reads** — [`SKILL.md`](SKILL.md), `references/`, `docs/`
+**Estate identifiers, in the package a client reads** — [`skills/`](skills/), `docs/`, `hooks/`
 and the configuration beside them. A workspace id in a working note is nobody's problem.
 The same id in a runbook is what a client sees, and the runbooks are clean today only
 because someone grepped them by hand.

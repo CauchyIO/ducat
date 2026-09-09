@@ -1,0 +1,14 @@
+{
+  "name": "ducat",
+  "owner": {
+    "name": "Cauchy",
+    "email": "pablo@cauchy.io"
+  },
+  "plugins": [
+    {
+      "name": "ducat",
+      "source": "./",
+      "description": "Read-only Databricks cost assessment: establish what one confirmed scope costs today and design a way to make it cost less, stopping at a Markdown proposal a human decides on."
+    }
+  ]
+}

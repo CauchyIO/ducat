@@ -3,9 +3,9 @@
 Two rule groups, deliberately different in scope.
 
 Credentials are refused in every file passed. Estate identifiers are refused only in
-the package a client reads: SKILL.md, references/, docs/, and the configuration beside
-them. A workspace id in a gitignored working note is nobody's problem; the same id in a
-runbook is what a client sees.
+the package a client reads: skills/, docs/, and the configuration beside them. A
+workspace id in a gitignored working note is nobody's problem; the same id in a runbook
+is what a client sees.
 
 Identifiers are matched by shape, never by value. A checker holding a list of the ids it
 forbids would be the leak it exists to prevent, and it would only ever protect one estate.
@@ -25,13 +25,13 @@ from pathlib import Path
 SELF = "tools/check-package.py"
 
 PACKAGE_ROOTS = (
-    "SKILL.md",
     "README.md",
     "NOTICE.md",
     ".mcp.json",
-    "references/",
+    ".claude-plugin/",
+    "skills/",
     "docs/",
-    ".claude/",
+    "hooks/",
 )
 
 CREDENTIALS = [

@@ -66,12 +66,12 @@ export DATABRICKS_MCP_URL="https://$WORKSPACE_URL/api/2.0/mcp/sql"
 export DATABRICKS_SP_TOKEN="$(security find-generic-password -a "$USER" -s ducat-pat -w)"
 ```
 
-## 4. Take the two configuration files
+## 4. Know what the plugin configures for you
 
-Copy both from this repository rather than retyping them.
+The plugin ships both configuration files; you copy nothing.
 
-`.mcp.json` defines the server. It carries no secret and no workspace identity — both arrive from
-the variables you just exported.
+`.mcp.json`, at the plugin root, defines the server. It carries no secret and no workspace
+identity — both arrive from the variables you just exported.
 
 ```json
 {
@@ -85,13 +85,17 @@ the variables you just exported.
 }
 ```
 
-`.claude/settings.json` denies the tools the skill must not use: the read-write MCP tool
+`hooks/hooks.json` denies the tools the skill must not use: the read-write MCP tool
 `execute_sql`, and the Databricks CLI, which the skill never needs because it reads everything as
-SQL. It allows `execute_sql_read_only` and `poll_sql_result`.
+SQL. It allows `execute_sql_read_only` and `poll_sql_result`. A plugin cannot ship permission
+rules, so the denial runs as a hook before each of those tools; the root
+[`README`](../README.md) says what that does and does not enforce.
 
 ## 5. Verify
 
-In the shell where you exported the variables, start Claude Code from the directory holding `.mcp.json` — it reads that file from the working directory and expands `${…}` from that shell's environment. Approve the project server when prompted, then type `/mcp` at the Claude Code prompt:
+In the shell where you exported the variables, start Claude Code with the plugin installed — it
+expands `${…}` in the plugin's `.mcp.json` from that shell's environment, from whatever directory
+you start in. Type `/mcp` at the Claude Code prompt:
 
 ```
 /mcp
@@ -119,5 +123,6 @@ alone.
 
 ### MCP server missing
 
-If the server is missing from `/mcp` entirely, you started Claude Code somewhere other than the
-directory holding `.mcp.json`, or in a shell where the variables were not set.
+If the server is missing from `/mcp` entirely, the plugin is not installed or not enabled in this
+session (`/plugin` shows both), or you started Claude Code in a shell where the variables were not
+set.

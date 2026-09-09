@@ -5,7 +5,7 @@ scope is confirmed — [`data-sources.md`](data-sources.md) during collection, [
 type is known, [`proposal-contract.md`](proposal-contract.md) before anything is written down.
 
 This is where the criteria live. A client who wants to change what the skill claims, or what counts
-as a saving, changes something here. See `docs/README.md` for the design and setup documents.
+as a saving, changes something here. See [`docs/README.md`](../../../docs/README.md) for the design and setup documents.
 
 | File | Governs | Read it when |
 |---|---|---|

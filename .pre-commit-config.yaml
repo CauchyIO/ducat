@@ -37,4 +37,4 @@ repos:
         entry: uv run --locked mypy
         language: system
         pass_filenames: false
-        files: ^tools/.*\.py$
+        files: ^(tools|hooks)/.*\.py$

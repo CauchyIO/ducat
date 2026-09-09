@@ -8,7 +8,7 @@ Five checks, all mechanical and deterministic:
 
     - An expired review date (`Review by YYYY-MM-DD`) anywhere in the package.
     - A price baseline whose re-verification has gone stale past PRICE_STALENESS_DAYS.
-    - A scope file in references/opportunities/ that the routing table does not name,
+    - A scope file in skills/ducat/references/opportunities/ that the routing table does not name,
       or a routed filename that does not exist.
     - A relative markdown link that does not resolve to a file on disk.
     - A reference file that has lost the dated sentence the first two checks read.
@@ -32,8 +32,8 @@ TODAY = date.today()
 
 PRICE_STALENESS_DAYS = 90
 
-ROUTING_TABLE = Path("references/opportunity-catalog.md")
-OPPORTUNITIES_DIR = Path("references/opportunities")
+ROUTING_TABLE = Path("skills/ducat/references/opportunity-catalog.md")
+OPPORTUNITIES_DIR = Path("skills/ducat/references/opportunities")
 
 REVIEW_BY_RX = re.compile(r"Review by (\d{4}-\d{2}-\d{2})")
 REVERIFIED_RX = re.compile(r"re-verified against live `list_prices` on (\d{4}-\d{2}-\d{2})")
@@ -42,11 +42,11 @@ SCHEME_RX = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")  # http:, https:, mailto:, 
 ROUTED_NAME_RX = re.compile(r"opportunities/([\w-]+\.md)")
 
 # The files the package obliges to carry a dated marker, and the shape each must hold.
-# SKILL.md and references/README.md already say these two files carry these dates; this
+# SKILL.md and skills/ducat/references/README.md already say these two files carry these dates; this
 # is that obligation written where it can be enforced.
 REQUIRED_MARKERS: dict[Path, tuple[re.Pattern[str], str]] = {
-    Path("references/freshness.md"): (REVIEW_BY_RX, "Review by YYYY-MM-DD"),
-    Path("references/opportunity-catalog.md"): (
+    Path("skills/ducat/references/freshness.md"): (REVIEW_BY_RX, "Review by YYYY-MM-DD"),
+    Path("skills/ducat/references/opportunity-catalog.md"): (
         REVERIFIED_RX,
         "re-verified against live `list_prices` on YYYY-MM-DD",
     ),
@@ -70,7 +70,7 @@ def check_review_dates(path: str, text: str) -> list[str]:
     """Flags every `Review by YYYY-MM-DD` claim in `text` that has passed.
 
     A dated claim that survives its review date is not thereby confirmed — it is
-    unreviewed, per `references/freshness.md`. This check makes that day visible.
+    unreviewed, per `skills/ducat/references/freshness.md`. This check makes that day visible.
 
     Args:
         path: The file `text` was read from, used only for the finding message.

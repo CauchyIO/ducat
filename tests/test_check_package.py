@@ -104,8 +104,8 @@ def test_identifiers_refused_only_in_package(
 @pytest.mark.parametrize(
     ("path", "expected"),
     [
-        ("SKILL.md", True),
-        ("references/opportunities/job.md", True),
+        ("skills/ducat/SKILL.md", True),
+        ("skills/ducat/references/opportunities/job.md", True),
         ("docs/runbook.md", True),
         ("tools/check-package.py", False),
         ("environment.local.md", False),

@@ -24,14 +24,14 @@ exist. Run those four checks as the principal, through the MCP connection, becau
 of all four pieces is what you are testing. Running the same queries as yourself would prove only
 that you can read the tables. Checks 2 to 5 are step 4 of [`getting-started.md`](getting-started.md).
 
-Running a query through the MCP connection means asking Claude Code to run it. Start a session in
-the directory holding `.mcp.json`, confirm with `/mcp` that `databricks-sql` is connected, then paste
-the query and ask for it to be run. Claude sends the query to Databricks over the connection, waits
+Running a query through the MCP connection means asking Claude Code to run it. Start a session with
+the plugin installed, in the shell where the two variables are exported, confirm with `/mcp` that
+`databricks-sql` is connected, then paste the query and ask for it to be run. Claude sends the query to Databricks over the connection, waits
 for the statement to finish, and shows the rows in the conversation. The query executes as the
 service principal, because the token in the connection belongs to the principal rather than to you —
 which is exactly why these four checks test the setup and not your own access.
 
-Only reads will run this way. `.claude/settings.json` denies the read-write tool, so a query that
+Only reads will run this way. The plugin's hook denies the read-write tool, so a query that
 tried to change anything would be refused before it reached Databricks. Every query below is a
 `SELECT`, so the question never arises.
 

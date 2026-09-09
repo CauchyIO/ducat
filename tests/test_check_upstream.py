@@ -31,7 +31,7 @@ def _source(check_upstream: ModuleType, **overrides: object) -> object:
         "kind": "learn-page",
         "url": "https://example.invalid/page",
         "signal": "pinned",
-        "distils_into": ("references/data-sources.md",),
+        "distils_into": ("skills/ducat/references/data-sources.md",),
     }
     fields.update(overrides)
     return check_upstream.Source(**fields)
@@ -88,7 +88,7 @@ def test_a_moved_source_names_what_to_re_read_and_re_distil(
     assert len(report.moved) == 1
     finding = report.moved[0]
     assert "pinned pinned, live moved" in finding
-    assert "references/data-sources.md" in finding
+    assert "skills/ducat/references/data-sources.md" in finding
     assert report.matched == []
 
 

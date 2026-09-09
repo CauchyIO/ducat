@@ -21,7 +21,7 @@ reduced representation, not the source itself.
 - **Changes:** distilled to canonical domain and capability slugs, display titles and URLs, after
   redirect resolution. No descriptive Framework text is reproduced.
 - **Intended use:** the practice taxonomy that each opportunity traces to, in
-  `references/opportunity-catalog.md`. Distilled 2026-08-21.
+  `skills/ducat/references/opportunity-catalog.md`. Distilled 2026-08-21.
 
 Do not re-distil from `github.com/finopsfoundation/framework`; that repository holds the retired
 2021 taxonomy.
@@ -40,7 +40,7 @@ Do not re-distil from `github.com/finopsfoundation/framework`; that repository h
 - **Changes:** distilled from the machine-readable requirements model to column identifiers,
   display names and requirement levels only. No normative text is reproduced.
 - **Intended use:** the vocabulary for cost bases and attribution method, in
-  `references/data-sources.md`. Distilled 2026-08-21.
+  `skills/ducat/references/data-sources.md`. Distilled 2026-08-21.
 
 ---
 

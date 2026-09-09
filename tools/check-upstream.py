@@ -1,8 +1,8 @@
 """Detect when an upstream source a reference file was distilled from has moved.
 
-`references/data-sources.md` and `references/opportunity-catalog.md` are distilled from
-sources that keep moving, and each carries a distillation date and nothing else. That
-date says when somebody last read the source. It never says whether the source has
+`skills/ducat/references/data-sources.md` and `.../opportunity-catalog.md` are distilled
+from sources that keep moving, and each carries a distillation date and nothing else.
+That date says when somebody last read the source. It never says whether the source has
 changed since, so a re-read that is owed looks exactly like one that is not.
 
 This script pins the change signal each source publishes and compares it against the
@@ -67,7 +67,7 @@ class Source:
     note: str = ""
 
 
-# The starting authorities `references/data-sources.md` names, which that file asks a
+# The starting authorities `skills/ducat/references/data-sources.md` names, which that file asks a
 # reader to "follow ... when Microsoft moves them", plus the two licensed sources
 # `NOTICE.md` records. Signals pinned 2026-09-07.
 SOURCES: tuple[Source, ...] = (
@@ -76,55 +76,58 @@ SOURCES: tuple[Source, ...] = (
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/usage/system-tables",
         signal="f684e9e50a753ff1341f9cd3adc12e0af4881c4a",
-        distils_into=("references/data-sources.md",),
+        distils_into=("skills/ducat/references/data-sources.md",),
     ),
     Source(
         id="learn-billing-system-table",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/billing",
         signal="9d69f24dbb22d6ad38df4b95845a050fb1ee59bd",
-        distils_into=("references/data-sources.md",),
+        distils_into=("skills/ducat/references/data-sources.md",),
     ),
     Source(
         id="learn-pricing-system-table",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/pricing",
         signal="0df2cf97dfb033d25e332ccfd462c803b0dd7619",
-        distils_into=("references/data-sources.md", "references/opportunity-catalog.md"),
+        distils_into=(
+            "skills/ducat/references/data-sources.md",
+            "skills/ducat/references/opportunity-catalog.md",
+        ),
     ),
     Source(
         id="learn-jobs-cost",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/jobs-cost",
         signal="0df2cf97dfb033d25e332ccfd462c803b0dd7619",
-        distils_into=("references/data-sources.md",),
+        distils_into=("skills/ducat/references/data-sources.md",),
     ),
     Source(
         id="learn-azure-cost-data",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/review-subscription-billing",
         signal="981d4c7a114a9026e67c1ac75226043c035d2ab5",
-        distils_into=("references/data-sources.md",),
+        distils_into=("skills/ducat/references/data-sources.md",),
     ),
     Source(
         id="learn-retail-prices-api",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices",
         signal="de6b152c15ece5c9525b925fce0240f31547c02a",
-        distils_into=("references/data-sources.md",),
+        distils_into=("skills/ducat/references/data-sources.md",),
     ),
     Source(
         id="focus-spec",
         kind="github-release",
         url="https://api.github.com/repos/FinOps-Open-Cost-and-Usage-Spec/FOCUS_Spec/releases/latest",
         signal="v1.4",
-        distils_into=("references/data-sources.md",),
+        distils_into=("skills/ducat/references/data-sources.md",),
         note="NOTICE.md pins tag v1.4, commit f1eeb30a78f7c141ef1237d589355296a2761c1c.",
     ),
     Source(
         id="finops-framework",
         kind="unversioned",
-        distils_into=("references/opportunity-catalog.md",),
+        distils_into=("skills/ducat/references/opportunity-catalog.md",),
         note=(
             "Published as a live site with no version or changelog, per NOTICE.md. "
             "Nothing here can detect its movement; it needs a review date instead."
@@ -133,13 +136,19 @@ SOURCES: tuple[Source, ...] = (
     Source(
         id="databricks-cost-component-matrix",
         kind="unnamed",
-        distils_into=("references/data-sources.md", "references/opportunity-catalog.md"),
+        distils_into=(
+            "skills/ducat/references/data-sources.md",
+            "skills/ducat/references/opportunity-catalog.md",
+        ),
         note="Named as a distillation source in both files, but no URL is recorded anywhere.",
     ),
     Source(
         id="databricks-cost-tracking-guide",
         kind="unnamed",
-        distils_into=("references/data-sources.md", "references/opportunity-catalog.md"),
+        distils_into=(
+            "skills/ducat/references/data-sources.md",
+            "skills/ducat/references/opportunity-catalog.md",
+        ),
         note="Named as a distillation source in both files, but no URL is recorded anywhere.",
     ),
 )

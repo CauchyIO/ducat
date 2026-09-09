@@ -34,8 +34,8 @@ neither secret nor workspace identity. See [`connect-mcp-server.md`](connect-mcp
 the principal through the connection: one job, one week, reconciled against its run history. The
 cheapest evidence that credential, warehouse, transport and tables all work together.
 
-**5. Install the skill.** Symlink the repository into your skills directory; the root
-[`README`](../README.md) has the command and additional instructions.
+**5. Install the plugin.** Load it from a checkout or add it as a marketplace; the root
+[`README`](../README.md) has the commands and additional instructions.
 
 **If Azure cost is in scope:** map each workspace to its subscription and managed resource
 group. Databricks cannot see per-workspace networking cost, and that is where an idle workspace

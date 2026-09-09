@@ -62,14 +62,14 @@ def test_routing_in_both_directions(check_consistency, tmp_path: Path, monkeypat
     The check only runs when the routing table itself is among the files being scanned.
     """
     monkeypatch.chdir(tmp_path)
-    opps = tmp_path / "references" / "opportunities"
+    opps = tmp_path / "skills" / "ducat" / "references" / "opportunities"
     opps.mkdir(parents=True)
     (opps / "job.md").write_text("")
     (opps / "orphan.md").write_text("")
-    table = tmp_path / "references" / "opportunity-catalog.md"
+    table = tmp_path / "skills" / "ducat" / "references" / "opportunity-catalog.md"
     table.write_text("| job | opportunities/job.md |\n| ghost | opportunities/ghost.md |\n")
 
-    findings = check_consistency.check_routing(["references/opportunity-catalog.md"])
+    findings = check_consistency.check_routing(["skills/ducat/references/opportunity-catalog.md"])
     assert len(findings) == 2
     assert "orphan.md" in findings[0] and "not named" in findings[0]
     assert "ghost.md" in findings[1] and "does not exist" in findings[1]
@@ -80,20 +80,21 @@ def test_routing_in_both_directions(check_consistency, tmp_path: Path, monkeypat
 def test_routing_needs_the_opportunities_directory(check_consistency, tmp_path: Path, monkeypatch):
     """With no opportunities directory there is nothing to route, so nothing is flagged."""
     monkeypatch.chdir(tmp_path)
-    (tmp_path / "references").mkdir()
-    (tmp_path / "references" / "opportunity-catalog.md").write_text("opportunities/ghost.md\n")
-    assert check_consistency.check_routing(["references/opportunity-catalog.md"]) == []
+    (tmp_path / "skills" / "ducat" / "references").mkdir(parents=True)
+    table = tmp_path / "skills" / "ducat" / "references" / "opportunity-catalog.md"
+    table.write_text("opportunities/ghost.md\n")
+    assert check_consistency.check_routing(["skills/ducat/references/opportunity-catalog.md"]) == []
 
 
 def _write_required_files(root: Path, review: str, reverified: str) -> None:
     """Writes the two files `REQUIRED_MARKERS` names, carrying the given sentences.
 
     Args:
-        root: Directory to write the `references/` tree under.
-        review: Full contents of `references/freshness.md`.
-        reverified: Full contents of `references/opportunity-catalog.md`.
+        root: Directory to write the `skills/ducat/references/` tree under.
+        review: Full contents of `skills/ducat/references/freshness.md`.
+        reverified: Full contents of `skills/ducat/references/opportunity-catalog.md`.
     """
-    references = root / "references"
+    references = root / "skills" / "ducat" / "references"
     references.mkdir(parents=True, exist_ok=True)
     (references / "freshness.md").write_text(review)
     (references / "opportunity-catalog.md").write_text(reverified)
@@ -128,7 +129,7 @@ def test_rewording_the_review_sentence_is_a_finding(
     )
     findings = check_consistency.check_required_markers()
     assert len(findings) == 1
-    assert findings[0].startswith('references/freshness.md: carries no "Review by')
+    assert findings[0].startswith('skills/ducat/references/freshness.md: carries no "Review by')
 
 
 def test_rewording_the_reverification_sentence_is_a_finding(
@@ -143,7 +144,8 @@ def test_rewording_the_reverification_sentence_is_a_finding(
     )
     findings = check_consistency.check_required_markers()
     assert len(findings) == 1
-    assert findings[0].startswith('references/opportunity-catalog.md: carries no "re-verified')
+    expected = 'skills/ducat/references/opportunity-catalog.md: carries no "re-verified'
+    assert findings[0].startswith(expected)
 
 
 def test_required_markers_flag_a_file_that_is_gone(
@@ -165,7 +167,7 @@ def test_main_exit_codes(check_consistency, today, tmp_path: Path, monkeypatch, 
     monkeypatch.chdir(tmp_path)
     # This test is about what a per-file finding does to the exit code. The required-file
     # check runs on every invocation and would fail from a directory that has no
-    # references/ tree, which is every tmp_path; its own tests cover it above.
+    # skills/ducat/references/ tree, which is every tmp_path; its own tests cover it above.
     monkeypatch.setattr(check_consistency, "REQUIRED_MARKERS", {})
     clean = tmp_path / "clean.md"
     clean.write_text(f"Review by {today + timedelta(days=1)}\n")

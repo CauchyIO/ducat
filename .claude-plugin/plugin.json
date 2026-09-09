@@ -1,0 +1,18 @@
+{
+  "name": "ducat",
+  "version": "1.0.0",
+  "description": "Read-only Databricks cost assessment: establish what one confirmed scope costs today and design a way to make it cost less, stopping at a Markdown proposal a human decides on.",
+  "author": {
+    "name": "Cauchy",
+    "email": "pablo@cauchy.io"
+  },
+  "repository": "https://github.com/CauchyIO/ducat",
+  "license": "MIT",
+  "keywords": [
+    "databricks",
+    "azure",
+    "finops",
+    "cost-optimization",
+    "read-only"
+  ]
+}
