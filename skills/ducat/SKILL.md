@@ -47,7 +47,10 @@ different authorization.
 
 ```mermaid
 flowchart TD
-  START([Invoke]) --> Q{Scope named<br/>in the request?}
+  START([Invoke]) --> ROUTE{{Choose access route<br/>explicit, safe default}}
+  ROUTE -->|service principal| Q{Scope named<br/>in the request?}
+  ROUTE -->|personal account| BRIEF[CLI briefing<br/>explicit consent]
+  BRIEF --> Q
 
   Q -->|no| OFFER[Offer coarse driver scan]
   OFFER -->|explicit confirmation| SCAN[Bounded read-only scan<br/>by billing origin product]
@@ -81,7 +84,54 @@ approval authorises — approval to confirm a scope is not approval to recommend
 branch rejoins at **Confirm scope** rather than bypassing it, so no path reaches a read without a
 confirmed scope.
 
-### 1. Scope gate
+### 1. Access route
+
+Two routes reach a workspace, and the user chooses one of them before anything else happens —
+before the scope question, and so before the coarse driver scan, which reads evidence too.
+The route decides the identity and what bounds it, not the evidence: both run the same packaged
+queries.
+
+**Service principal.** The managed SQL MCP server, authenticated as the read-only principal. It is
+available when the `execute_sql_read_only` and `poll_sql_result` tools are present in the session
+and `DATABRICKS_MCP_URL` and `DATABRICKS_SP_TOKEN` are set in the shell that launched it. Unity
+Catalog holds the boundary on this route: the principal cannot write, whatever the session intends.
+
+**Personal account.** The Databricks CLI, authenticated as the person from a profile they choose.
+The account can do whatever its grants allow, writes included, so the boundary on this route is the
+briefing and the person's explicit consent, not the platform. Taking this route means delivering
+that briefing next; nothing is read until consent is recorded.
+
+Report both availability facts first, whichever route is then chosen: whether the MCP server is
+connected, and whether the two variables are set. Then put the choice to the user and wait.
+
+When the service-principal route is available, present it as the recommended default and the
+personal-account route as the alternative. When the service-principal route is unavailable, say so,
+and narrow the choice to the personal-account route or stopping here. Whenever the personal-account
+route is on offer, the question itself carries this warning in full, marked as one and not softened
+— never condensed into an option's description, and no less prominent when the service principal is
+available and recommended than when it is the only route left:
+
+> ⚠️ **Warning:** On this route the session runs as you, through the Databricks CLI, with every
+> privilege your account holds. If your account can create, resize or delete compute, so can this
+> session. The read-only rule is written instruction in this package, not something the platform
+> enforces, and under insistence it has been seen to break in testing. Choose this route only if
+> you accept that your own permissions, and nothing else, are the boundary.
+
+Proceed only on an explicit choice. Silence, a pasted scope, or a yes given to another question
+chooses nothing.
+
+Name the chosen route before the first query, in one line the user can quote back: which identity,
+which transport, and what bounds what the session can do. A route is chosen once. A query failing
+on it is not a request for the other one, and changing route mid-assessment means returning to this
+step and choosing again, never switching in place.
+
+On the personal-account route every direct `databricks` call is meant to prompt the user, in any
+session mode. If one is refused with no prompt, a rule in force denies the CLI outright, and the
+refusal is the boundary working as designed: say so, name what the user can run themselves, and
+stop. Never reach the CLI another way — a script, another interpreter, a different shape of the
+same command.
+
+### 2. Scope gate
 
 Identify what the user wants to optimize before touching a tool.
 
@@ -113,7 +163,7 @@ through another service's SKU and would otherwise vanish into the jobs line. Ret
 candidate scopes with enough context to choose between them, plus the residual you cannot explain.
 That output is not a global optimization report and must not be presented as one.
 
-### 2. Read-only preflight
+### 3. Read-only preflight
 
 Detect which authenticated evidence sources are actually available, then present a capability
 matrix: source and access method, accessible period and grain, expected contribution, and — the
@@ -129,7 +179,7 @@ instead. Never install a dependency or create infrastructure to complete an asse
 Read `references/data-sources.md` at this point. It carries source precedence, what each source can
 and cannot support, and the pricing-join rules.
 
-### 3. Evidence and baseline
+### 4. Evidence and baseline
 
 Calculate the current baseline, then replay it to the user before discussing any saving:
 
@@ -148,7 +198,7 @@ should have included. Savings measured against a baseline nobody accepted are un
 precisely the way the replay exists to prevent. Put the revised total back, say what moved it and by
 how much, and agree the boundary again before continuing.
 
-### 4. Opportunity selection
+### 5. Opportunity selection
 
 Apply only practices relevant to the confirmed scope. Read `references/opportunity-catalog.md` for
 the practice taxonomy and price baseline, then exactly one file from `references/opportunities/`,
@@ -235,6 +285,11 @@ a null against the row's vintage: a recent row means genuinely unset, an older r
 Never report "no schedule" from a null on an old row.
 
 ## Reaching Databricks
+
+The access route the user chose in step 1 decides the identity and the transport; the rungs below
+decide what each source can support. On the service-principal route the transport is the MCP
+server. On the personal-account route it is the Databricks CLI, as the person, and the same source
+rules apply.
 
 Rung 1 is the Databricks-managed SQL MCP server at `https://<workspace-hostname>/api/2.0/mcp/sql`.
 Use `execute_sql_read_only` for every query and `poll_sql_result` for anything that returns

@@ -43,19 +43,33 @@ def test_read_tools_are_allowed(refuse_writes, tool):
 @pytest.mark.parametrize(
     "command",
     [
-        "databricks clusters list",
         "dbsp tokens create",
-        "cd /tmp && databricks jobs list",
         "echo hi; dbsp auth describe",
+        "ls | dbsp auth token",
+        "set -e\ndbsp tokens list",
+    ],
+)
+def test_service_principal_wrapper_is_denied_in_any_segment(refuse_writes, command):
+    """`dbsp` belongs to neither route, so it is refused wherever it appears as a command."""
+    decision, reason = refuse_writes.decide("Bash", {"command": command})
+    assert decision == "deny"
+    assert "dbsp" in reason
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "databricks clusters list",
+        "cd /tmp && databricks jobs list",
         "ls | databricks fs cp -",
         "set -e\ndatabricks warehouses list",
     ],
 )
-def test_databricks_cli_is_denied_in_any_segment(refuse_writes, command):
-    """The CLI is refused at the start of the line and after ; & | or a newline."""
+def test_databricks_cli_asks_in_any_segment(refuse_writes, command):
+    """The CLI is the personal-account route's transport, so every call asks the user first."""
     decision, reason = refuse_writes.decide("Bash", {"command": command})
-    assert decision == "deny"
-    assert "databricks" in reason or "dbsp" in reason
+    assert decision == "ask"
+    assert "databricks" in reason
 
 
 @pytest.mark.parametrize(
@@ -80,12 +94,21 @@ def test_unrelated_tools_pass_through(refuse_writes):
 
 def test_main_emits_decision_json_and_exits_zero(refuse_writes, monkeypatch, capsys):
     """A denial travels in the stdout JSON, with exit 0, per Claude Code's hook contract."""
-    event = {"tool_name": "Bash", "tool_input": {"command": "databricks clusters delete x"}}
+    event = {"tool_name": "Bash", "tool_input": {"command": "dbsp tokens create"}}
     monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(event)))
     assert refuse_writes.main() == 0
     out = json.loads(capsys.readouterr().out)
     assert out["hookSpecificOutput"]["permissionDecision"] == "deny"
     assert out["hookSpecificOutput"]["hookEventName"] == "PreToolUse"
+
+
+def test_main_emits_ask_for_the_cli(refuse_writes, monkeypatch, capsys):
+    """The CLI travels the same JSON contract, carrying `ask` rather than `deny`."""
+    event = {"tool_name": "Bash", "tool_input": {"command": "databricks clusters list"}}
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(event)))
+    assert refuse_writes.main() == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["hookSpecificOutput"]["permissionDecision"] == "ask"
 
 
 def test_main_is_silent_when_it_has_no_opinion(refuse_writes, monkeypatch, capsys):

@@ -23,7 +23,7 @@ decides on.
 **Claude Code only, for the time being.** The skill itself is Markdown — `skills/ducat/SKILL.md`
 and its `references/` — and nothing in it is structurally tied to one harness. Everything around it
 is Claude Code's plugin surface: the `.mcp.json` that connects it to Databricks and the
-`hooks/hooks.json` that denies the tools it must not use. No other harness has been tried.
+`hooks/hooks.json` that rules on the tools it reaches for. No other harness has been tried.
 
 ## Status
 
@@ -133,7 +133,7 @@ ducat/
 │           └── proposal-contract.md
 ├── hooks/
 │   ├── hooks.json                  ← runs the hook before the tools it governs
-│   └── refuse-writes.py            ← denies the read-write tool and the CLI, see below
+│   └── refuse-writes.py            ← denies the read-write tool, asks before the CLI
 ├── .mcp.json                       ← the connection to the Databricks SQL MCP server
 ├── docs/                           ← how it was designed and how to connect it
 │   ├── README.md                   ← what each document is for
@@ -180,10 +180,19 @@ one warehouse. Every write it attempts is refused by the platform, whatever the 
 **Enforced by configuration.** A plugin cannot ship permission rules, so
 [`hooks/hooks.json`](hooks/hooks.json) runs [`hooks/refuse-writes.py`](hooks/refuse-writes.py)
 before every `databricks-sql` tool and every Bash command. It denies the read-write MCP tool
-`execute_sql` and the Databricks CLI outright — the package reads everything through SQL and needs
-no CLI — and it approves `execute_sql_read_only` and `poll_sql_result`, so a confirmed scope is not
-re-asked per query. This applies only where the plugin is loaded, and no static rule catches an
-alias someone invents.
+`execute_sql`, and `dbsp`, the service-principal wrapper, since that identity reaches a workspace
+through the MCP server. It approves `execute_sql_read_only` and `poll_sql_result`, so a confirmed
+scope is not re-asked per query.
+
+It does not deny `databricks`. On the personal-account route the CLI is the transport, so every
+direct call asks the user, after the route warning in
+[`SKILL.md`](skills/ducat/SKILL.md) — and unlike a permission rule, the hook carries its reason
+with the decision. The skill is told to stop on a refusal that arrives with no prompt, since that
+means a deny rule is in force somewhere, rather than work around it.
+
+This applies only where the plugin is loaded, and it sees only the command string: no static rule
+catches an alias someone invents, and a script that shells out to the CLI passes unseen. On that
+route the user's own permissions, and nothing else, are the boundary.
 
 ### Other limits
 
