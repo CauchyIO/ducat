@@ -133,9 +133,11 @@ one warehouse. Every write it attempts is refused by the platform, whatever the 
 **Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies the
 read-write MCP tool outright, and `dbsp`, the service-principal wrapper, since that identity's
 route is the MCP server. It does not deny `databricks`: on the personal-account route the CLI is
-the transport, and `databricks` is listed under `ask`, so every direct call prompts the user even in
-auto mode, after the route warning in `SKILL.md`. A permission rule carries no reason text, which
-is why that warning lives in the prompt. This applies only where those settings load, and it sees
+the transport, and `databricks` is listed under `ask`, so every direct call prompts the user after
+the route warning in `SKILL.md`. In auto mode there is no prompt to give, and an `ask` rule refuses
+instead, so the personal-account route needs a session mode that can ask; the skill is told to stop
+on a promptless refusal rather than work around it. A permission rule carries no reason text, which
+is why the warning lives in the prompt. This applies only where those settings load, and it sees
 only the command string: a script that shells out to the CLI passes it unseen, which is why on this
 route the user's own permissions, and nothing else, are the boundary.
 
