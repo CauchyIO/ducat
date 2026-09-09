@@ -133,10 +133,11 @@ one warehouse. Every write it attempts is refused by the platform, whatever the 
 **Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies the
 read-write MCP tool outright, and `dbsp`, the service-principal wrapper, since that identity's
 route is the MCP server. It does not deny `databricks`: on the personal-account route the CLI is
-the transport, and every `databricks` command passes Claude Code's ordinary permission prompt, so
-the user approves each one, or the session, after the route warning in `SKILL.md`. A permission
-rule carries no reason text, which is why that warning lives in the prompt. This applies only where
-those settings load, and no static rule catches an alias someone invents.
+the transport, and `databricks` is listed under `ask`, so every direct call prompts the user even in
+auto mode, after the route warning in `SKILL.md`. A permission rule carries no reason text, which
+is why that warning lives in the prompt. This applies only where those settings load, and it sees
+only the command string: a script that shells out to the CLI passes it unseen, which is why on this
+route the user's own permissions, and nothing else, are the boundary.
 
 ### Other limits
 
