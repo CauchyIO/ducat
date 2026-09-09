@@ -47,7 +47,10 @@ different authorization.
 
 ```mermaid
 flowchart TD
-  START([Invoke]) --> Q{Scope named<br/>in the request?}
+  START([Invoke]) --> ROUTE{{Choose access route<br/>explicit, safe default}}
+  ROUTE -->|service principal| Q{Scope named<br/>in the request?}
+  ROUTE -->|personal account| BRIEF[CLI briefing<br/>explicit consent]
+  BRIEF --> Q
 
   Q -->|no| OFFER[Offer coarse driver scan]
   OFFER -->|explicit confirmation| SCAN[Bounded read-only scan<br/>by billing origin product]
@@ -55,10 +58,7 @@ flowchart TD
   CAND --> GATE
 
   Q -->|yes| GATE{{Confirm scope}}
-  GATE -->|authorises targeted reads| ROUTE{{Choose access route<br/>explicit, safe default}}
-  ROUTE -->|service principal| PRE[Read-only preflight<br/>capability matrix]
-  ROUTE -->|personal account| BRIEF[CLI briefing<br/>explicit consent]
-  BRIEF --> PRE
+  GATE -->|authorises targeted reads| PRE[Read-only preflight<br/>capability matrix]
   PRE --> CLAIM[/Claim gates<br/>absent evidence forbids named claims/]
   CLAIM --> ATTR{{Confirm attribution boundary}}
   ATTR --> BASE[Establish baseline]
@@ -84,41 +84,10 @@ approval authorises — approval to confirm a scope is not approval to recommend
 branch rejoins at **Confirm scope** rather than bypassing it, so no path reaches a read without a
 confirmed scope.
 
-### 1. Scope gate
+### 1. Access route
 
-Identify what the user wants to optimize before touching a tool.
-
-If the invocation already names a scope, restate it for confirmation — do not ask again. Someone who
-said "our customer-360 pipeline" and gets asked "what would you like to assess?" has learned you
-were not listening.
-
-Gather only what is missing and could change the assessment:
-
-- scope type, named objects, owners;
-- analysis period;
-- business outcome and service-level constraints;
-- workspaces, regions, environments;
-- known ownership, attribution rules, material changes during the period.
-
-Check `usage_metadata` for a native identifier before proposing any attribution method — where the
-billing record already names the object, that is the strongest population and no mapping is needed.
-
-Where tags are unreliable, build a confirmed mapping from jobs, pipelines, clusters, warehouses,
-endpoints, catalogs, workspaces, or identities to the scope. Label each mapping **native**,
-**manual**, or **inferred**, and keep unmatched spend visible as **unallocated**.
-
-Never ask for a generic cost export instead of a scope. Give examples relevant to what the user
-already said.
-
-**If the user cannot name a scope,** offer a limited scan of major cost drivers and wait. Do not run
-it on assumed consent. Group it by `billing_origin_product`, not by SKU — background services bill
-through another service's SKU and would otherwise vanish into the jobs line. Return a shortlist of
-candidate scopes with enough context to choose between them, plus the residual you cannot explain.
-That output is not a global optimization report and must not be presented as one.
-
-### 2. Access route
-
-Two routes reach a workspace, and the user chooses one of them before the skill reads anything.
+Two routes reach a workspace, and the user chooses one of them before anything else happens —
+before the scope question, and so before the coarse driver scan, which reads evidence too.
 The route decides the identity and what bounds it, not the evidence: both run the same packaged
 queries.
 
@@ -158,6 +127,38 @@ On the personal-account route every direct `databricks` call is meant to prompt 
 refused with no prompt, the session is running in a mode that cannot ask, and the refusal is the
 boundary working as designed: say so, name what the user can run themselves, and stop. Never reach
 the CLI another way — a script, another interpreter, a different shape of the same command.
+
+### 2. Scope gate
+
+Identify what the user wants to optimize before touching a tool.
+
+If the invocation already names a scope, restate it for confirmation — do not ask again. Someone who
+said "our customer-360 pipeline" and gets asked "what would you like to assess?" has learned you
+were not listening.
+
+Gather only what is missing and could change the assessment:
+
+- scope type, named objects, owners;
+- analysis period;
+- business outcome and service-level constraints;
+- workspaces, regions, environments;
+- known ownership, attribution rules, material changes during the period.
+
+Check `usage_metadata` for a native identifier before proposing any attribution method — where the
+billing record already names the object, that is the strongest population and no mapping is needed.
+
+Where tags are unreliable, build a confirmed mapping from jobs, pipelines, clusters, warehouses,
+endpoints, catalogs, workspaces, or identities to the scope. Label each mapping **native**,
+**manual**, or **inferred**, and keep unmatched spend visible as **unallocated**.
+
+Never ask for a generic cost export instead of a scope. Give examples relevant to what the user
+already said.
+
+**If the user cannot name a scope,** offer a limited scan of major cost drivers and wait. Do not run
+it on assumed consent. Group it by `billing_origin_product`, not by SKU — background services bill
+through another service's SKU and would otherwise vanish into the jobs line. Return a shortlist of
+candidate scopes with enough context to choose between them, plus the residual you cannot explain.
+That output is not a global optimization report and must not be presented as one.
 
 ### 3. Read-only preflight
 
@@ -282,7 +283,7 @@ Never report "no schedule" from a null on an old row.
 
 ## Reaching Databricks
 
-The access route the user chose in step 2 decides the identity and the transport; the rungs below
+The access route the user chose in step 1 decides the identity and the transport; the rungs below
 decide what each source can support. On the service-principal route the transport is the MCP
 server. On the personal-account route it is the Databricks CLI, as the person, and the same source
 rules apply.
