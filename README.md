@@ -131,9 +131,11 @@ that decide what the skill may claim and what counts as a saving. If you want to
 one warehouse. Every write it attempts is refused by the platform, whatever the model intends.
 
 **Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies the
-read-write MCP tool outright. It denies the Databricks CLI too, unconditionally until the consent
-gate for the personal-account route lands; a permission rule carries no reason text, so the warning
-for that route lives in the route prompt in `SKILL.md`, not in the denial. This applies only where
+read-write MCP tool outright, and `dbsp`, the service-principal wrapper, since that identity's
+route is the MCP server. It does not deny `databricks`: on the personal-account route the CLI is
+the transport, and every `databricks` command passes Claude Code's ordinary permission prompt, so
+the user approves each one, or the session, after the route warning in `SKILL.md`. A permission
+rule carries no reason text, which is why that warning lives in the prompt. This applies only where
 those settings load, and no static rule catches an alias someone invents.
 
 ### Other limits

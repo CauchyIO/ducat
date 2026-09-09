@@ -2,7 +2,6 @@
   "permissions": {
     "deny": [
       "mcp__databricks-sql__execute_sql",
-      "Bash(databricks:*)",
       "Bash(dbsp:*)"
     ],
     "allow": [
