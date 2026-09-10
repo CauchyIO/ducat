@@ -12,6 +12,7 @@ Two kinds of documents exist. `docs/` explains **how the skill was designed, how
 | [`connect-mcp-server.md`](connect-mcp-server.md) | Runbook for wiring the client to Databricks | After the principal exists |
 | [`smoke-check.md`](smoke-check.md) | How to prove the evidence path returns defensible figures | After connecting, and whenever a number looks wrong |
 | [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md) | How to reach billed cost and the Azure resources a workspace consumes on its own | Only if list cost is not enough |
+| [`personal-account-route.md`](personal-account-route.md) | The other route: the CLI as yourself, what it needs, what it cannot promise | When the service principal is unavailable, or you chose to read as yourself |
 
 Session transcripts from validation runs are **not here and not committed**. A transcript records everything a run did, credentials in cleartext included, so transcripts stay in a gitignored `transcripts/` at the repository root. What those runs established travels in the Linear issue instead.
 
