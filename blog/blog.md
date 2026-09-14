@@ -6,36 +6,36 @@ Brace yourselves: it is that day of the month again. Your cloud bill has just ar
 * Why is our bill higher this month? 
 * What team or project is driving up the costs? 
 * How can we possibly cut the bill while delivering on our SLAs? 
-* Who of you decided it was a good idea to leave a VM active over the weekend and generate the cloud cost equivalent to leaving the lights on in your house while you go abroad on a month vacation? No judgment (okay, maybe some judgement) 
+* Who of you decided it was a good idea to leave a VM active over the weekend and generate the cloud cost equivalent to leaving the lights on in your house while you go abroad on a month vacation? No judgement (okay, maybe some judgement) 
 
-Most likely you have had to ask or answer at least one of these questions. The good news is: you are not alone! According to a report from 2025, [up to 94% of IT leaders are struggling to understand and optimize these costs](https://news.cision.com/softwareone/r/94--of-it-leaders-struggle-to-optimize-cloud-costs,c4231173). 
+Most likely you have had to ask or answer at least one of these questions. The good news is: you are not alone! According to a report from 2025, [up to 94% of IT leaders are struggling to understand and optimise these costs](https://news.cision.com/softwareone/r/94--of-it-leaders-struggle-to-optimize-cloud-costs,c4231173). 
 
-As many others, [we are aware](https://blog.cauchy.io/p/the-complete-guide-to-databricks) of the current challenges with regards to FinOps in Cauchy. Particularly on Databricks setups, a number of system tables can be used to find relevant conclusions tackling those challenges: identifying major cost drivers and reviewing the platform critically, in the hopes of spotting potential cost optimizations: modifying an auto-shutdown schedule, or choosing a cheaper VM for your ETL jobs, for example. 
+As many others, [we are aware](https://blog.cauchy.io/p/the-complete-guide-to-databricks) of the current challenges with regards to FinOps in Cauchy. Particularly on Databricks setups, a number of system tables can be used to find relevant conclusions tackling those challenges: identifying major cost drivers and reviewing the platform critically, in the hopes of spotting potential cost optimisations: modifying an auto-shutdown schedule, or choosing a cheaper VM for your ETL jobs, for example. 
 
 ## Where LLMs come in 
-We, at Cauchy, as individual data practitioners, know what sources to use, and what considerations to bear in mind, in order to diagnose an overpriced Databricks scope and come up with a cheaper alternative. The challenge we set ourselves building this skill was: can we distil this knowledge into a generalizable approach, which, given a request to optimise a Databricks scope... 
+We, at Cauchy, as individual data practitioners, know what sources to use, and what considerations to bear in mind, in order to diagnose an overpriced Databricks scope and come up with a cheaper alternative. The challenge we set ourselves building this skill was: can we distil this knowledge into a generalisable approach, which, given a request to optimise a Databricks scope... 
 
 * Follows consistently the same user workflow procedure 
-* Review and optimizes Databricks scope settings consistently, using a predefined criterion 
-* Provides consistently a standardized structured output report, tackling every relevant aspect present in the workflow 
+* Review and optimises Databricks scope settings consistently, using a predefined criterion 
+* Provides consistently a standardised structured output report, tackling every relevant aspect present in the workflow 
 
-The three goals above should hold across different user runs, turning the skill workflow into a semi-deterministic cost assessment where the user is prompted to define the constraints of the optimization problem, and the task of reading system tables and extracting conclusions from them is delegated on your choice of Claude model. 
+The three goals above should hold across different user runs, turning the skill workflow into a semi-deterministic cost assessment where the user is prompted to define the constraints of the optimisation problem, and the task of reading system tables and extracting conclusions from them is delegated on your choice of Claude model. 
 
-In this blog post, I will speak about the speak about the approach followed by the skill workflow to first review, then optimize a Databricks setup. I will also mention some limitations of the skill: some we have tackled; others remain open at the moment. 
+In this blog post, I will speak about the speak about the approach followed by the skill workflow to first review, then optimise a Databricks setup. I will also mention some limitations of the skill: some we have tackled; others remain open at the moment. 
 
 Let’s get on with it. 
 
 ## The workflow 
 
 ### Two governing rules for the workflow 
-* Scope confirmation precede analysis: Global optimization is never a valid starting point. Prior to the assessment, user must provide key information about the optimization scope in terms of resources, attribution method, period of analysis, etc. Only then the optimization can be meaningful. 
+* Scope confirmation precede analysis: Global optimisation is never a valid starting point. Prior to the assessment, user must provide key information about the optimisation scope in terms of resources, attribution method, period of analysis, etc. Only then the optimisation can be meaningful. 
 * Read-only workflow: no create, update, start, stop, resize or delete operation is invoked, ever. 
 
 ### Diagram 
 
 ```mermaid
 flowchart TD
-  START(["'Can you optimize my Databricks project?'"]) --> ROUTE{{"Gate 1: Choosing authentication route"}}
+  START(["'Can you optimise my Databricks project?'"]) --> ROUTE{{"Gate 1: Choosing authentication route"}}
   ROUTE -->|"service principal: the platform enforces read-only"| Q{"Did you name<br/>the scope<br/>in the original request?"}
   ROUTE -->|"your own account: only your consent bounds it"| BRIEF["DUCAT briefs you on the risk<br/>and waits for a clear yes"]
   BRIEF --> Q
@@ -83,7 +83,7 @@ flowchart TD
 ### Choosing a scope 
 ### Determining available sources of evidence 
 ### Confirming a baseline 
-### Selecting one or several cost optimization paths 
+### Selecting one or several cost optimisation paths 
 ### Generating report 
 ## An example run 
 Here we illustrate the skill workflow with Steven’s cold run for RDW project. 
