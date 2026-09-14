@@ -23,37 +23,40 @@ your permission before it runs.
 
 ## Prerequisites
 
-**The Databricks CLI, authenticated against the workspace.** Install it per the principal runbook,
-then log in once per workspace:
+Three things, and the second is the one most people lack.
 
-```sh
-databricks auth login --host https://<workspace-hostname> --profile <profile>
-```
+1. **The Databricks CLI, authenticated against the workspace.** Install it per the principal
+   runbook, then log in once per workspace:
 
-`databricks auth profiles` lists what you have and whether each token is still valid. The skill
-presents that list and you pick; it never selects a profile for you, and it never touches a
-production profile you did not name.
+   ```sh
+   databricks auth login --host https://<workspace-hostname> --profile <profile>
+   ```
 
-**Read on the system catalog, held by your own account.** This is the part most people do not have.
-A workspace admin typically holds `MANAGE` on the `system` catalog, which permits administering it
-and reads nothing. Reading needs `USE_CATALOG`, `USE_SCHEMA` and `SELECT`, the same three the
-principal runbook grants to the principal. Check before you start:
+   `databricks auth profiles` lists what you have and whether each token is still valid. The skill
+   presents that list and you pick; it never selects a profile for you, and it never touches a
+   production profile you did not name.
 
-```sql
-SELECT count(*) AS rows FROM system.billing.usage WHERE usage_date >= current_date() - 7
-```
+2. **Read on the system catalog, held by your own account.** A workspace admin typically holds
+   `MANAGE` on the `system` catalog, which permits administering it and reads nothing. Reading
+   needs `USE_CATALOG`, `USE_SCHEMA` and `SELECT`, the same three the principal runbook grants to
+   the principal. Check before you start:
 
-**Passes when** it returns a count. `INSUFFICIENT_PRIVILEGES` on `USE SCHEMA` means the grant is
-missing. Granting it is a write in the workspace, and the skill will not do it for you — run the
-principal runbook's catalog grant with your own account as the principal, in your own admin
-session, and weigh the same caveat: the catalog-level grant is wider than the eleven tables the
-skill reads and includes the audit log.
+   ```sql
+   SELECT count(*) AS rows FROM system.billing.usage WHERE usage_date >= current_date() - 7
+   ```
 
-**A SQL warehouse you may use.** The MCP server picks one for the principal; on this route the
-statement names it. `CAN_USE` on any warehouse is enough. The skill lists them and takes one that is
-running or can auto-resume, and tells you that assessment queries incur ordinary warehouse compute.
+   The check passes when it returns a count. `INSUFFICIENT_PRIVILEGES` on `USE SCHEMA` means the
+   grant is missing. Granting it is a write in the workspace, and the skill will not do it for
+   you: run the principal runbook's catalog grant with your own account as the principal, in your
+   own admin session, and weigh the same caveat, that the catalog-level grant is wider than the
+   eleven tables the skill reads and includes the audit log.
 
-## The command surface
+3. **A SQL warehouse you may use.** The MCP server picks one for the principal; on this route the
+   statement names it. `CAN_USE` on any warehouse is enough. The skill lists them and takes one
+   that is running or can auto-resume, and tells you that assessment queries incur ordinary
+   warehouse compute.
+
+## The three CLI calls
 
 Three CLI calls carry the whole route. Every one is a direct `databricks` command, so before each
 one runs Claude Code shows you the exact command and waits for you to approve or refuse it.
@@ -81,14 +84,11 @@ databricks api post /api/2.0/sql/statements --profile <profile> --json '{
 databricks api get /api/2.0/sql/statements/<statement-id> --profile <profile>
 ```
 
-Why this surface and not a notebook, a SQL connector, or a Python script: it adds no dependency,
-there is no code to trust, and the query text is identical on both routes, so a figure from the CLI
-route and one from the MCP route can be compared line for line. That comparison is what proves the
-route, and it is still owed for one confirmed scope.
-
-Query shape is not optional here either: aggregate, bound the period, cap the rows, per
-`references/data-sources.md`. The API returns at most the rows the statement asks for, and a
-statement that returns `PENDING` past the wait is polled rather than re-run.
+These three calls, and not a notebook, a SQL connector or a Python script, because they add no
+dependency and put no code between you and the query: the statement-execution API takes the same
+SQL text the MCP route runs, so a figure from the CLI route and one from the MCP route can be
+compared line for line. That comparison is what proves the route, and it is still owed for one
+confirmed scope.
 
 ## What the permission prompt does, and what it cannot see
 
