@@ -36,6 +36,43 @@ Let’s get on with it.
 ### Diagram 
 
 ```mermaid
+flowchart LR
+  START(["'Can you optimize my Databricks project?'"]) --> G1{{"Gate 1: You choose the authentication route"}}
+  G1 --> G2{{"Gate 2: You choose and confirm the scope"}}
+  G2 --> G3{{"Gate 3: You agree what counts as this scope's cost"}}
+  G3 --> G4{{"Gate 4: You confirm the baseline matches what you know"}}
+  G4 -->|"no, something is off"| G3
+  G4 -->|"yes"| G5{{"Gate 5: You choose which cost-saving cards go forward"}}
+  G5 --> STOP(["DUCAT hands off the design.<br/>Nothing in your workspace has changed"])
+
+  classDef gate fill:#DDEEEB,stroke:#0F766E,stroke-width:1.5px,color:#0B3D39;
+  classDef term fill:#12212B,stroke:#12212B,color:#F1F4F6;
+  class G1,G2,G3,G4,G5 gate;
+  class START,STOP term;
+```
+
+### Choosing an authentication route 
+### Choosing a scope 
+### Determining available sources of evidence 
+### Confirming a baseline 
+### Selecting one or several cost optimization paths 
+### Generating report 
+## An example run 
+Here we illustrate the skill workflow with Steven’s cold run for RDW project. 
+
+#### The safeguards 
+Here we speak about staleness tests for references. 
+
+#### Limitations and aspects to consider 
+- Read-only enforcements in the skill instructions are bypassed when user pushes hard enough.
+- Lack of implementation of eval suite: testing of the skill has been mostly manual and we lack a scoreboard that rates the output of the skill,
+#### Conclusions 
+
+## Appendix 
+
+### Full workflow diagram 
+
+```mermaid
 flowchart TD
   START(["'Can you optimize my Databricks project?'"]) --> ROUTE{{"Gate 1: Choosing authentication route"}}
   ROUTE -->|"service principal: the platform enforces read-only"| Q{"Did you name<br/>the scope<br/>in the original request?"}
@@ -80,20 +117,3 @@ flowchart TD
   class T1,T2,T3,T4,T5 plain;
   style KEY fill:#DDEEEB,fill-opacity:0.5,stroke:#0F766E,stroke-dasharray:2 4,color:#0B3D39;
 ```
-
-### Choosing an authentication route 
-### Choosing a scope 
-### Determining available sources of evidence 
-### Confirming a baseline 
-### Selecting one or several cost optimization paths 
-### Generating report 
-## An example run 
-Here we illustrate the skill workflow with Steven’s cold run for RDW project. 
-
-#### The safeguards 
-Here we speak about staleness tests for references. 
-
-#### Limitations and aspects to consider 
-- Read-only enforcements in the skill instructions are bypassed when user pushes hard enough.
-- Lack of implementation of eval suite: testing of the skill has been mostly manual and we lack a scoreboard that rates the output of the skill,
-#### Conclusions 
