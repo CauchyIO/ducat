@@ -37,6 +37,11 @@ cheapest evidence that credential, warehouse, transport and tables all work toge
 **5. Install the skill.** Symlink the repository into your skills directory; the root
 [`README`](../README.md) has the command and additional instructions.
 
+**If the service-principal route is unavailable,** or you choose to read as yourself: the skill
+offers the personal-account route through the Databricks CLI, with a warning, before it reads
+anything. That route has no platform boundary and its own prerequisites. See
+[`personal-account-route.md`](personal-account-route.md).
+
 **If Azure cost is in scope:** map each workspace to its subscription and managed resource
 group. Databricks cannot see per-workspace networking cost, and that is where an idle workspace
 hides. See [`map-workspaces-to-azure.md`](map-workspaces-to-azure.md).
