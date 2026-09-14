@@ -1,25 +1,27 @@
 # Assess and optimize your Databricks setup with this Claude skill 
 *Databricks Usage and Costs Assessment Tool (DUCAT) reviews your current platform and suggests improvements to make it cost less*
 
-Brace yourselves: it is that day of the month again. Your cloud bill has just arrived and with it, a myriad of questions no one is able to properly answer: 
+Brace yourselves: it is that day of the month again. Your cloud bill has just arrived and, with it, a myriad of questions no one is able to properly answer: 
 
 * Why is our bill higher this month? 
 * What team or project is driving up the costs? 
-* How can we possibly cut the bill while delivering on our SLAs? 
-* Who of you decided it was a good idea to leave a VM active over the weekend and generate the cloud cost equivalent to leaving the lights on in your house while you go abroad on a month vacation? No judgment (okay, maybe some judgment) 
+* How can we possibly cut the bill while delivering on our service level agreements? 
+* Who of you decided it was a good idea to leave a virtual machine (VM) active over the weekend and generate the cloud cost equivalent to leaving the lights on in your house while you go abroad on a month vacation? No judgment (okay, maybe some judgment). 
 
-Most likely you have had to ask or answer at least one of these questions. The good news is: you are not alone! According to a report from 2025, [up to 94% of IT leaders are struggling to understand and optimize these costs](https://news.cision.com/softwareone/r/94--of-it-leaders-struggle-to-optimize-cloud-costs,c4231173). 
+Most likely, you have had to ask or answer at least one of these questions. The good news is you are not alone! According to a report from 2025, [up to 94% of IT leaders are struggling to understand and optimize these costs](https://news.cision.com/softwareone/r/94--of-it-leaders-struggle-to-optimize-cloud-costs,c4231173). 
 
-As many others, [we are aware](https://blog.cauchy.io/p/the-complete-guide-to-databricks) of the current challenges with regards to FinOps in Cauchy. Particularly on Databricks setups, a number of system tables can be used to find relevant conclusions tackling those challenges: identifying major cost drivers and reviewing the platform critically, in the hopes of spotting potential cost optimizations: modifying an auto-shutdown schedule, or choosing a cheaper VM for your ETL jobs, for example. 
+Like many others, we at Cauchy have felt these challenges first-hand, and we have [written before](https://blog.cauchy.io/p/the-complete-guide-to-databricks) about how we practice FinOps, the discipline of managing cloud spend jointly between engineering and finance. On Databricks in particular, a handful of system tables hold most of the answers. They let you identify the major cost drivers and review the platform critically, looking for optimizations such as tightening an auto-termination schedule or choosing a cheaper VM for your extract, transform, and load (ETL) jobs. 
 
 ## Where LLMs come in 
-We, at Cauchy, as individual data practitioners, know what sources to use, and what considerations to bear in mind, in order to diagnose an overpriced Databricks scope and come up with a cheaper alternative. The challenge we set ourselves building this skill was: can we distill this knowledge into a generalizable approach, which, given a request to optimize a Databricks scope... 
+As individual data practitioners at Cauchy, we know what sources to explore and what considerations to bear in mind in order to diagnose Databricks overspending and come up with cheaper alternatives. However, this is not as simple as it seems, even for experienced Databricks users and especially for teams that do not have Databricks specialists on hand. Thus, we set out to create a skill that is able to distill Databricks cost optimization knowledge into a generalizable approach that can be used by both experienced engineers and newcomers to the platform alike. 
 
-* Follows consistently the same user workflow procedure 
-* Review and optimizes Databricks scope settings consistently, using a predefined criterion 
-* Provides consistently a standardized structured output report, tackling every relevant aspect present in the workflow 
+One of the primary goals when creating the skill was that it adhere to the following standards when given a request to optimize a Databricks scope: 
 
-The three goals above should hold across different user runs, turning the skill workflow into a semi-deterministic cost assessment where the user is prompted to define the constraints of the optimization problem, and the task of reading system tables and extracting conclusions from them is delegated on your choice of Claude model. 
+* Consistently follow the same user workflow procedure. 
+* Review and optimize Databricks scope settings consistently against predefined criteria. 
+* Consistently provide a standardized, structured report covering every relevant aspect of the workflow. 
+
+The three standards should hold across different user runs, turning the skill workflow into a semi-deterministic cost assessment where the user is prompted to define the constraints of the optimization problem, and the task of reading system tables and extracting conclusions from them is delegated to your choice of Claude model. 
 
 In this blog post, I will speak about the speak about the approach followed by the skill workflow to first review, then optimize a Databricks setup. I will also mention some limitations of the skill: some we have tackled; others remain open at the moment. 
 
