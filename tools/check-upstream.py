@@ -69,9 +69,7 @@ class Source:
 
 # The starting authorities `references/data-sources.md` names, which that file asks a
 # reader to "follow ... when Microsoft moves them", plus the two licensed sources
-# `NOTICE.md` records. Signals pinned 2026-09-07; the four Azure Databricks system-table
-# articles were re-read and re-pinned 2026-09-15, after one content commit on 2026-09-11 moved
-# all four at once.
+# `NOTICE.md` records. `references/freshness.md` says when each was last re-read and what moved.
 SOURCES: tuple[Source, ...] = (
     Source(
         id="learn-system-tables-overview",
