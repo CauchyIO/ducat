@@ -69,34 +69,36 @@ class Source:
 
 # The starting authorities `references/data-sources.md` names, which that file asks a
 # reader to "follow ... when Microsoft moves them", plus the two licensed sources
-# `NOTICE.md` records. Signals pinned 2026-09-07.
+# `NOTICE.md` records. Signals pinned 2026-09-07; the four Azure Databricks system-table
+# articles were re-read and re-pinned 2026-09-15, after one content commit on 2026-09-11 moved
+# all four at once.
 SOURCES: tuple[Source, ...] = (
     Source(
         id="learn-system-tables-overview",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/usage/system-tables",
-        signal="f684e9e50a753ff1341f9cd3adc12e0af4881c4a",
+        signal="276403b28e7dbb9a17877d26563507d28270bf56",
         distils_into=("references/data-sources.md",),
     ),
     Source(
         id="learn-billing-system-table",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/billing",
-        signal="9d69f24dbb22d6ad38df4b95845a050fb1ee59bd",
+        signal="276403b28e7dbb9a17877d26563507d28270bf56",
         distils_into=("references/data-sources.md",),
     ),
     Source(
         id="learn-pricing-system-table",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/pricing",
-        signal="0df2cf97dfb033d25e332ccfd462c803b0dd7619",
+        signal="276403b28e7dbb9a17877d26563507d28270bf56",
         distils_into=("references/data-sources.md", "references/opportunity-catalog.md"),
     ),
     Source(
         id="learn-jobs-cost",
         kind="learn-page",
         url="https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/jobs-cost",
-        signal="0df2cf97dfb033d25e332ccfd462c803b0dd7619",
+        signal="276403b28e7dbb9a17877d26563507d28270bf56",
         distils_into=("references/data-sources.md",),
     ),
     Source(

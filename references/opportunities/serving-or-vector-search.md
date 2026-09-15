@@ -6,9 +6,10 @@ Practices: `usage-optimization`, `architecting-workload-placement`, `unit-econom
 
 Both bill in more than one component, which is where assessments usually go wrong.
 
-- **Vector Search** bills endpoint serving on `SERVERLESS_REAL_TIME_INFERENCE` **and** index sync on
-  `JOBS_SERVERLESS_COMPUTE`, both under origin `VECTOR_SEARCH`. An index synced continuously against
-  an endpoint serving few queries spends most of its cost on maintenance nobody asked for.
+- **Vector Search**, now AI Search, bills endpoint serving on `SERVERLESS_REAL_TIME_INFERENCE`
+  **and** index sync on `JOBS_SERVERLESS_COMPUTE`, both under origin `VECTOR_SEARCH`. An index synced
+  continuously against an endpoint serving few queries spends most of its cost on maintenance nobody
+  asked for.
 - **Model serving** splits between custom inference and the foundation model SKUs. Foundation model
   pricing is published per 1M tokens; do not carry a flat per-DBU figure into a counterfactual.
 - **Lakebase** bills compute, storage in DSUs, and background maintenance. Snapshot storage became

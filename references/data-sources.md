@@ -51,17 +51,20 @@ on a mutable vendor fact.
 | Practice guidance | `opportunity-catalog.md` plus current official docs | Mechanisms, constraints, current product behaviour |
 | Business constraints | User confirmation | Required outcomes, risk tolerance, ownership, feasibility |
 
-Starting authorities — follow successor pages when Microsoft moves them, and record retrieval dates:
+Starting authorities, last re-read 2026-09-15 — follow successor pages when Microsoft moves them,
+and record retrieval dates:
 
 - [Monitor costs using Azure Databricks system tables](https://learn.microsoft.com/en-us/azure/databricks/admin/usage/system-tables)
 - [Billable usage system table reference](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/billing)
 - [Pricing system table reference](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/pricing)
-- [Monitor job costs and performance](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/jobs-cost)
+- [Monitor job costs & performance with system tables](https://learn.microsoft.com/en-us/azure/databricks/admin/system-tables/jobs-cost)
 - [Actual and amortized Azure cost data](https://learn.microsoft.com/en-us/azure/cost-management-billing/manage/review-subscription-billing)
 - [Azure Retail Prices API](https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices)
 
-**System tables have no SLA.** Data typically lands hours after the usage. They are an accounting
-source, not an operational one — never present a system-table figure as real-time.
+**System tables have no SLA.** Records typically land within 12 hours of the usage, and later for a
+new workspace; that window covers original records only, and a correction arrives on its own clock.
+They are an accounting source, not an operational one — never present a system-table figure as
+real-time.
 
 **Azure Cost Management throttles hard.** A second query within a minute returns HTTP 429. Put every
 grouping you need into one query rather than looping over scopes, and back off in minutes rather
@@ -217,15 +220,15 @@ Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment �
 | `SQL` | `SQL_COMPUTE`, `SQL_PRO_COMPUTE`, `SERVERLESS_SQL_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Warehouse compute; JOBS_SERVERLESS for DLT-backed streaming tables and MVs |
 | `DLT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Classic DLT on DLT SKUs; serverless DLT on JOBS_SERVERLESS |
 | `MODEL_SERVING` | `SERVERLESS_REAL_TIME_INFERENCE`, plus one SKU per foundation-model vendor: `ANTHROPIC_`, `OPENAI_`, `GEMINI_`, `DEEPSEEK_`, `MOONSHOT_`, `THINKING_MACHINES_` and `ZHIPU_MODEL_SERVING` | Custom models on the inference SKU; foundation models have their own. All bill per DBU — pay-per-token endpoints are a different SKU family. The vendor list grows; enumerate it rather than trusting this one |
-| `VECTOR_SEARCH` | `SERVERLESS_REAL_TIME_INFERENCE` + `JOBS_SERVERLESS_COMPUTE` | **Dual billing**: endpoint serving plus background index sync |
-| `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE`, `DATABRICKS_STORAGE`, plus background maintenance on `JOBS_SERVERLESS_COMPUTE` | **Triple component**: compute, storage in DSUs, background jobs |
+| `VECTOR_SEARCH` | `SERVERLESS_REAL_TIME_INFERENCE` + `JOBS_SERVERLESS_COMPUTE` | **Dual billing**: endpoint serving plus background index sync. The product is now documented as AI Search; the origin value has not moved |
+| `DATABASE` / `LAKEBASE` | `DATABASE_SERVERLESS_COMPUTE`, `DATABRICKS_STORAGE`, plus background maintenance on `JOBS_SERVERLESS_COMPUTE` | **Triple component**: compute, storage in DSUs, background jobs. `DATABASE` is the original provisioned Lakebase and `LAKEBASE` the current one — expect both in an estate that predates the split |
 | `APPS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Lakehouse Apps |
 | `PREDICTIVE_OPTIMIZATION` | `JOBS_SERVERLESS_COMPUTE` | Background service, per catalog/schema |
 | `DATA_QUALITY_MONITORING` | `JOBS_SERVERLESS_COMPUTE` | **Renamed** from `LAKEHOUSE_MONITORING` (~Feb 2026); old value now legacy |
 | `AI_FUNCTIONS` | `SERVERLESS_REAL_TIME_INFERENCE` | Only `ai_parse_document`, `ai_extract`, `ai_classify`. **`ai_query` bills under `MODEL_SERVING`** as batch inference |
 | `AI_GATEWAY`, `AGENT_EVALUATION` | `SERVERLESS_REAL_TIME_INFERENCE` | Own origin values, inference SKU |
 | `DATA_CLASSIFICATION`, `FINE_GRAINED_ACCESS_CONTROL`, `BASE_ENVIRONMENTS` | `JOBS_SERVERLESS_COMPUTE` | Background platform services |
-| `ONLINE_TABLES`, `LAKEFLOW_CONNECT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Bill through the pipeline underneath |
+| `ONLINE_TABLES`, `LAKEFLOW_CONNECT` | `DLT_CORE_COMPUTE`, `DLT_PRO_COMPUTE`, `DLT_ADVANCED_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Bill through the pipeline underneath; online tables are legacy |
 | `AI_RUNTIME` | `ALL_PURPOSE_SERVERLESS_COMPUTE`, `JOBS_SERVERLESS_COMPUTE` | Serverless GPU pool |
 | `FOUNDATION_MODEL_TRAINING` | `MODEL_TRAINING` | Fine-tuning |
 | `NOTEBOOKS` | `ALL_PURPOSE_SERVERLESS_COMPUTE` | Distinct origin from `INTERACTIVE` |
@@ -233,9 +236,10 @@ Observed mapping (matrix March 2026, corrected by the 2026-07-01 reassessment �
 | `NETWORKING` | `INTERNET_EGRESS_*`, `INTER_REGION_EGRESS_*`, `DATABRICKS_INTER_AZ_EGRESS`, `DATABRICKS_INTER_CONTINENTAL_EGRESS_*`, `PUBLIC_CONNECTIVITY_DATA_PROCESSED`, `PRIVATE_CONNECTIVITY_*` | Per-GB by route; per-hour for private endpoints |
 | `GENIE` | `GENIE_FREE_USAGE` | Metered DBUs; underlying SQL compute still billed on top. Carries no `list_prices` row — see below |
 
-Other origins to expect: `DEFAULT_STORAGE`, `AGENT_BRICKS`, `DATA_SHARING`,
-`EXTERNAL_COMPATIBILITY`. Enumerate what is actually present rather than assuming this list is
-closed — always start a scan with `SELECT DISTINCT billing_origin_product`.
+Other origins to expect: `DEFAULT_STORAGE`, `AGENT_BRICKS`, `SUPERVISOR_AGENT`, `DATA_SHARING`
+(OpenSharing, formerly Delta Sharing), `EXTERNAL_COMPATIBILITY`, `FEATURE_STORE` and
+`LAKEHOUSE_REAL_TIME`. Enumerate what is actually present rather than assuming this list is closed —
+always start a scan with `SELECT DISTINCT billing_origin_product`.
 
 ### Usage that carries no price
 
@@ -254,9 +258,12 @@ disappear: a SKU dropped from the total takes its quantity with it, and the base
 wrong rather than visibly incomplete.
 
 Newer attribution surfaces worth using: `usage_type`, `product_features` (`jobs_tier`, `sql_tier`,
-`dlt_tier`, `is_serverless`, `is_photon`, `serving_type`), `identity_metadata`, and `usage_metadata`
-subfields including `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`, `notebook_id`,
-`app_name`, `database_instance_id`, `budget_policy_id`.
+`dlt_tier`, `is_serverless`, `is_photon`, `serving_type`, and `performance_target`, which records
+whether a serverless job or pipeline ran performance-optimized or standard), `identity_metadata`,
+and `usage_metadata` subfields including `job_id`, `warehouse_id`, `dlt_pipeline_id`,
+`endpoint_name`, `notebook_id`, `app_name`, `database_instance_id` and `usage_policy_id`.
+`budget_policy_id` is the same value under its old name and is documented as deprecated; read the
+new one.
 
 ## Tying a cost to the scope that caused it
 
@@ -272,7 +279,7 @@ GROUP BY ALL
 ```
 
 The subfields worth reaching for are `job_id`, `warehouse_id`, `dlt_pipeline_id`, `endpoint_name`,
-`app_name`, `notebook_id` and `database_instance_id`, among some fifty in total. Where one of them
+`app_name`, `notebook_id` and `database_instance_id`, among some forty in total. Where one of them
 covers the scope you are assessing, that is native attribution and the platform has already done the
 work for you. Query for it first, offer it first, and label it native.
 
@@ -305,6 +312,8 @@ scope, say so in the assessment rather than reporting the figure as though it we
 | Pool tag key collides with cluster tag key | Pool tag wins; the cluster tag is silently dropped on cloud resources |
 | Custom tag key collides with a default | Custom key is prefixed `x_` |
 | Job runs on all-purpose compute | No `job_id` on the billing record. Per-job attribution is impossible on shared all-purpose compute — this is a structural gap, not a query problem |
+| All-purpose compute, attributed by identity | `identity_metadata.run_as` names whoever created the compute, not its owner. Attribute to the owner through `system.compute.clusters.owned_by`, joined on `cluster_id` |
+| Serverless private-endpoint networking | Bills per hour under `NETWORKING` with `workspace_id` null, so a scope filtered by workspace never sees it |
 | Notebook runs inside a job | The job's serverless usage policy applies; the notebook's is ignored |
 | Pipeline in development mode | Policy tag updates take up to 24 h to propagate |
 | Workspace tag change | Up to 1 h to propagate; existing resources need a restart |
@@ -371,6 +380,9 @@ Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedT
   anything runs. Measured in one estate: a workspace with zero DBUs for a week still cost €7.38,
   ninety percent of it NAT gateway — around €384 a year to exist. No Databricks system table shows
   a cent of it. Serverless closes the per-workload gap and never touches this one.
+- Sum `usage_quantity` over every `record_type`. A correction lands as a `RETRACTION` carrying a
+  negative quantity beside a `RESTATEMENT`; filtering to `ORIGINAL` keeps the wrong figure, and
+  reading rows one by one counts it twice.
 - Missing records prove nothing. Not zero cost, not zero use, not ownership.
 - User assertions are valid business context and are not billing evidence.
 

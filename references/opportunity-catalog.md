@@ -100,7 +100,8 @@ Ratios that survive price drift better than the figures do, and that usually dri
    exception, and it is an exception to every ratio here.
 4. **SQL classic is flat, Pro is regional.** Region choice matters for Pro and serverless, not for
    classic — again outside India West.
-5. **Egress is easy to miss** and compounds with Delta Sharing and cross-region replication.
+5. **Egress is easy to miss** and compounds with OpenSharing (formerly Delta Sharing) and
+   cross-region replication.
 
 ## Scope routing
 
@@ -110,7 +111,7 @@ Read exactly one, chosen by the confirmed scope. Reading a second means the scop
 |---|---|
 | A job or Lakeflow pipeline | `opportunities/job-or-pipeline.md` |
 | A SQL warehouse | `opportunities/sql-warehouse.md` |
-| A serving endpoint or Vector Search index | `opportunities/serving-or-vector-search.md` |
+| A serving endpoint or AI Search (formerly Vector Search) index | `opportunities/serving-or-vector-search.md` |
 | A team or workstream | `opportunities/team-or-workstream.md` | 
 | A background platform service | `opportunities/background-service.md` |
 | A Databricks App | `opportunities/app.md` |

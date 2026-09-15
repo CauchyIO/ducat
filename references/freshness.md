@@ -22,12 +22,26 @@ from 2026-07-20 and absent from `list_prices` entirely. The model-serving vendor
 networking egress families had both grown past what the table listed. A name that was never right
 fails the same way as one that has drifted, and neither is visible without running the query.
 
+Re-read 2026-09-15: the four Azure Databricks system-table articles `data-sources.md` names as
+starting authorities moved to one content commit on 2026-09-11, the day Delta Sharing became
+OpenSharing across the docs. The billable-usage reference carried the substance:
+`usage_metadata.budget_policy_id` is now documented as deprecated in favour of `usage_policy_id`;
+three origins were added, `SUPERVISOR_AGENT`, `FEATURE_STORE` and `LAKEHOUSE_REAL_TIME`; `DATABASE`
+and `LAKEBASE` are the original and the current Lakebase; Vector Search is now AI Search. The
+pricing reference had not changed since 2025-02-05 — a shared commit moves every article it
+touches, so a moved signal is a prompt to read, not proof of a change.
+
 Confirmed drift as of 2026-07-01. Treat every item as re-checkable, not settled:
 
-- **"Serverless budget policies" are now "serverless usage policies."** The mechanism and the
-  `budget_policy_id` column are unchanged; only the name moved.
+- **"Serverless budget policies" are now "serverless usage policies,"** and since 2026-09-11 the
+  column has followed: `usage_metadata.usage_policy_id` is current, and `budget_policy_id` is
+  documented as deprecated. The mechanism is unchanged.
 - **DLT is now "Lakeflow Spark Declarative Pipelines" — in name only.** Billing is untouched:
   origin `DLT`, SKUs `DLT_CORE/PRO/ADVANCED_COMPUTE`. Do not rename anything in billing logic.
+- **Vector Search is now "AI Search" — in name only.** Origin `VECTOR_SEARCH` and its dual billing
+  are unchanged.
+- **Delta Sharing is now "OpenSharing" — in name only.** Origin `DATA_SHARING` is unchanged, and
+  egress back to recipients still lands under `NETWORKING`.
 - **Monitoring's origin changed** to `DATA_QUALITY_MONITORING`.
 - **`ai_query` bills under `MODEL_SERVING`**, not `AI_FUNCTIONS`.
 - **Genie moved to pay-as-you-go on 2026-07-06** with its own metered DBUs, 150 free per identified
