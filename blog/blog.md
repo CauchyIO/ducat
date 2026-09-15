@@ -37,26 +37,83 @@ Let’s get on with it.
 
 ```mermaid
 flowchart LR
-  START(["'Can you optimize my Databricks project?'"]) --> G1{{"Gate 1: You choose the authentication route"}}
+  START(["'Can you optimize my Databricks project?'"]) --> G1{{"Gate 1: You choose the authentication and access route"}}
   G1 --> G2{{"Gate 2: You choose and confirm the scope"}}
-  G2 --> G3{{"Gate 3: You agree what counts as this scope's cost"}}
-  G3 --> G4{{"Gate 4: You confirm the baseline matches what you know"}}
-  G4 -->|"no, something is off"| G3
-  G4 -->|"yes"| G5{{"Gate 5: You choose which cost-saving cards go forward"}}
-  G5 --> STOP(["DUCAT hands off the design.<br/>Nothing in your workspace has changed"])
+  G2 --> G3{{"Gate 3: You confirm the baseline matches what you know"}}
+  G3 -->|"no, something is off"| G2
+  G3 -->|"yes"| G4{{"Gate 4: You choose which cost-saving cards go forward"}}
+  G4 --> STOP(["DUCAT hands off the design.<br/>Nothing in your workspace has changed"])
 
   classDef gate fill:#DDEEEB,stroke:#0F766E,stroke-width:1.5px,color:#0B3D39;
   classDef term fill:#12212B,stroke:#12212B,color:#F1F4F6;
-  class G1,G2,G3,G4,G5 gate;
+  class G1,G2,G3,G4 gate;
   class START,STOP term;
 ```
+### Steps
+#### Choosing an authentication and access route 
+Before DUCAT reads a single row, you choose how it reaches your workspace. We have defined two separate routes, each of which uses a different authentication token and access gate:
 
-### Choosing an authentication route 
-### Choosing a scope 
-### Determining available sources of evidence 
-### Confirming a baseline 
-### Selecting one or several cost optimization paths 
-### Generating report 
+- **Read-only service principal + Databricks MCP Server** (recommended default setting): a step-by-step tutorial is provided on how to provision a read-only service principal, and how to mint a token linked to that identity that is used to reach the Databricks MCP server. Since the service principal created is read-only, this approach ensures that the workspace will not be modified by the skill (a constraint enforced numerous times in Markdown text that we have observed can be violated if the user pressures Claude hard enough)
+
+- **Databricks personal account + Databricks CLI**: in order to follow this route, all that is needed from you is to have lgoged in your Databrick workspace with your personal account via the CLI. It is important to bear in mind if you choose to use the skill with this route that you might force Claude to modify the provisions of your workspace, or make writes to your database. However, even if you do, as a security measure we have set by design that Databricks bash commands are only executed after explicit authorization from the user. This setting is defined in .claude/settings.json, as Bash(databricks:*) is given "ask" permissions.
+
+Note that we have created these two predefined access and authenticaiton routes, but you could theoretically tinker with the setup and create your own. For example: you might want to interact with your workspace via the MCP server using your personal account. However, it will require you to go a bit off-rails with the provided workflow, or expanding it so that it accounts for your new route.
+
+#### Choosing a scope 
+This is where "optimize my Databricks" gets turned into a question DUCAT can actually answer. 
+
+If your request already names a scope, DUCAT restates it and asks you to confirm. If something is missing that could change the assessment, DUCAT asks for it. For example:
+
+- What kind of thing are we looking at? A job, a pipeline, a SQL warehouse, a serving endpoint, or a whole team's spend?
+- What are those objects called in the workspace?
+- What kind of results does this project deliver, and on what frequency?
+
+Answering these questions helps narrow down the scope of optimization. If you cannot determine the scope (what exact kind of thing is the project you want to optimize), DUCAT offers a bounded, coarse scan of your major cost drivers. After user consent is granted, the scan returns candidate scopes, and once you pick one you are back at this gate. A confirmed scope is a hard requirement for a targeted read.
+
+The same prompt settles what counts as the scope's cost, because a scope is a set of objects and a scope cost is every billing row those objects produced. The gap between the two is where most disputed chargeback numbers come from. So DUCAT makes the edges explicit before it adds anything up: the dependency that feeds your pipeline, the dev copy that runs alongside it, the warehouse that three other teams also use. Each is a call you take, rather than something quietly included or left out. 
+
+Based on the information provided by the user and the remaining available evidence, our skill discriminates between the following types of attribution.
+
+* **Native.** The billing record itself names the object, through a job ID, a warehouse ID, a pipeline ID, or similar. The platform did the work, and DUCAT looks for this first. 
+* **Manual.** A person asserted that the object belongs to the scope, either by confirming it in the conversation or by tagging it in the workspace. 
+* **Inferred.** The object was matched by name or convention, with nothing on the record to confirm it. The weakest, and always labeled as such. 
+* **Unallocated.** Spend in the period that matched nothing. It gets its own line and is never spread across the others. 
+
+The four stay separate all the way to the final report, because collapsing them into one total destroys your ability to judge it. A figure that is 80% native and 20% inferred is a different figure from one that is 20% native and 80% inferred, even when they add up to the same amount. 
+
+Figures are always reported along with their attribution type, rather than simply provided. A job that runs on shared all-purpose compute leaves no job ID on the billing record, so per-job attribution is structurally impossible there. A cluster launched from a pool inherits the pool's tags, so the cluster's own tags never reach the cloud bill. A warehouse serving several teams has to be split, in proportion to each team's query time, and the queries that carried no team tag are unallocated spend, not free spend. 
+
+#### Confirming a baseline 
+After the scope has been confirmed, a series of targeted reads are done against the system tables of your Databricks workspace. The next step in the workflow is consolidating the information coming from the output of those queries and replaying it to the user. Two possible scenarios follow:
+
+- Scenario 1: user acknowledges the baseline suggested by the skill and gives a clear *go ahead*, thus proceeding to the next step.
+- Scenario 2: user disputes one or more aspects of the suggested baseline. What follows then is a new, refined baseline that incorporates the feedback of the user, bringing them to the beginning of this step again.
+
+#### Selecting one or several cost optimization paths 
+Only now that the baseline has been confirmed by the user does the skill look for potential savings. 
+
+[ Give here a brief explanation of our reference system and the accessed sources ]
+
+What comes out as a result of this process is a number of cost saving opportunities, presented as cards, with the following attributes:
+
+- Description of the cost saving idea: what idea does the opportunity card contain.
+- Description of intial claim: what cost claim does the skill make, along with evidence used for that claim.
+- Description of suggested modification: what new setting the skill suggests and what savings would the user incur on were he to implement them.
+
+You choose which cards go forward and which ones are discarded.
+
+#### Generating report 
+The engagement ends with one Markdown document, `cost-optimization-design.md`, with the following sections:
+
+1. Decision summary 
+2. Scope and evidence 
+3. Current-state baseline 
+4. Opportunity disposition 
+5. Target-state design 
+6. Financial case 
+7. Implementation and verification 
+8. Open decisions and limitations 
+
 ## An example run 
 Here we illustrate the skill workflow with Steven’s cold run for RDW project. 
 
