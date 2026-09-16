@@ -72,8 +72,6 @@ If your request already names a scope, DUCAT restates it and asks you to confirm
 
 Answering these questions helps narrow down the scope of optimization. If you cannot determine the scope (what exact kind of thing is the project you want to optimize), DUCAT offers a bounded, coarse scan of your major cost drivers. After user consent is granted, the scan returns candidate scopes, and once you pick one you are back at this gate. A confirmed scope is a hard requirement for a targeted read.
 
-The same prompt settles what counts as the scope's cost, because a scope is a set of objects and a scope cost is every billing row those objects produced. The gap between the two is where most disputed chargeback numbers come from. So DUCAT makes the edges explicit before it adds anything up: the dependency that feeds your pipeline, the dev copy that runs alongside it, the warehouse that three other teams also use. Each is a call you take, rather than something quietly included or left out. 
-
 Based on the information provided by the user and the remaining available evidence, our skill discriminates between the following types of attribution.
 
 * **Native.** The billing record itself names the object, through a job ID, a warehouse ID, a pipeline ID, or similar. The platform did the work, and DUCAT looks for this first. 
