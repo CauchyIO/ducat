@@ -90,9 +90,11 @@ After the scope has been confirmed, a series of targeted reads are done against 
 - Scenario 2: user disputes one or more aspects of the suggested baseline. What follows then is a new, refined baseline that incorporates the feedback of the user, bringing them to the beginning of this step again.
 
 #### Selecting one or several cost optimization paths 
-Only now that the baseline has been confirmed by the user does the skill look for potential savings. 
+Only now that the baseline has been confirmed by the user does the skill look for potential cost saving recommendations. In order to create such recommendations, the skill makes use of two manually curated sets of references:
 
-[ Give here a brief explanation of our reference system and the accessed sources ]
+- Data sources: a list of all the available sources of evidence the skill might use for the recommendation, specifying order of preference, help on interpreting query results, rules on making conclusions, among others. It serves as sort of an alongside manual for the skill to follow along with querying the Databricks workspace, or having to resort to any of the alternative sources.
+
+- Opportunity catalog: a number of files pinpointing different ways in which specific scopes can be made cheaper. Think of it as the tools in your belt as a cloud cost saving specialist. For example, the following actions can be potentially performed in order to optimize a Databricks job: for example, right-sizing the job cluster, or modifying the autotermination settings. 
 
 What comes out as a result of this process is a number of cost saving opportunities, presented as cards, with the following attributes:
 
