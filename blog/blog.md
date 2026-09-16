@@ -98,7 +98,7 @@ What comes out as a result of this process is a number of cost saving opportunit
 
 - Description of the cost saving idea: what idea does the opportunity card contain.
 - Description of intial claim: what cost claim does the skill make, along with evidence used for that claim.
-- Description of suggested modification: what new setting the skill suggests and what savings would the user incur on were he to implement them.
+- Description of suggested modification: what new setting the skill suggests and what savings would the user incur on were they to implement it.
 
 You choose which cards go forward and which ones are discarded.
 
