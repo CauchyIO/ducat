@@ -23,17 +23,19 @@ One of the primary goals when creating the skill was that it adhere to the follo
 
 The three standards should hold across different user runs, turning the skill workflow into a semi-deterministic cost assessment where the user is prompted to define the constraints of the optimization problem, and the task of reading system tables and extracting conclusions from them is delegated to your choice of Claude model. 
 
-In this blog post, I will speak about the speak about the approach followed by the skill workflow to first review, then optimize a Databricks setup. I will also mention some limitations of the skill: some we have tackled; others remain open at the moment. 
+In this blog post, I will write about the approach we used to define the skill, followed by the workflow it runs to first review, then optimize, a Databricks setup. I will also cover some of its limitations: some we have tackled, others remain open. 
 
-Let’s get on with it. 
+So let's get on with it!
 
 ## The workflow 
 
 ### Two governing rules for the workflow 
-* Scope confirmation precede analysis: Global optimization is never a valid starting point. Prior to the assessment, user must provide key information about the optimization scope in terms of resources, attribution method, period of analysis, etc. Only then the optimization can be meaningful. 
-* Read-only workflow: no create, update, start, stop, resize or delete operation is invoked, ever. 
+* Scope confirmations precedes analysis: Global optimization is never a valid starting point. Prior to the assessment, the user must provide key information about the optimization scope in terms of resources, attribution method, period of analysis, etc. Only after this is done can the optimization be meaningful.
+* Read-only workflow: no create, update, start, stop, resize, or delete operations are ever invoked. 
 
 ### Diagram 
+
+Find below a simplified diagram representation of the skill workflow. Each node in the diagram represents a user gate (a step of the workflow that requires input from the user)
 
 ```mermaid
 flowchart LR
