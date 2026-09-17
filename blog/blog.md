@@ -68,7 +68,7 @@ If your request already names a [scope](../references/opportunity-catalog.md), D
 
 - What kind of thing are we looking at? A job, a pipeline, a SQL warehouse, a serving endpoint, or a whole team's spend?
 - What are those objects called in the workspace?
-- What kind of results does this project deliver, and on what frequency?
+- What time period should be used for the analysis?
 
 Answering these questions helps narrow down the scope of optimization. If you cannot determine the scope (what elements of the project/workspace you want to optimize), DUCAT offers a bounded, coarse scan of your major cost drivers. After user consent is granted, the scan returns candidate scopes and, once you pick one, you arrive back at this gate. A confirmed scope is a hard requirement for a targeted read.
 
@@ -96,15 +96,11 @@ Only now that the baseline has been confirmed by the user does the skill look fo
 
 - Opportunity catalog: a number of files pinpointing different ways in which specific scopes can be made cheaper. Think of it as the tools in your belt as a cloud cost saving specialist. For example, the following actions can be potentially performed in order to optimize a Databricks job: for example, right-sizing the job cluster, or modifying the autotermination settings. 
 
-What comes out as a result of this process is a number of cost saving opportunities, presented as cards, with the following attributes:
-
-- Description of the cost saving idea: what idea does the opportunity card contain.
-- Description of intial claim: what cost claim does the skill make, along with evidence used for that claim.
-- Description of suggested modification: what new setting the skill suggests and what savings would the user incur were they to implement it.
+What comes out as a result of this process is a shortlist of cost saving opportunities. Each opportunity will contain a concise description of the suggested change and the entailed savings, among other details.
 
 You choose which cards go forward into the final report and which ones are discarded.
 
-#### 5. Generating report 
+### Generating report 
 The engagement ends with one Markdown document, `cost-optimization-design.md`, with the following sections:
 
 1. Decision summary: a simplified overview of the whole cost optimization process, from initial selection of project scope and period for assessment, to chosen opportunities and estimated savings.
@@ -117,15 +113,53 @@ The engagement ends with one Markdown document, `cost-optimization-design.md`, w
 8. Open decisions and limitations: missing evidence, unresolved ownership and insufficiently supported claims that arose during the assesment.
 
 ## An example run 
-Here we illustrate the skill workflow with Steven’s cold run for RDW project. 
+Enough theory. To show what the workflow looks like in practice, I will walk you through a real run. Steven, a colleague at Cauchy, pointed DUCAT at his [RDW project](https://blog.cauchy.io/p/the-secrets-of-bronze-silver-and): a medallion-style ETL (a download job, then bronze/silver/gold processing) deployed as a Databricks Asset Bundle, with its own job compute and its own SQL warehouse packaged in the bundle. It was a cold run: Steven had never used the skill before and nobody was coaching him. His opening message was as vague as they come:
 
-#### The safeguards 
+> RDW is costing more than expected, can you investigate?
+
+Let's follow it gate by gate.
+
+### Gate 1. Authentication and access route 
+Steven's setup already pointed at the Databricks MCP server, so the first gate was settled before he typed anything: the authentication method would be a read-only service principal, and the access route the Databricks MCP Server.
+
+### Gate 2. Choosing a scope 
+"RDW" names something, but not something DUCAT can query. Before touching a system table it asked three questions in one go: 
+- What kind of scope is RDW? 
+> A DAB project.
+- How is the project spend identified? 
+> Via the named resources (job compute & warehouse) packed in the project DAB.
+- What period should the skill analyze? 
+> Last 30 days against the prior 30.
+
+Those answers told DUCAT where to look. It searched `system.lakeflow.jobs`, `system.compute.warehouses` and `system.lakeflow.pipelines` for RDW-named objects and came back with three live jobs and one serverless warehouse. Every one of them carries its own ID on the billing record, so the attribution was **native** throughout and the unallocated line stayed empty.
+
+### Gate 3. Confirming a baseline 
+The period comparison came back with a number that explained the surprise: $0.02 in the prior 30 days, $62.01 in the last 30. Of that, $59.95 was the bundle's serverless warehouse and $2.06 was serverless job compute. 
+
+That was replayed to Steven as one question: does this baseline match your understanding, with the option to dispute the numbers or DUCAT's understanding of the scope. 
+> Confirmed, continue
+He confirmed, and only then did the skill go looking for savings.
+
+### Gate 4. Selecting one or several cost optimization paths 
+With a confirmed scope of "jobs plus warehouse", DUCAT read the opportunity catalog, then checked a relevant piece of online documentation to verify one fact it was about to rely on: the serverless warehouse auto-stop floor is 5 minutes in the UI but 1 minute through the API, which is how bundles deploy. It then presented three cards:
+
+- **Card A (recommended):** cut the warehouse auto-stop from 10 to 1 minute in the bundle. Modeled saving of $42–52 a month for a one-line change; the trade-off is a few seconds of cold resume on the first query of each burst.
+- **Card B:** delete the dedicated warehouse and route RDW's dev queries to the workspace's shared starter warehouse. Up to the full $59.95 at scope level, but a smaller and less certain account-level saving, and RDW's SQL spend stops being separately attributable.
+- **Card C:** a cost anomaly alert, explicitly labeled as not a saving; it would have flagged this increase on about 5 August instead of at month end.
+
+> B: drop warehouse, use shared
+Steven picked Card B, not the recommended one. This is the gate working as intended: DUCAT quantifies and recommends, but which trade-off to accept is a decision only the person who owns the project can make.
+
+### Generating report 
+Twelve minutes after a one-line question, the engagement ended with [`cost-optimization-design.md`](link/to/markdown) written to the repository, and with no change made to the workspace. Click on the file link to read the whole assessment report.
+
+## The safeguards 
 Here we speak about staleness tests for references. 
 
-#### Limitations and aspects to consider 
+## Limitations and aspects to consider 
 - Read-only enforcements in the skill instructions are bypassed when user pushes hard enough.
 - Lack of implementation of eval suite: testing of the skill has been mostly manual and we lack a scoreboard that rates the output of the skill,
-#### Conclusions 
+## Conclusions 
 
 ## Appendix 
 
