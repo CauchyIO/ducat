@@ -107,14 +107,14 @@ You choose which cards go forward into the final report and which ones are disca
 #### 5. Generating report 
 The engagement ends with one Markdown document, `cost-optimization-design.md`, with the following sections:
 
-1. Decision summary 
-2. Scope and evidence 
-3. Current-state baseline 
-4. Opportunity disposition 
-5. Target-state design 
-6. Financial case 
-7. Implementation and verification 
-8. Open decisions and limitations 
+1. Decision summary: a simplified overview of the whole cost optimization process, from initial selection of project scope and period for assessment, to chosen opportunities and estimated savings.
+2. Scope and evidence: the Databricks objects included in the asessment and evidence sources used for the cost claims.
+3. Current-state baseline: current cost components, utilization measures and operational drivers of the chosen scope.
+4. Opportunity disposition: every opportunity that was suggested to you as a potential cost optimization, whether it was accepted or rejected.
+5. Target-state design: design of your project in its final state inlcuding the cost saving opportunities that you accepted.
+6. Financial case: estimation of "before and after" platform costs, including attribution type of cost (as described below) and modeled values for potential re-implementation.
+7. Implementation and verification: measures to verify the implementation of the target-state design has been successful.
+8. Open decisions and limitations: missing evidence, unresolved ownership and insufficiently supported claims that arose during the assesment.
 
 ## An example run 
 Here we illustrate the skill workflow with Steven’s cold run for RDW project. 
