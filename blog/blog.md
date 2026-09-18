@@ -113,7 +113,7 @@ The engagement ends with one Markdown document, `cost-optimization-design.md`, w
 8. Open decisions and limitations: missing evidence, unresolved ownership and insufficiently supported claims that arose during the assesment.
 
 ## An example run 
-Enough theory. To show what the workflow looks like in practice, I will walk you through a real run. Steven, a colleague at Cauchy, pointed DUCAT at his [RDW project](https://blog.cauchy.io/p/the-secrets-of-bronze-silver-and): a medallion-style ETL (a download job, then bronze/silver/gold processing) deployed as a Databricks Asset Bundle, with its own job compute and its own SQL warehouse packaged in the bundle. It was a cold run: Steven had never used the skill before and nobody was coaching him. His opening message was as vague as they come:
+Enough theory. To show what the workflow looks like in practice, I will walk you through a real run. Steven, a colleague at Cauchy, pointed DUCAT at his [RDW project](https://blog.cauchy.io/p/the-secrets-of-bronze-silver-and): a medallion-style ETL (a download job, then bronze/silver/gold processing) deployed as a Declarative Automation Bundle (DAB), with its own job compute and its own SQL warehouse defined in the bundle. It was a cold run: Steven had never used the skill before and nobody was coaching him. His opening message was as vague as they come:
 
 > RDW is costing more than expected, can you investigate?
 
@@ -131,17 +131,17 @@ Steven's setup already pointed at the Databricks MCP server, so the first gate w
 - What period should the skill analyze? 
 > Last 30 days against the prior 30.
 
-Those answers told DUCAT where to look. It searched `system.lakeflow.jobs`, `system.compute.warehouses` and `system.lakeflow.pipelines` for RDW-named objects and came back with three live jobs and one serverless warehouse. Every one of them carries its own ID on the billing record, so the attribution was **native** throughout and the unallocated line stayed empty.
+Those answers told DUCAT where to look. It searched `system.lakeflow.jobs`, `system.compute.warehouses` and `system.lakeflow.pipelines` for RDW-named objects and came back with three live jobs and one serverless warehouse. Every one of them carries its own ID on the billing record, so the attribution was **native** (*the billing record itself names the object*) throughout and the unallocated line stayed empty.
 
 ### Gate 3. Confirming a baseline 
-The period comparison came back with a number that explained the surprise: $0.02 in the prior 30 days, $62.01 in the last 30. Of that, $59.95 was the bundle's serverless warehouse and $2.06 was serverless job compute. 
+The period comparison came back with the following figures: $0.02 in the prior 30 days, $62.01 in the last 30. Of that, $59.95 was the bundle's serverless warehouse and $2.06 was serverless job compute. 
 
-That was replayed to Steven as one question: does this baseline match your understanding, with the option to dispute the numbers or DUCAT's understanding of the scope. 
+That was replayed to Steven as one question, with the option to dispute the numbers or DUCAT's understanding of the scope: does this baseline match your understanding?
 > Confirmed, continue
 He confirmed, and only then did the skill go looking for savings.
 
 ### Gate 4. Selecting one or several cost optimization paths 
-With a confirmed scope of "jobs plus warehouse", DUCAT read the opportunity catalog, then checked a relevant piece of online documentation to verify one fact it was about to rely on: the serverless warehouse auto-stop floor is 5 minutes in the UI but 1 minute through the API, which is how bundles deploy. It then presented three cards:
+With a confirmed scope of "jobs plus warehouse", DUCAT read the opportunity catalog, and verified one fact it was about to rely on: the serverless warehouse auto-stop floor is 5 minutes in the UI but 1 minute through the API, which is how bundles deploy. It then presented three cards:
 
 - **Card A (recommended):** cut the warehouse auto-stop from 10 to 1 minute in the bundle. Modeled saving of $42–52 a month for a one-line change; the trade-off is a few seconds of cold resume on the first query of each burst.
 - **Card B:** delete the dedicated warehouse and route RDW's dev queries to the workspace's shared starter warehouse. Up to the full $59.95 at scope level, but a smaller and less certain account-level saving, and RDW's SQL spend stops being separately attributable.
@@ -154,15 +154,15 @@ Steven picked Card B, not the recommended one. This is the gate working as inten
 Twelve minutes after a one-line question, the engagement ended with [`cost-optimization-design.md`](link/to/markdown) written to the repository, and with no change made to the workspace. Click on the file link to read the whole assessment report.
 
 ## The safeguards 
-The skill ships with packaged knowledge: a table of reference prices, SKU and product names, the routing from scope to opportunity file, and the mechanisms behind each optimization. All of that is distilled from online documentation material the vendor publishes and updates. This entails a risk that out-of-date information can be used as a base to generate a platform assessment, which a user can hardly tell by reading the assessment if at all. For example, in the months we have been working on this, DLT was renamed to Lakeflow Spark Declarative Pipelines, Genie moved to pay-as-you-go under a SKU that carries no list price at all, and the Standard tier was scheduled for retirement. None of those changes announces itself inside a reference file.
+The skill ships with packaged knowledge: a table of reference prices, SKU and product names, the routing from scope to opportunity file, and the mechanisms behind each optimization. All of that is distilled from online documentation material the vendor publishes and updates. This entails a risk that out-of-date information can be used as a base to generate a platform assessment, which a user can hardly tell by reading the assessment, if at all. For example, in the months we have been working on this, Delta Live Tables was renamed to Lakeflow Spark Declarative Pipelines, Genie moved to pay-as-you-go under a SKU that carries no list price at all, and the Standard tier was scheduled for retirement. None of those changes announces itself inside a reference file.
 
-We handle this in three layers.
+We handle this in three layers:
 
 **Every vendor fact carries a date, and loses to a live query.** Each reference states when it was distilled and by when it must be reviewed, and the price table records the last time it was re-verified against `system.billing.list_prices`. Live system tables and current official documentation outrank static documentation every time, and when the skill corrects one it says so in the assessment. 
 
 **A commit hook refuses stale references.** [`check-consistency.py`](../tools/check-consistency.py) runs before every commit and again in CI. It fails on a review date that has expired, a price baseline older than 90 days, a scope file the routing table does not name (or a route to a file that does not exist), and a relative link that no longer resolves. 
 
-**A weekly job watches the sources themselves.** A distillation date says when someone last read a source, not whether the source has changed since. [`check-upstream.py`](../tools/check-upstream.py) pins the change signal each upstream page publishes and compares it against the live one every Monday, raising an issue when a source has moved so that a human owes a re-read. It runs on its own clock rather than as a commit hook, because committing must never depend on Microsoft being reachable.
+**A weekly job watches the sources themselves.** A distillation date says when someone last read a source, not whether the source has changed since. [`check-upstream.py`](../tools/check-upstream.py) pins the change signal each upstream page publishes and compares it against the live one every Monday, raising an issue when a source has moved so that a human can recheck the documentation and make a relevant PR to close the issue. It runs on its own clock rather than as a commit hook, because committing must never depend on Microsoft being reachable.
 
 ## Evaluation report
 Although the results we had obtained using the skill in our own workspace seemed very promising, a manual testing approach is not sufficient evidence to ensure the following two claims:
@@ -203,13 +203,13 @@ In conclusion: the skill buys a large correctness gain (+52 points) for a modera
 You can read the whole results [here](link/to/eval/html). A pass rate of 100% deserves some scepticism. The scenarios and the assertions behind them were generated by Claude from the skill's own description, not written by us, so what they test is what the skill says it does. A hand-built suite would probe the corners the skill does not describe, which is where it is most likely to be wrong. Still, the areas where the skill most improves on vanilla Claude are clear enough to be worth reporting. Building that suite is the next step.
 
 ## Limitations and aspects to consider 
-**Read-only is not strictly enforced by the skill.** Despite the many times it is mentioned in the skill that being read-only is one of the governing principles, we have observed in one session that the skill has executed its design whenever it has had the necessary grants to do so after being prompted by the user. Read-only can be enforced by using an identity with read-only grant, which is why we provide step-by-step instructions to create a read-only service principal that cannot possibly modify your workspace.
+**Read-only is not strictly enforced by the skill.** The skill text says many times that it never modifies a workspace, and we have watched one session ignore that. After producing the design with the optimizations the user had chosen, it was asked to go ahead, it had the grants to do so, and it applied the changes itself. Read-only can be enforced by using an identity with read-only grant, which is why we provide step-by-step instructions to create a read-only service principal that cannot possibly modify your workspace.
 
-**There is no dedicated eval suite yet.** Testing has been manual: colleagues run the skill cold, and we read the transcript and the report. Furthermore, we have rUn a dynamically generated eval suite generated by Anthropic's skill-creator plugin. Apart from these facts, there is not a dedicated eval suite running on a specific schedule or triggered by spefic events. Ahead of us lays the need to design and implement these tests to ensure the tool behaves according to the expectation on a number of scenarios and grade it accordingly.
+**There is no dedicated eval suite yet.** Testing has been manual: colleagues run the skill cold, and we read the transcript and the report. Furthermore, we have run a dynamically generated eval suite generated by Anthropic's skill-creator plugin. Apart from these facts, there is no dedicated eval suite running on a specific schedule or triggered by specific events. Ahead of us lays the need to design and implement these tests to ensure the tool behaves according to the expectation on a number of scenarios and grade it accordingly.
 
-**Azure Databricks and Claude Code only.** AWS, GCP and other agent harnesses are untested.
+**Azure Databricks and Claude Code only.** AWS, GCP and other agent harnesses are untested for the time being. We plan on implementing them at some point in the future.
 
-**The numbers are list price, not what you pay.** System tables know how many DBUs you used, not what you were charged for them. DUCAT multiplies usage by the published price, which is the figure Databricks puts on its pricing page, not the one on your invoice. Your invoice will be lower if you have a negotiated discount, and higher if your scope runs on classic compute, because the virtual machines behind it are billed by Azure and never show up in a Databricks table. Only Azure Cost Management knows the real number, and when DUCAT can reach it, the billed and list figures are reported side by side, never merged. When it cannot, every figure in the report says so. And even with your discounted rate in hand, there is one thing DUCAT cannot tell you: whether that discount still applies once you change the setup it recommends.
+**The numbers are list price, not what you pay.** System tables know how many DBUs you used, not what you were charged for them. DUCAT multiplies usage by the published price, which is the figure Databricks puts on its pricing page, not the one on your invoice. Your invoice will be lower if you have a negotiated discount, and higher if your scope runs on classic compute, because the virtual machines behind it are billed by Azure and never show up in a Databricks table. Only Azure Cost Management knows the real number, and when DUCAT can reach it, the billed and list figures are reported side by side, never merged. When it cannot, every figure in the report says so; and even with your discounted rate in hand, there is one thing DUCAT cannot tell you: whether that discount still applies once you change the setup it recommends.
 
 ## Conclusions 
 
