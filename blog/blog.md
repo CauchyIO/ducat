@@ -211,7 +211,8 @@ You can read the whole results [here](link/to/eval/html). A pass rate of 100% de
 
 **The numbers are list price, not what you pay.** System tables know how many DBUs you used, not what you were charged for them. DUCAT multiplies usage by the published price, which is the figure Databricks puts on its pricing page, not the one on your invoice. Your invoice will be lower if you have a negotiated discount, and higher if your scope runs on classic compute, because the virtual machines behind it are billed by Azure and never show up in a Databricks table. Only Azure Cost Management knows the real number, and when DUCAT can reach it, the billed and list figures are reported side by side, never merged. When it cannot, every figure in the report says so; and even with your discounted rate in hand, there is one thing DUCAT cannot tell you: whether that discount still applies once you change the setup it recommends.
 
-## Conclusions 
+## In a nutshell
+After this deep-dive, we hope you have a good understanding of the capabilities of the DUCAT skill! If you like, you can give it a [try](../README.md) yourself and run it on your own workspace. 
 
 ## Appendix 
 
