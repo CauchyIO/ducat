@@ -27,6 +27,11 @@ In this blog post, I will write about the approach we used to define the skill, 
 
 So let's get on with it!
 
+## What is DUCAT?
+DUCAT stands for Databricks Usage and Cost Assessment Tool, and is a Claude skill intended to help you optimize the cost of your Databricks products. Ducat was also the name of one of the most trusted trade coins in Europe from the later Middle Ages to the 19th century. Hence why our logo resembles a coin!
+
+![image](../assets/ducat-lockup.svg)S
+
 ## How it works 
 
 ### Two governing rules 
