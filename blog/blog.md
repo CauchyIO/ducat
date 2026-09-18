@@ -165,29 +165,42 @@ We handle this in three layers.
 **A weekly job watches the sources themselves.** A distillation date says when someone last read a source, not whether the source has changed since. [`check-upstream.py`](../tools/check-upstream.py) pins the change signal each upstream page publishes and compares it against the live one every Monday, raising an issue when a source has moved so that a human owes a re-read. It runs on its own clock rather than as a commit hook, because committing must never depend on Microsoft being reachable.
 
 ## Evaluation report
-Although the results we had obtained using the skill in our own workspace seemed very promising, a manual testing approach is not sufficient evidence to ensure the two following assertions:
+Although the results we had obtained using the skill in our own workspace seemed very promising, a manual testing approach is not sufficient evidence to ensure the following two claims:
 
-- The skill performs as expected in a variety of possible scenarios, respecting the given guardrails and pre-defined workflow. Each of this testing scenarios is commonly known in the space as an evaluation.
+- The skill performs as expected in a variety of possible scenarios, respecting the given guardrails and pre-defined workflow. Each such test scenario is commonly known an evaluation or eval.
+
 - The skill brings an added value compared to using vanilla Claude for the task of Databricks platform cost optimization, visibly observed when comparing the results of the evaluations of Claude using the skill against the results of the evaluations of vanilla Claude.
 
-As stated in the section [Limitations and aspects to consider](#limitations-and-aspects-to-consider), one feature the skill lacks as of today is a dedicated evaluation suite. However, we did run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). We provide a link to the full evaluation report on the appendix if you are interested in reading it in full. In summary, the skill was tested across the following axis:
+As stated in the section [Limitations and aspects to consider](#limitations-and-aspects-to-consider), one feature the skill lacks as of today is a dedicated evaluation suite. However, we did run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). In summary, the skill was tested along the following axes:
 
-1. Scope confirmation must precede workspace reads: user explicit choice of optimization scope effectively unblocks reading system tables and making API requests.
+1. Scope confirmation must precede workspace reads: only the user's explicit choice of scope unlocks reads of system tables and making API requests.
 2. Remain read-only in all circumstances: do not ever try to implement one of the suggested cost saving opportunities, even when under user pressure.
-3. Attribution is kept honest: Native, manual, inferred and unallocated cost stay separate throughout the assessment and it is always explicitly stated.
+3. Attribution is kept honest: Native, manual, inferred and unallocated cost stay separate throughout the assessment, and each figure says which it is.
 4. Claims are bounded by evidence: no cost claim is ever made without the source of evidence accompanying the figure.
 5. Agent stays on-rails within the pre-defined workflow during the session: skill does not take unexpected turns in following the steps sequentially.
 
-A total of ten tests were conducted on DUCAT (formerly known internally as databricks-cost-optimizer): five different prompts with and without the skill enabled. The results are summarized in the table below:
+A total of eight tests were conducted on DUCAT (formerly known internally as databricks-cost-optimizer): four different prompts with and without the skill enabled. The results are summarized in the table below:
 ![image](benchmark-results.png)
 
-- Using DUCAT lifted the pass rate by 52% compared with vanilla Claude. Vanilla Claude results also variated highly across different queries (std dev. of 32 points)
+- Using DUCAT lifted the pass rate by 52 percentage points compared with vanilla Claude. Vanilla Claude's results also varied widely across scenarios (std dev. of 32 points)
 
 - Tests with the skill enabled took 149.6 seconds longer than vanilla Claude on average (approximately 2.5 minutes). Most likely a consequence of the highly structured workflow the session follows when the skill is enabled compared to when it is not.
 
 - Finally, token consumption was also higher when the skill was enabled by 9038 tokens on average. The most likely reason is the fact that several reference files have to be loaded for the skill to be invoked.
 
-In conclusion: the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). Based on the result, the aspects where the skill seems to overperform vanilla Claude are the following:
+In conclusion: the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). The areas where the skill made the largest difference were:
+
+- **Keeping spend separate per attribution**: in scenario 3, whereas vanilla Claude did provide a single total figure for the cost requested, DUCAT provided four separated attribution lines and rejected providing a single figure collapsing all attributed lines together.
+
+- **Claiming only what available evidence supports**: in scenario 3, vanilla Claude asserted "... [the assessment] is complete, not just DBUs..." while lacking access to Azure Cost Management (ACM). DUCAT, on the other hand, acknowledged the invoice will not necessarily match the figure built from the system tables since access to ACM was lacking.
+
+- **Dropping usage that could not be priced**: in scenario 0, vanilla Claude omitted Genie usage entirely, because Genie has no row in the price system table. Facing the same situation, DUCAT did account for that usage while stating that it could not know its cost because the corresponding price figure was not available.
+
+- **Labelling every figure:** in scenario 1, none of vanilla Claude's three deliverables contained which currency its figures were in or which cost basis they used (as defined by [FOCUS](link/to/focus) specification). Because DUCAT enforces both labels, every one of its figures carried a currency and a basis.
+
+- **Finishing the handoff.** Vanilla Claude's idle-warehouse handoff had the right setting but no sequencing and no verification method, and in scenario 1 it wrote five files of its own naming instead of the design document at the location the user asked for. DUCAT produced one document, where requested, with exact settings, an order of operations and the queries to confirm the change worked.
+
+You can read the whole results [here](link/to/eval/html). A pass rate of 100% deserves some scepticism. The scenarios and the assertions behind them were generated by Claude from the skill's own description, not written by us, so what they test is what the skill says it does. A hand-built suite would probe the corners the skill does not describe, which is where it is most likely to be wrong. Still, the areas where the skill most improves on vanilla Claude are clear enough to be worth reporting. Building that suite is the next step.
 
 ## Limitations and aspects to consider 
 **Read-only is not strictly enforced by the skill.** Despite the many times it is mentioned in the skill that being read-only is one of the governing principles, we have observed in one session that the skill has executed its design whenever it has had the necessary grants to do so after being prompted by the user. Read-only can be enforced by using an identity with read-only grant, which is why we provide step-by-step instructions to create a read-only service principal that cannot possibly modify your workspace.
