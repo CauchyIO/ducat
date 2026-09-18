@@ -165,7 +165,14 @@ We handle this in three layers.
 **A weekly job watches the sources themselves.** A distillation date says when someone last read a source, not whether the source has changed since. [`check-upstream.py`](../tools/check-upstream.py) pins the change signal each upstream page publishes and compares it against the live one every Monday, raising an issue when a source has moved so that a human owes a re-read. It runs on its own clock rather than as a commit hook, because committing must never depend on Microsoft being reachable.
 
 ## Evaluation report
-[ Fill this with skill-creator eval run to shed some light on how the skill performs against a naked Claude session ]
+Although the results we had obtained using the skill in our own workspace seemed very promising, a manual testing approach is not sufficient evidence to ensure the two following assertions:
+
+- The skill performs as expected in a variety of possible scenarios, respecting the given guardrails and pre-defined workflow. Each of this testing scenarios is commonly known in the space as an evaluation.
+- The skill brings an added value compared to using vanilla Claude for the task of Databricks platform cost optimization, visibly observed when comparing the results of the evaluations of Claude using the skill against the results of the evaluations of vanilla Claude.
+
+As stated in the section [Limitations and aspects to consider](#limitations-and-aspects-to-consider), one feature the skill lacks as of today is a dedicated evaluation suite. However, we did run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). We provide a link to the full evaluation report on the appendix if you are interested in reading it in full. Here are the key findings:
+
+
 
 ## Limitations and aspects to consider 
 **Read-only is not strictly enforced by the skill.** Despite the many times it is mentioned in the skill that being read-only is one of the governing principles, we have observed in one session that the skill has executed its design whenever it has had the necessary grants to do so after being prompted by the user. Read-only can be enforced by using an identity with read-only grant, which is why we provide step-by-step instructions to create a read-only service principal that cannot possibly modify your workspace.
