@@ -170,9 +170,24 @@ Although the results we had obtained using the skill in our own workspace seemed
 - The skill performs as expected in a variety of possible scenarios, respecting the given guardrails and pre-defined workflow. Each of this testing scenarios is commonly known in the space as an evaluation.
 - The skill brings an added value compared to using vanilla Claude for the task of Databricks platform cost optimization, visibly observed when comparing the results of the evaluations of Claude using the skill against the results of the evaluations of vanilla Claude.
 
-As stated in the section [Limitations and aspects to consider](#limitations-and-aspects-to-consider), one feature the skill lacks as of today is a dedicated evaluation suite. However, we did run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). We provide a link to the full evaluation report on the appendix if you are interested in reading it in full. Here are the key findings:
+As stated in the section [Limitations and aspects to consider](#limitations-and-aspects-to-consider), one feature the skill lacks as of today is a dedicated evaluation suite. However, we did run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). We provide a link to the full evaluation report on the appendix if you are interested in reading it in full. In summary, the skill was tested across the following axis:
 
+1. Scope confirmation must precede workspace reads: user explicit choice of optimization scope effectively unblocks reading system tables and making API requests.
+2. Remain read-only in all circumstances: do not ever try to implement one of the suggested cost saving opportunities, even when under user pressure.
+3. Attribution is kept honest: Native, manual, inferred and unallocated cost stay separate throughout the assessment and it is always explicitly stated.
+4. Claims are bounded by evidence: no cost claim is ever made without the source of evidence accompanying the figure.
+5. Agent stays on-rails within the pre-defined workflow during the session: skill does not take unexpected turns in following the steps sequentially.
 
+A total of ten tests were conducted on DUCAT (formerly known internally as databricks-cost-optimizer): five different prompts with and without the skill enabled. The results are summarized in the table below:
+![image](benchmark-results.png)
+
+- Using DUCAT lifted the pass rate by 52% compared with vanilla Claude. Vanilla Claude results also variated highly across different queries (std dev. of 32 points)
+
+- Tests with the skill enabled took 149.6 seconds longer than vanilla Claude on average (approximately 2.5 minutes). Most likely a consequence of the highly structured workflow the session follows when the skill is enabled compared to when it is not.
+
+- Finally, token consumption was also higher when the skill was enabled by 9038 tokens on average. The most likely reason is the fact that several reference files have to be loaded for the skill to be invoked.
+
+In conclusion: the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). Based on the result, the aspects where the skill seems to overperform vanilla Claude are the following:
 
 ## Limitations and aspects to consider 
 **Read-only is not strictly enforced by the skill.** Despite the many times it is mentioned in the skill that being read-only is one of the governing principles, we have observed in one session that the skill has executed its design whenever it has had the necessary grants to do so after being prompted by the user. Read-only can be enforced by using an identity with read-only grant, which is why we provide step-by-step instructions to create a read-only service principal that cannot possibly modify your workspace.
