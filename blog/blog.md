@@ -15,7 +15,7 @@ Like many others, we at Cauchy have felt these challenges first-hand, and we hav
 ## Where LLMs come in
 As individual data practitioners at Cauchy, we know what sources to explore and what considerations to bear in mind in order to diagnose Databricks overspending and come up with cheaper alternatives. However, this is not as simple as it seems, even for experienced Databricks users and especially for teams that do not have Databricks specialists on hand. Thus, we set out to create a Claude skill that distills Databricks cost optimization knowledge into a generalizable approach, one that experienced engineers and newcomers to the platform can use alike.
 
-One of the primary goals when creating the skill was that it adhere to the following standards when given a request to optimize a Databricks scope:
+One of the primary goals when creating the skill was that it adhered to the following standards when given a request to optimize a Databricks scope:
 
 * Consistently follow the same user workflow procedure.
 * Review and optimize Databricks scope settings consistently against predefined criteria.
