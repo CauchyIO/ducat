@@ -215,7 +215,7 @@ From the table above, we can see that:
 
 In conclusion, the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). The areas where the skill made the largest difference were:
 
-- **Keeping spend separate per attribution**: in scenario 3, whereas vanilla Claude provided a single total figure for the cost requested, DUCAT provided four separate attribution lines and refused to collapse them into a single figure.
+- **Keeping spend separate per attribution**: in scenario 3, vanilla Claude provided a single total figure for the cost requested, whereas DUCAT provided four separate attribution lines and refused to collapse them into a single figure.
 
 - **Claiming only what available evidence supports**: in scenario 3, vanilla Claude asserted "... [the assessment] is complete, not just DBUs..." while lacking access to Azure Cost Management (ACM). DUCAT, on the other hand, acknowledged that the invoice will not necessarily match the figure built from the system tables, since access to ACM was lacking.
 
