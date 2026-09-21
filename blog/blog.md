@@ -17,9 +17,9 @@ As individual data practitioners at Cauchy, we know what sources to explore and 
 
 One of the primary goals when creating the skill was that it adhered to the following standards when given a request to optimize a Databricks scope:
 
-* Consistently follow the same user workflow procedure.
-* Review and optimize Databricks scope settings consistently against predefined criteria.
-* Consistently provide a standardized, structured report covering every relevant aspect of the workflow.
+* Consistently following the same user workflow procedure.
+* Reviewing and optimizing Databricks scope settings consistently against predefined criteria.
+* Consistently providing a standardized, structured report covering every relevant aspect of the workflow.
 
 The three standards should hold across different user runs, turning the skill workflow into a semi-deterministic cost assessment where the user is prompted to define the constraints of the optimization problem, and the task of reading system tables and extracting conclusions from them is delegated to your choice of Claude model.
 
