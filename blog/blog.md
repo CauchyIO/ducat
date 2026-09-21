@@ -6,7 +6,7 @@ Brace yourselves: it is that day of the month again. Your cloud bill has just ar
 * Why is our bill higher this month?
 * What team or project is driving up the costs?
 * How can we possibly cut the bill while delivering on our service level agreements?
-* Who of you decided it was a good idea to leave a virtual machine (VM) active over the weekend and generate the cloud cost equivalent to leaving the lights on in your house while you go abroad on a month vacation? No judgment (okay, maybe some judgment).
+* Who of you decided it was a good idea to leave a virtual machine active over the weekend and generate the cloud cost equivalent to leaving the lights on in your house while you go abroad on a month vacation? No judgment (okay, maybe some judgment).
 
 Most likely, you have had to ask or answer at least one of these questions. The good news is you are not alone! According to a survey conducted in 2025 with about 2,300 participants across the entire globe, [94% of IT leaders are struggling to understand and optimize cloud costs](https://news.cision.com/softwareone/r/94--of-it-leaders-struggle-to-optimize-cloud-costs,c4231173).
 
