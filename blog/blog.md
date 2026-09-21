@@ -187,9 +187,9 @@ We handle this in three layers:
 ## Evaluation report
 The safeguards above keep the skill's inputs current. They say nothing about whether the skill itself behaves as intended. Although the results we obtained in our own workspace seemed very promising, manual testing is not sufficient evidence for the two claims we want to make:
 
-- The skill performs as expected in a variety of possible scenarios, respecting the given guardrails and predefined workflow. Each such test scenario is commonly known as an evaluation, or eval.
+- The skill performs as expected in a variety of possible scenarios, respecting the given guardrails and predefined workflow. Each test scenario is commonly known as an evaluation, or eval for short.
 
-- The skill adds value compared with using vanilla Claude for the task of Databricks platform cost optimization, visible when comparing the results of the evaluations of Claude using the skill against the results of the evaluations of vanilla Claude.
+- The skill adds value compared with using vanilla Claude for the task of Databricks platform cost optimization, visible when comparing the results of the evaluation produced by Claude using the skill against the results of the evaluation produced by vanilla Claude.
 
 As discussed in [Limitations and aspects to consider](#limitations-and-aspects-to-consider) below, one feature the skill lacks as of today is a dedicated evaluation suite. We did, however, run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). In summary, the skill was tested along the following axes:
 
@@ -197,7 +197,7 @@ As discussed in [Limitations and aspects to consider](#limitations-and-aspects-t
 2. Remain read-only in all circumstances: never try to implement one of the suggested cost-saving opportunities, even under user pressure.
 3. Attribution is kept honest: native, manual, inferred and unallocated cost stay separate throughout the assessment, and each figure says which it is.
 4. Claims are bounded by evidence: no cost claim is ever made without the source of evidence accompanying the figure.
-5. The agent stays on rails within the predefined workflow during the session: the skill does not take unexpected turns in following the steps sequentially.
+5. The agent operates within the confines of the predefined workflow during the session and the skill does not take unexpected turns in following the steps sequentially.
 
 A total of eight tests were run on DUCAT (formerly known internally as databricks-cost-optimizer): four different prompts, each with and without the skill enabled. The results are summarized in the table below.
 
@@ -205,23 +205,25 @@ A total of eight tests were run on DUCAT (formerly known internally as databrick
   <img src="benchmark-results.png" alt="Benchmark results: DUCAT versus vanilla Claude across four scenarios" width="720">
 </p>
 
+From the table above, we can see that:
+
 - Using DUCAT lifted the pass rate by 52 percentage points compared with vanilla Claude. Vanilla Claude's results also varied widely across scenarios (std dev. of 32 points).
 
-- Tests with the skill enabled took 149.6 seconds longer than vanilla Claude on average (approximately 2.5 minutes), most likely a consequence of the highly structured workflow the session follows when the skill is enabled.
+- Tests with the skill enabled took 149.6 seconds (approximately 2.5 minutes) longer than vanilla Claude on average, most likely a consequence of the highly structured workflow the session follows when the skill is enabled.
 
 - Finally, token consumption was also higher when the skill was enabled, by 9,038 tokens on average. The most likely reason is that several reference files have to be loaded for the skill to be invoked.
 
-In conclusion: the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). The areas where the skill made the largest difference were:
+In conclusion, the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). The areas where the skill made the largest difference were:
 
 - **Keeping spend separate per attribution**: in scenario 3, whereas vanilla Claude provided a single total figure for the cost requested, DUCAT provided four separate attribution lines and refused to collapse them into a single figure.
 
 - **Claiming only what available evidence supports**: in scenario 3, vanilla Claude asserted "... [the assessment] is complete, not just DBUs..." while lacking access to Azure Cost Management (ACM). DUCAT, on the other hand, acknowledged that the invoice will not necessarily match the figure built from the system tables, since access to ACM was lacking.
 
-- **Dropping usage that could not be priced**: in scenario 0, vanilla Claude omitted Genie usage entirely, because Genie has no row in the price system table. Facing the same situation, DUCAT did account for that usage while stating that it could not know its cost because the corresponding price figure was not available.
+- **Dropping usage that could not be priced**: in scenario 0, vanilla Claude omitted Genie usage entirely, because Genie has no row in the price system table. Facing the same situation, DUCAT did account for that usage by stating that it could not know its cost because the corresponding price figure was not available.
 
 - **Labelling every figure**: in scenario 1, none of vanilla Claude's three deliverables stated which currency its figures were in or which cost basis they used (as defined by the [FOCUS](https://focus.finops.org/) specification). Because DUCAT enforces both labels, every one of its figures carried a currency and a basis.
 
-- **Finishing the handoff**: vanilla Claude's idle-warehouse handoff had the right setting but no sequencing and no verification method, and in scenario 1 it wrote five files of its own naming instead of the design document at the location the user asked for. DUCAT produced one document, where requested, with exact settings, an order of operations and the queries to confirm the change worked.
+- **Finishing the handoff**: vanilla Claude's idle-warehouse handoff had the right setting but no sequencing and no verification method, and in scenario 1 it wrote five files of its own naming instead of the design document at the location the user asked for. DUCAT, however, produced a single document that did follow the criteria outlined in the design document, containing an order of operations and the queries to confirm the change worked.
 
 You can read the full results in the [evaluation report](../artifacts/eval-2026-09-04/eval-review.html). A pass rate of 100% deserves some scepticism. The scenarios and the assertions behind them were generated by Claude from the skill's own description, not written by us, so what they test is what the skill says it does. A hand-built suite would probe the corners the skill does not describe, which is where it is most likely to be wrong. Still, the areas where the skill most improves on vanilla Claude are clear enough to be worth reporting. Building that suite is the next step, and it is one of several open points worth stating plainly.
 
@@ -235,7 +237,7 @@ You can read the full results in the [evaluation report](../artifacts/eval-2026-
 **The numbers are list price, not what you pay.** System tables know how many DBUs you used, not what you were charged for them. DUCAT multiplies usage by the published price, which is the figure Databricks puts on its pricing page, not the one on your invoice. Your invoice will be lower if you have a negotiated discount, and higher if your scope runs on classic compute, because the virtual machines behind it are billed by Azure and never show up in a Databricks table. Only Azure Cost Management knows the real number, and when DUCAT can reach it, the billed and list figures are reported side by side, never merged. When it cannot, every figure in the report says so; and even with your discounted rate in hand, there is one thing DUCAT cannot tell you: whether that discount still applies once you change the setup it recommends.
 
 ## In a nutshell
-DUCAT turns "why is our Databricks bill higher this month?" into a question that can be answered with evidence. You set the scope, it reads the system tables, and together you arrive at a confirmed baseline, a shortlist of cost-saving cards, and a design document that says exactly what to change and how to verify it. Nothing in your workspace changes along the way.
+DUCAT turns the previously difficult-to-answer question of "Why is our Databricks bill higher this month?" into one that can be answered with evidence. You set the scope, it reads the system tables, and together you arrive at a confirmed baseline, a shortlist of cost-saving cards, and a design document that says exactly what to change and how to verify it. Nothing in your workspace changes along the way.
 
 We hope this deep-dive has given you a good understanding of what the skill can and cannot do. If you like, give it a [try](../README.md) on your own workspace, and let us know how it goes.
 
