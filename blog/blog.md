@@ -97,7 +97,7 @@ The four stay separate all the way to the final report because collapsing them i
 This is why figures are always reported along with their attribution type, rather than simply provided. A job that runs on shared all-purpose compute leaves no job ID on the billing record, so per-job attribution is structurally impossible there. A cluster launched from a pool inherits the pool's tags, so the cluster's own tags never reach the cloud bill. A warehouse serving several teams has to be split in proportion to each team's query time, and the queries that carried no team tag are unallocated spend, not free spend.
 
 #### 3. Confirming a baseline
-After the scope has been confirmed, DUCAT runs a series of targeted reads against the system tables of your Databricks workspace, consolidates the output of those queries, and plays the result back to you as a baseline. Two possible scenarios follow:
+After the scope has been confirmed, DUCAT runs a series of targeted reads against the system tables of your Databricks workspace, consolidates the output of those queries, and plays the result back to you as a baseline. Here, by baseline we mean the current state of your Databricks assets. The goal of DUCAT is to make modifications to it so that you end up paying less for it while expecting the same performance based on historical usage. Two possible scenarios follow:
 
 - Scenario 1: you acknowledge the baseline suggested by the skill and give a clear *go ahead*, and the workflow proceeds to the next step.
 - Scenario 2: you dispute one or more aspects of the suggested baseline. DUCAT then produces a new, refined baseline that incorporates your feedback and brings you back to the beginning of this step.
