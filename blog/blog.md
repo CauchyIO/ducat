@@ -220,7 +220,7 @@ In conclusion, the skill buys a large correctness gain (+52 points) for a modera
 
 - **Dropping usage that could not be priced:** in scenario 0, vanilla Claude omitted Genie usage entirely, because Genie has no row in the price system table. Facing the same situation, DUCAT did account for that usage by stating that it could not know its cost because the corresponding price figure was not available.
 
-- **Labelling every figure:** in scenario 1, none of vanilla Claude's three deliverables stated which currency its figures were in or which cost basis they used (as defined by the [FOCUS](https://focus.finops.org/) specification). Because DUCAT enforces both labels, every one of its figures carried a currency and a basis.
+- **Labelling every figure:** in scenario 1, none of vanilla Claude's three deliverables stated which currency its figures were in or which cost basis they used (as defined by the [FOCUS](https://focus.finops.org/docs/specification/v1-4/datasets/cost-and-usage/) specification). Because DUCAT enforces both labels, every one of its figures carried a currency and a basis.
 
 - **Finishing the handoff:** in scenario 1, vanilla Claude's idle warehouse handoff used the right settings but did not apply any sequencing and verification methods. Furthermore, it wrote five files of its own naming instead of one and did not follow the criteria outlined for the design document. DUCAT, however, produced a single document that did follow the criteria outlined in the design document, containing an order of operations and the queries to confirm the change worked.
 
