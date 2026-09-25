@@ -50,8 +50,7 @@ flowchart LR
   START(["'Can you optimize my Databricks project?'"]) --> G1{{"Gate 1: You choose the authentication and access route"}}
   G1 --> G2{{"Gate 2: You choose and confirm the scope"}}
   G2 --> G3{{"Gate 3: You confirm the baseline matches what you know"}}
-  G3 -->|"no, something is off"| G2
-  G3 -->|"yes"| G4{{"Gate 4: You choose which cost-saving cards go forward"}}
+  G3 --> G4{{"Gate 4: You choose which cost-saving cards go forward"}}
   G4 --> STOP(["DUCAT hands off the design.<br/>Nothing in your workspace has changed"])
 
   classDef gate fill:#DDEEEB,stroke:#0F766E,stroke-width:1.5px,color:#0B3D39;
@@ -256,27 +255,28 @@ The diagram in [the workflow at a glance](#the-workflow-at-a-glance) shows only 
 
 ```mermaid
 flowchart TD
-  START(["'Can you optimize my Databricks project?'"]) --> ROUTE{{"Gate 1: Choosing authentication route"}}
+  START(["'Can you optimize my Databricks project?'"]) --> ROUTE{{"Gate 1: You choose the authentication<br/>and access route"}}
   ROUTE -->|"service principal: the platform enforces read-only"| Q{"Did you name<br/>the scope<br/>in the original request?"}
-  ROUTE -->|"your own account: only your consent bounds it"| BRIEF["DUCAT briefs you on the risk<br/>and waits for a clear yes"]
-  BRIEF --> Q
+  ROUTE -->|"your own account: you accept the<br/>write risk DUCAT briefed you on"| Q
 
-  Q -->|"no"| OFFER["DUCAT offers a quick scan<br/>of what is driving spend"]
-  OFFER -->|"you say go"| SCAN["A bounded, read-only look<br/>at spend by product"]
-  SCAN --> CAND[/"Show a list of candidate scopes.<br/>Not findings yet"/]
+  Q -->|"yes:<br/>DUCAT restates it"| GATE{{"Gate 2: You choose and confirm the scope,<br/>including what counts as its cost.<br/>Nothing specific is read before this"}}
+  Q ~~~ GATE
+  Q -->|"no:<br/>DUCAT asks for it"| GATE
+  GATE -->|"you cannot name one yet:<br/>you ask for a quick scan"| SCAN["A bounded, read-only look<br/>at spend by product"]
+  SCAN --> CAND[/"Show a list of candidate scopes.<br/>No findings yet"/]
   CAND --> GATE
-
-  Q -->|"yes"| GATE{{"Gate 2: You choose and confirm the scope.<br/>Nothing specific is read before this"}}
   GATE -->|"you unlock targeted reads"| PRE["DUCAT checks which evidence<br/>sources it can actually reach"]
   PRE --> CLAIM[/"Constraint: What cannot be reached cannot be claimed"/]
-  CLAIM --> ATTR{{"Gate 3: You agree what counts as this scope's cost<br/>and what is left out"}}
-  ATTR --> BASE["DUCAT measures what the scope<br/>costs today, from billing data"]
-  BASE --> REPLAY{{"Gate 4: DUCAT plays the baseline back to you.<br/>Does it match what you know?"}}
-  REPLAY -->|"no, something is off"| ATTR
-  REPLAY -->|"yes"| SHORT["DUCAT lists ways to spend less.<br/>Each is a decision card with evidence and trade-offs"]
-  SHORT -->|"the numbers moved"| REPLAY
-  SHORT --> SEL{{"Gate 5: You choose which cards go forward"}}
-  SEL -->|"you unlock a recommendation"| PORT["DUCAT prices the chosen changes together,<br/>allowing for how they interact"]
+  CLAIM --> BASE["DUCAT measures what the scope<br/>costs today, from billing data"]
+  BASE --> REPLAY{{"Gate 3: You confirm the baseline<br/>matches what you know"}}
+  REPLAY -->|"no, something is off"| GATE
+  SHORT emoved@-->|"the numbers moved"| REPLAY
+  REPLAY ~~~ SHORT
+  REPLAY eyes@-->|"yes"| SHORT["DUCAT lists ways to spend less.<br/>Each is a decision card with evidence and trade-offs"]
+  eyes@{ curve: linear }
+  emoved@{ curve: linear }
+  SHORT --> SEL{{"Gate 4: You choose which<br/>cost-saving cards go forward"}}
+  SEL -->|"you unlock a recommendation"| PORT["DUCAT prices the chosen changes together,<br/>taking into consideration their<br/>cost and performance synergies"]
   PORT --> HAND["DUCAT writes the design handoff:<br/>steps, risks, and how to verify the saving"]
   HAND --> STOP(["DUCAT stops here.<br/>Nothing in your workspace has changed"])
 
@@ -292,7 +292,7 @@ flowchart TD
   classDef gate fill:#DDEEEB,stroke:#0F766E,stroke-width:1.5px,color:#0B3D39;
   classDef term fill:#12212B,stroke:#12212B,color:#F1F4F6;
   classDef note fill:#F1F4F6,stroke:#8FA3B0,stroke-dasharray:4 3,color:#3D4E5A;
-  class ROUTE,GATE,ATTR,REPLAY,SEL,K1 gate;
+  class ROUTE,GATE,REPLAY,SEL,K1 gate;
   class START,STOP,K5 term;
   class CAND,CLAIM,K4 note;
   classDef plain fill:none,stroke:none,color:#0B3D39,font-size:11px;
