@@ -240,7 +240,7 @@ DUCAT turns the previously difficult-to-answer question of "Why is our Databrick
 
 We hope this deep-dive has given you a good understanding of what the skill can and cannot do. If you like, give it a try on your own workspace, and let us know how it goes.
 
-[Link to the GitHub repository](https://github.com/CauchyIO/ducat)
+[Link to the GitHub repository](https://github.com/CauchyIO/ducat).
 
 ## References
 - **[Steven's cold run](../transcripts/steven-cold-run/steven.html):** the full transcript of the example run above, gate by gate.
