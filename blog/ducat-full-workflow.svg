@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1870" width="900" height="1870" role="img" aria-labelledby="t d" font-family="'trebuchet ms', verdana, arial, sans-serif">
+<title id="t">DUCAT full workflow</title>
+<desc id="d">Full DUCAT workflow: four gates where DUCAT stops for your answer (authentication route, scope, baseline, cost-saving cards) and the read-only steps it takes between them, ending with a design handoff and no change to your workspace.</desc>
+<!-- Generated layout: option pairs are mirror-symmetric about x=450; see the DUCAT blog source. -->
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666666"/></marker></defs>
+<rect width="900" height="1870" fill="none"/>
+<rect x="16" y="1545" width="262" height="246" fill="#DDEEEB" fill-opacity="0.5" stroke="#0F766E" stroke-dasharray="2 4"/>
+<text x="30" y="1565" font-size="13" fill="#0B3D39" font-weight="600">Key</text>
+<polygon points="32,1595 38,1587 54,1587 60,1595 54,1603 38,1603" fill="#DDEEEB" stroke="#0F766E" stroke-width="1.5"/>
+<text font-size="12" fill="#0B3D39" dominant-baseline="central"><tspan x="74" y="1587.2">DUCAT stops and waits</tspan><tspan x="74" y="1602.8">for your answer</tspan></text>
+<rect x="32" y="1628" width="28" height="18" fill="#EEEEEE" stroke="#999999"/>
+<text font-size="12" fill="#0B3D39" dominant-baseline="central"><tspan x="74" y="1629.2">DUCAT does this itself,</tspan><tspan x="74" y="1644.8">read-only</tspan></text>
+<polygon points="46,1668 60,1679 46,1690 32,1679" fill="#EEEEEE" stroke="#999999"/>
+<text font-size="12" fill="#0B3D39" dominant-baseline="central"><tspan x="74" y="1671.2">Answered from your request,</tspan><tspan x="74" y="1686.8">no question asked</tspan></text>
+<polygon points="36,1712 62,1712 56,1730 30,1730" fill="#F1F4F6" stroke="#8FA3B0" stroke-dasharray="4 3"/>
+<text font-size="12" fill="#0B3D39" dominant-baseline="central"><tspan x="74" y="1713.2">A rule that limits the next step,</tspan><tspan x="74" y="1728.8">not an action</tspan></text>
+<rect x="32" y="1754" width="28" height="18" rx="9" fill="#12212B"/>
+<text font-size="12" fill="#0B3D39" dominant-baseline="central"><tspan x="74" y="1763.0">Where the flow starts or ends</tspan></text>
+<path d="M 450.0 70.0 L 450.0 118.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 395.0 182.0 L 300.0 255.0 L 410.0 350.6" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 505.0 182.0 L 600.0 255.0 L 490.0 350.6" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 410.0 459.4 L 350.0 540.0 L 390.0 590.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 490.0 459.4 L 550.0 540.0 L 510.0 590.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 279.0 680.0 L 170.0 800.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 680.0 L 450.0 800.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 170.0 850.0 L 170.0 900.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 45.0 925.0 L 22.0 925.0 L 22.0 635.0 L 255.0 635.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 850.0 L 450.0 900.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 950.0 L 450.0 1000.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 1050.0 L 450.0 1093.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 410.0 1157.0 L 370.0 1212.0 L 410.0 1270.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 490.0 1270.0 L 530.0 1212.0 L 490.0 1157.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 610.0 1125.0 L 670.0 1125.0 L 670.0 1212.0 L 860.0 1212.0 L 860.0 635.0 L 645.0 635.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 1340.0 L 450.0 1383.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 1447.0 L 450.0 1560.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 1630.0 L 450.0 1670.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M 450.0 1740.0 L 450.0 1780.0" fill="none" stroke="#666666" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect class="shape" x="330.0" y="20.0" width="240" height="50" rx="25.0" fill="#12212B" stroke="#12212B"/>
+<text font-size="14" fill="#F1F4F6" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="35.9">'Can you optimize my</tspan><tspan x="450" y="54.1">Databricks project?'</tspan></text>
+<polygon class="shape" points="285.0,150.0 309.0,118.0 591.0,118.0 615.0,150.0 591.0,182.0 309.0,182.0" fill="#DDEEEB" stroke="#0F766E" stroke-width="1.5"/>
+<text font-size="14" fill="#0B3D39" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="140.9">Gate 1: You choose the authentication</tspan><tspan x="450" y="159.1">and access route</tspan></text>
+<polygon class="shape" points="450.0,325.0 575.0,405.0 450.0,485.0 325.0,405.0" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="386.8">Did you name</tspan><tspan x="450" y="405.0">the scope</tspan><tspan x="450" y="423.2">in the original request?</tspan></text>
+<polygon class="shape" points="255.0,635.0 279.0,590.0 621.0,590.0 645.0,635.0 621.0,680.0 279.0,680.0" fill="#DDEEEB" stroke="#0F766E" stroke-width="1.5"/>
+<text font-size="14" fill="#0B3D39" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="616.8">Gate 2: You choose and confirm the scope,</tspan><tspan x="450" y="635.0">including what counts as its cost.</tspan><tspan x="450" y="653.2">Nothing specific is read before this</tspan></text>
+<rect class="shape" x="65.0" y="800.0" width="210" height="50" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="170" y="815.9">A bounded, read-only look</tspan><tspan x="170" y="834.1">at spend by product</tspan></text>
+<polygon class="shape" points="59.0,900.0 309.0,900.0 281.0,950.0 31.0,950.0" fill="#F1F4F6" stroke="#8FA3B0" stroke-dasharray="4 3"/>
+<text font-size="14" fill="#3D4E5A" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="170" y="915.9">Show a list of candidate scopes.</tspan><tspan x="170" y="934.1">No findings yet</tspan></text>
+<rect class="shape" x="325.0" y="800.0" width="250" height="50" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="815.9">DUCAT checks which evidence</tspan><tspan x="450" y="834.1">sources it can actually reach</tspan></text>
+<polygon class="shape" points="319.0,900.0 609.0,900.0 581.0,950.0 291.0,950.0" fill="#F1F4F6" stroke="#8FA3B0" stroke-dasharray="4 3"/>
+<text font-size="14" fill="#3D4E5A" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="915.9">Constraint: What cannot be reached</tspan><tspan x="450" y="934.1">cannot be claimed</tspan></text>
+<rect class="shape" x="320.0" y="1000.0" width="260" height="50" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1015.9">DUCAT measures what the scope</tspan><tspan x="450" y="1034.1">costs today, from billing data</tspan></text>
+<polygon class="shape" points="290.0,1125.0 314.0,1093.0 586.0,1093.0 610.0,1125.0 586.0,1157.0 314.0,1157.0" fill="#DDEEEB" stroke="#0F766E" stroke-width="1.5"/>
+<text font-size="14" fill="#0B3D39" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1115.9">Gate 3: You confirm the baseline</tspan><tspan x="450" y="1134.1">matches what you know</tspan></text>
+<rect class="shape" x="310.0" y="1270.0" width="280" height="70" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1286.8">DUCAT lists ways to spend less.</tspan><tspan x="450" y="1305.0">Each is a decision card</tspan><tspan x="450" y="1323.2">with evidence and trade-offs</tspan></text>
+<polygon class="shape" points="300.0,1415.0 324.0,1383.0 576.0,1383.0 600.0,1415.0 576.0,1447.0 324.0,1447.0" fill="#DDEEEB" stroke="#0F766E" stroke-width="1.5"/>
+<text font-size="14" fill="#0B3D39" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1405.9">Gate 4: You choose which</tspan><tspan x="450" y="1424.1">cost-saving cards go forward</tspan></text>
+<rect class="shape" x="300.0" y="1560.0" width="300" height="70" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1576.8">DUCAT prices the chosen changes together,</tspan><tspan x="450" y="1595.0">taking into consideration their</tspan><tspan x="450" y="1613.2">cost and performance synergies</tspan></text>
+<rect class="shape" x="315.0" y="1670.0" width="270" height="70" fill="#EEEEEE" stroke="#999999" stroke-width="1"/>
+<text font-size="14" fill="#333333" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1686.8">DUCAT writes the design handoff:</tspan><tspan x="450" y="1705.0">steps, risks, and how to</tspan><tspan x="450" y="1723.2">verify the saving</tspan></text>
+<rect class="shape" x="325.0" y="1780.0" width="250" height="70" rx="35.0" fill="#12212B" stroke="#12212B"/>
+<text font-size="14" fill="#F1F4F6" text-anchor="middle" dominant-baseline="central" font-weight="400"><tspan x="450" y="1796.8">DUCAT stops here.</tspan><tspan x="450" y="1815.0">Nothing in your workspace</tspan><tspan x="450" y="1833.2">has changed</tspan></text>
+<rect class="label" x="180.0" y="234.1" width="240" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="300.0" y="246.6">service principal: the</tspan><tspan x="300.0" y="263.4">platform enforces read-only</tspan></text>
+<rect class="label" x="480.0" y="234.1" width="240" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="600.0" y="246.6">your own account: you accept the</tspan><tspan x="600.0" y="263.4">write risk DUCAT briefed you on</tspan></text>
+<rect class="label" x="280.0" y="519.1" width="140" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="350.0" y="531.5">yes:</tspan><tspan x="350.0" y="548.4">DUCAT restates it</tspan></text>
+<rect class="label" x="480.0" y="519.1" width="140" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="550.0" y="531.5">no:</tspan><tspan x="550.0" y="548.4">DUCAT asks for it</tspan></text>
+<rect class="label" x="129.5" y="719.1" width="190" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="224.5" y="731.5">you cannot name one yet:</tspan><tspan x="224.5" y="748.4">you ask for a quick scan</tspan></text>
+<rect class="label" x="385.0" y="719.1" width="130" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="450.0" y="731.5">you unlock</tspan><tspan x="450.0" y="748.4">targeted reads</tspan></text>
+<rect class="label" x="346.0" y="1199.5" width="48" height="24.9" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="370.0" y="1212.0">yes</tspan></text>
+<rect class="label" x="460.0" y="1199.5" width="140" height="24.9" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="530.0" y="1212.0">the numbers moved</tspan></text>
+<rect class="label" x="690.0" y="1199.5" width="150" height="24.9" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="765.0" y="1212.0">no, something is off</tspan></text>
+<rect class="label" x="385.0" y="1479.1" width="130" height="41.8" fill="#FFFFFF"/>
+<text font-size="13" fill="#333333" text-anchor="middle" dominant-baseline="central"><tspan x="450.0" y="1491.5">you unlock a</tspan><tspan x="450.0" y="1508.5">recommendation</tspan></text>
+</svg>
