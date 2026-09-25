@@ -253,49 +253,6 @@ We hope this deep-dive has given you a good understanding of what the skill can 
 ### Full workflow diagram
 The diagram in [the workflow at a glance](#the-workflow-at-a-glance) shows only the gates. The full version below also shows what DUCAT does between them.
 
-```mermaid
-flowchart TD
-  START(["'Can you optimize my Databricks project?'"]) --> ROUTE{{"Gate 1: You choose the authentication<br/>and access route"}}
-  ROUTE -->|"service principal: the platform enforces read-only"| Q{"Did you name<br/>the scope<br/>in the original request?"}
-  ROUTE -->|"your own account: you accept the<br/>write risk DUCAT briefed you on"| Q
-
-  Q -->|"yes:<br/>DUCAT restates it"| GATE{{"Gate 2: You choose and confirm the scope,<br/>including what counts as its cost.<br/>Nothing specific is read before this"}}
-  Q ~~~ GATE
-  Q -->|"no:<br/>DUCAT asks for it"| GATE
-  GATE -->|"you cannot name one yet:<br/>you ask for a quick scan"| SCAN["A bounded, read-only look<br/>at spend by product"]
-  SCAN --> CAND[/"Show a list of candidate scopes.<br/>No findings yet"/]
-  CAND --> GATE
-  GATE -->|"you unlock targeted reads"| PRE["DUCAT checks which evidence<br/>sources it can actually reach"]
-  PRE --> CLAIM[/"Constraint: What cannot be reached cannot be claimed"/]
-  CLAIM --> BASE["DUCAT measures what the scope<br/>costs today, from billing data"]
-  BASE --> REPLAY{{"Gate 3: You confirm the baseline<br/>matches what you know"}}
-  REPLAY -->|"no, something is off"| GATE
-  SHORT emoved@-->|"the numbers moved"| REPLAY
-  REPLAY ~~~ SHORT
-  REPLAY eyes@-->|"yes"| SHORT["DUCAT lists ways to spend less.<br/>Each is a decision card with evidence and trade-offs"]
-  eyes@{ curve: linear }
-  emoved@{ curve: linear }
-  SHORT --> SEL{{"Gate 4: You choose which<br/>cost-saving cards go forward"}}
-  SEL -->|"you unlock a recommendation"| PORT["DUCAT prices the chosen changes together,<br/>taking into consideration their<br/>cost and performance synergies"]
-  PORT --> HAND["DUCAT writes the design handoff:<br/>steps, risks, and how to verify the saving"]
-  HAND --> STOP(["DUCAT stops here.<br/>Nothing in your workspace has changed"])
-
-  subgraph KEY["Key"]
-    direction LR
-    K1{{"&nbsp;&nbsp;"}} ~~~ T1["DUCAT stops and waits for your answer"]
-    K2["&nbsp;&nbsp;"] ~~~ T2["DUCAT does this itself, read-only"]
-    K3{"&nbsp;"} ~~~ T3["Answered from your request, no question asked"]
-    K4[/"&nbsp;&nbsp;"/] ~~~ T4["A rule that limits the next step, not an action"]
-    K5(["&nbsp;&nbsp;"]) ~~~ T5["Where the flow starts or ends"]
-  end
-
-  classDef gate fill:#DDEEEB,stroke:#0F766E,stroke-width:1.5px,color:#0B3D39;
-  classDef term fill:#12212B,stroke:#12212B,color:#F1F4F6;
-  classDef note fill:#F1F4F6,stroke:#8FA3B0,stroke-dasharray:4 3,color:#3D4E5A;
-  class ROUTE,GATE,REPLAY,SEL,K1 gate;
-  class START,STOP,K5 term;
-  class CAND,CLAIM,K4 note;
-  classDef plain fill:none,stroke:none,color:#0B3D39,font-size:11px;
-  class T1,T2,T3,T4,T5 plain;
-  style KEY fill:#DDEEEB,fill-opacity:0.5,stroke:#0F766E,stroke-dasharray:2 4,color:#0B3D39;
-```
+<p align="center">
+  <img src="ducat-full-workflow.svg" alt="Full DUCAT workflow: the four gates where DUCAT waits for your answer, and the read-only steps it takes between them" width="900">
+</p>
