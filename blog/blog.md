@@ -65,9 +65,9 @@ Let's take the four gates in turn.
 #### 1. Choosing an authentication and access route
 Before DUCAT reads a single row, you choose how it reaches your workspace. We have defined two separate routes, each of which uses a different authentication token and access gate:
 
-- **Read-only service principal + Databricks MCP Server** (recommended default setting): a [step-by-step](../docs/getting-started.md) tutorial is provided on how to provision a read-only service principal, and how to mint a token linked to that identity that is used to reach the Databricks MCP server. Since the service principal created is read-only, this approach ensures that the workspace will not be modified by the skill (a constraint enforced numerous times in Markdown text that we have observed can be violated if the user pressures Claude hard enough).
+- **Read-only service principal + Databricks MCP Server (recommended default setting):** a [step-by-step](../docs/getting-started.md) tutorial is provided on how to provision a read-only service principal, and how to mint a token linked to that identity that is used to reach the Databricks MCP server. Since the service principal created is read-only, this approach ensures that the workspace will not be modified by the skill (a constraint enforced numerous times in Markdown text that we have observed can be violated if the user pressures Claude hard enough).
 
-- **Databricks personal account + Databricks CLI**: in order to follow this route, all that is needed from you is to have logged in to your Databricks workspace with your personal account via the CLI. It is important to bear in mind that, if you choose to use the skill with this route, you might allow Claude to modify the provisions of your workspace or make writes to your database. However, even if you choose this method, to provide an extra layer of security, we have designed the skill so that Databricks bash commands are only ever executed after explicit authorization from the user. This is set in [.claude/settings.json](../.claude/settings.json), where Bash(databricks:*) has the ask permission.
+- **Databricks personal account + Databricks CLI:** in order to follow this route, all that is needed from you is to have logged in to your Databricks workspace with your personal account via the CLI. It is important to bear in mind that, if you choose to use the skill with this route, you might allow Claude to modify the provisions of your workspace or make writes to your database. However, even if you choose this method, to provide an extra layer of security, we have designed the skill so that Databricks bash commands are only ever executed after explicit authorization from the user. This is set in [.claude/settings.json](../.claude/settings.json), where Bash(databricks:*) has the ask permission.
 
 These are the two predefined access and authentication routes, but you can tinker with the setup and create your own. For example, you might want to reach your workspace through the MCP server using your personal account. Doing so requires you to actively change or extend the provided workflow so that it accounts for your custom route.
 
@@ -98,15 +98,15 @@ This is why figures are always reported along with their attribution type, rathe
 #### 3. Confirming a baseline
 After the scope has been confirmed, DUCAT runs a series of targeted reads against the system tables of your Databricks workspace, consolidates the output of those queries, and plays the result back to you as a baseline. Here, by baseline we mean the current state of your Databricks assets. The goal of DUCAT is to make modifications to it so that you end up paying less for it while expecting the same performance based on historical usage. Two possible scenarios follow:
 
-- Scenario 1: you acknowledge the baseline suggested by the skill and give a clear *go ahead*, and the workflow proceeds to the next step.
-- Scenario 2: you dispute one or more aspects of the suggested baseline. DUCAT then produces a new, refined baseline that incorporates your feedback and brings you back to the beginning of this step.
+- **Scenario 1:** you acknowledge the baseline suggested by the skill and give a clear *go ahead*, and the workflow proceeds to the next step.
+- **Scenario 2:** you dispute one or more aspects of the suggested baseline. DUCAT then produces a new, refined baseline that incorporates your feedback and brings you back to the beginning of this step.
 
 #### 4. Selecting one or several cost optimization paths
 Only once you have confirmed the baseline does the skill look for potential cost-saving recommendations. To create them, the skill draws on two manually curated sets of references:
 
-- Data sources: a list of all the available sources of evidence the skill might use for a recommendation, specifying order of preference, help on interpreting query results, rules on drawing conclusions, among others. It serves as a companion manual the skill follows while querying the Databricks workspace or resorting to any of the alternative sources.
+- **Data sources:** a list of all the available sources of evidence the skill might use for a recommendation, specifying order of preference, help on interpreting query results, rules on drawing conclusions, among others. It serves as a companion manual the skill follows while querying the Databricks workspace or resorting to any of the alternative sources.
 
-- Opportunity catalog: a set of files pinpointing the ways in which specific scopes can be made cheaper. Think of it as the tools in your belt as a cloud cost-saving specialist. For a Databricks job, for example, the catalog covers actions such as right-sizing the job cluster or modifying the auto-termination settings.
+- **Opportunity catalog:** a set of files pinpointing the ways in which specific scopes can be made cheaper. Think of it as the tools in your belt as a cloud cost-saving specialist. For a Databricks job, for example, the catalog covers actions such as right-sizing the job cluster or modifying the auto-termination settings.
 
 What comes out of this process is a shortlist of cost-saving opportunities, each presented as a decision card with a concise description of the suggested change, the savings it entails, and its trade-offs, among other details.
 
@@ -115,14 +115,14 @@ You choose which cards go forward into the final report and which ones are disca
 ### Generating the report
 The engagement ends with one Markdown document, `cost-optimization-design.md`, with the following sections:
 
-1. Decision summary: a simplified overview of the whole cost optimization process, from initial selection of project scope and period for assessment, to chosen opportunities and estimated savings.
-2. Scope and evidence: the Databricks objects included in the assessment and evidence sources used for the cost claims.
-3. Current-state baseline: current cost components, utilization measures and operational drivers of the chosen scope.
-4. Opportunity disposition: every opportunity that was suggested to you as a potential cost optimization, whether it was accepted or rejected.
-5. Target-state design: design of your project in its final state including the cost saving opportunities that you accepted.
-6. Financial case: estimation of "before and after" platform costs, including attribution type of cost (as described above) and modeled values for potential re-implementation.
-7. Implementation and verification: measures to verify the implementation of the target-state design has been successful.
-8. Open decisions and limitations: missing evidence, unresolved ownership and insufficiently supported claims that arose during the assessment.
+1. **Decision summary:** a simplified overview of the whole cost optimization process, from initial selection of project scope and period for assessment, to chosen opportunities and estimated savings.
+2. **Scope and evidence:** the Databricks objects included in the assessment and evidence sources used for the cost claims.
+3. **Current-state baseline:** current cost components, utilization measures and operational drivers of the chosen scope.
+4. **Opportunity disposition:** every opportunity that was suggested to you as a potential cost optimization, whether it was accepted or rejected.
+5. **Target-state design:** design of your project in its final state including the cost saving opportunities that you accepted.
+6. **Financial case:** estimation of "before and after" platform costs, including attribution type of cost (as described above) and modeled values for potential re-implementation.
+7. **Implementation and verification:** measures to verify the implementation of the target-state design has been successful.
+8. **Open decisions and limitations:** missing evidence, unresolved ownership and insufficiently supported claims that arose during the assessment.
 
 With the report written, the engagement is over. That is the whole workflow on paper.
 
@@ -192,10 +192,10 @@ The safeguards above keep the skill's inputs current. They say nothing about whe
 
 As discussed in [Limitations and aspects to consider](#limitations-and-aspects-to-consider) below, one feature the skill lacks as of today is a dedicated evaluation suite. We did, however, run a dynamically created evaluation suite using [skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py). In summary, the skill was tested along the following axes:
 
-1. Scope confirmation must precede workspace reads: only the user's explicit choice of scope unlocks reads of system tables and API requests.
-2. Remain read-only in all circumstances: never try to implement one of the suggested cost-saving opportunities, even under user pressure.
-3. Attribution is kept honest: native, manual, inferred and unallocated cost stay separate throughout the assessment, and each figure says which it is.
-4. Claims are bounded by evidence: no cost claim is ever made without the source of evidence accompanying the figure.
+1. **Scope confirmation must precede workspace reads:** only the user's explicit choice of scope unlocks reads of system tables and API requests.
+2. **Remain read-only in all circumstances:** never try to implement one of the suggested cost-saving opportunities, even under user pressure.
+3. **Attribution is kept honest:** native, manual, inferred and unallocated cost stay separate throughout the assessment, and each figure says which it is.
+4. **Claims are bounded by evidence:** no cost claim is ever made without the source of evidence accompanying the figure.
 5. The agent operates within the confines of the predefined workflow during the session and the skill does not take unexpected turns in following the steps sequentially.
 
 A total of eight tests were run on DUCAT (formerly known internally as databricks-cost-optimizer): four different prompts, each with and without the skill enabled. The results are summarized in the table below.
@@ -214,15 +214,15 @@ From the table above, we can see that:
 
 In conclusion, the skill buys a large correctness gain (+52 points) for a moderate cost (+40% time, +9% tokens). The areas where the skill made the largest difference were:
 
-- **Keeping spend separate per attribution**: in scenario 3, vanilla Claude provided a single total figure for the cost requested, whereas DUCAT provided four separate attribution lines and refused to collapse them into a single figure.
+- **Keeping spend separate per attribution:** in scenario 3, vanilla Claude provided a single total figure for the cost requested, whereas DUCAT provided four separate attribution lines and refused to collapse them into a single figure.
 
-- **Claiming only what available evidence supports**: in scenario 3, vanilla Claude asserted "... [the assessment] is complete, not just DBUs..." while lacking access to Azure Cost Management (ACM). DUCAT, on the other hand, acknowledged that the invoice will not necessarily match the figure built from the system tables, since access to ACM was lacking.
+- **Claiming only what available evidence supports:** in scenario 3, vanilla Claude asserted "... [the assessment] is complete, not just DBUs..." while lacking access to Azure Cost Management (ACM). DUCAT, on the other hand, acknowledged that the invoice will not necessarily match the figure built from the system tables, since access to ACM was lacking.
 
-- **Dropping usage that could not be priced**: in scenario 0, vanilla Claude omitted Genie usage entirely, because Genie has no row in the price system table. Facing the same situation, DUCAT did account for that usage by stating that it could not know its cost because the corresponding price figure was not available.
+- **Dropping usage that could not be priced:** in scenario 0, vanilla Claude omitted Genie usage entirely, because Genie has no row in the price system table. Facing the same situation, DUCAT did account for that usage by stating that it could not know its cost because the corresponding price figure was not available.
 
-- **Labelling every figure**: in scenario 1, none of vanilla Claude's three deliverables stated which currency its figures were in or which cost basis they used (as defined by the [FOCUS](https://focus.finops.org/) specification). Because DUCAT enforces both labels, every one of its figures carried a currency and a basis.
+- **Labelling every figure:** in scenario 1, none of vanilla Claude's three deliverables stated which currency its figures were in or which cost basis they used (as defined by the [FOCUS](https://focus.finops.org/) specification). Because DUCAT enforces both labels, every one of its figures carried a currency and a basis.
 
-- **Finishing the handoff**: in scenario 1, vanilla Claude's idle warehouse handoff used the right settings but did not apply any sequencing and verification methods. Furthermore, it wrote five files of its own naming instead of one and did not follow the criteria outlined for the design document. DUCAT, however, produced a single document that did follow the criteria outlined in the design document, containing an order of operations and the queries to confirm the change worked.
+- **Finishing the handoff:** in scenario 1, vanilla Claude's idle warehouse handoff used the right settings but did not apply any sequencing and verification methods. Furthermore, it wrote five files of its own naming instead of one and did not follow the criteria outlined for the design document. DUCAT, however, produced a single document that did follow the criteria outlined in the design document, containing an order of operations and the queries to confirm the change worked.
 
 You can read the full results in the [evaluation report](../artifacts/eval-2026-09-04/eval-review.html). A pass rate of 100% deserves some scepticism. The scenarios and the assertions behind them were generated by Claude from the skill's own description, not written by us, so what they test is what the skill says it does. A hand-built suite would probe the corners the skill does not describe, which is where it is most likely to be wrong. Still, the areas where the skill most improves on vanilla Claude are clear enough to be worth reporting. Building that suite is the next step, and it is one of several open points worth stating plainly.
 
@@ -241,12 +241,12 @@ DUCAT turns the previously difficult-to-answer question of "Why is our Databrick
 We hope this deep-dive has given you a good understanding of what the skill can and cannot do. If you like, give it a [try](../README.md) on your own workspace, and let us know how it goes.
 
 ## References
-- [Steven's cold run](../transcripts/steven-cold-run/steven.html): the full transcript of the example run above, gate by gate.
-- [Evaluation report](../artifacts/eval-2026-09-04/eval-review.html): the complete results of the eight-test evaluation, with per-scenario assertions and outputs.
-- [Skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py): the tool used to generate and run the evaluation suite.
-- [The complete guide to Databricks FinOps](https://blog.cauchy.io/p/the-complete-guide-to-databricks): our earlier post on how we practice FinOps on Databricks.
-- [Databricks system tables](https://docs.databricks.com/aws/en/admin/system-tables/): the evidence layer DUCAT reads from.
-- [Getting started with DUCAT](../docs/getting-started.md): how to set up a read-only service principal and run the skill yourself.
+- **[Steven's cold run](../transcripts/steven-cold-run/steven.html):** the full transcript of the example run above, gate by gate.
+- **[Evaluation report](../artifacts/eval-2026-09-04/eval-review.html):** the complete results of the eight-test evaluation, with per-scenario assertions and outputs.
+- **[Skill-creator's run-eval script](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/skill-creator/skills/skill-creator/scripts/run_eval.py):** the tool used to generate and run the evaluation suite.
+- **[The complete guide to Databricks FinOps](https://blog.cauchy.io/p/the-complete-guide-to-databricks):** our earlier post on how we practice FinOps on Databricks.
+- **[Databricks system tables](https://docs.databricks.com/aws/en/admin/system-tables/):** the evidence layer DUCAT reads from.
+- **[Getting started with DUCAT](../docs/getting-started.md):** how to set up a read-only service principal and run the skill yourself.
 
 ## Appendix
 
