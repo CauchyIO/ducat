@@ -44,6 +44,8 @@ on a mutable vendor fact.
 | Historical published cost | Date-valid `system.billing.list_prices` | Historical list cost, normalized comparisons |
 | Per-statement attribution | `system.billing.attributed_usage` | DBSQL statement-level DBUs, query tags, executing identity. Empty in some accounts — check before designing around it |
 | Workload behaviour | `system.lakeflow.*`, `system.compute.*`, `system.query.history`, serving telemetry | Runtime, failures, utilization, schedules, consumers, performance |
+| Job and pipeline runs | `system.lakeflow.job_run_timeline`, `system.lakeflow.job_task_run_timeline`, `system.lakeflow.pipeline_update_timeline` | Each run's outcome and duration; per-task runtimes and the compute each task ran on (`compute_ids`); each pipeline update's type, outcome and compute |
+| Node sizes | `system.compute.node_types` | Cores, memory and GPUs per node type, so a cluster's size is stated in hardware rather than asserted |
 | Object configuration | `system.compute.*` and `system.lakeflow.*`, as slowly-changing dimensions | Settings as they were during the period, carrying `change_time`. A live API returns only what is true now |
 | Actual Azure cost | Cost Management actual or amortized data | Billed cost, discounts, classic infrastructure, invoice reconciliation |
 | Azure attribution | Resource Graph, resource tags | Resource identity, region, ownership, tag context |
@@ -311,7 +313,7 @@ scope, say so in the assessment rather than reporting the figure as though it we
 | Cluster launched from a pool (Azure/AWS) | Cloud resources inherit pool and workspace tags only — cluster tags never reach the VMs, so Azure Cost Analysis cannot see them |
 | Pool tag key collides with cluster tag key | Pool tag wins; the cluster tag is silently dropped on cloud resources |
 | Custom tag key collides with a default | Custom key is prefixed `x_` |
-| Job runs on all-purpose compute | No `job_id` on the billing record. Per-job attribution is impossible on shared all-purpose compute — this is a structural gap, not a query problem |
+| Job runs on all-purpose compute | No `job_id` on the billing record. Per-job attribution is impossible on shared all-purpose compute — this is a structural gap, not a query problem. `compute_ids` in `system.lakeflow.job_task_run_timeline` still ties the job to the cluster it ran on; the job's share of that cluster's cost stays modeled |
 | All-purpose compute, attributed by identity | `identity_metadata.run_as` names whoever created the compute, not its owner. Attribute to the owner through `system.compute.clusters.owned_by`, joined on `cluster_id` |
 | Serverless private-endpoint networking | Bills per hour under `NETWORKING` with `workspace_id` null, so a scope filtered by workspace never sees it |
 | Notebook runs inside a job | The job's serverless usage policy applies; the notebook's is ignored |
