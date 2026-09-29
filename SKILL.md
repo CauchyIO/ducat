@@ -250,11 +250,15 @@ a snapshot says what a setting *was* during it. A live API returns only what it 
 | Warehouse | `system.compute.warehouses` | Type, size, min and max clusters, auto-stop, channel |
 | Job | `system.lakeflow.jobs` | Trigger and cron expression, paused, timeout, health rules, run-as |
 | Pipeline | `system.lakeflow.pipelines` | Pipeline configuration over time |
+| Node type | `system.compute.node_types` | Cores, memory and GPUs per node type — what a cluster's node types amount to in hardware, so "oversized" is stated rather than asserted |
 
-Not carried: Photon, cluster-policy contents behind `policy_id`, task-level compute mapping, retry
-and concurrency limits, and notification configuration. Of these only Photon has another route —
-`product_features.is_photon`, below. Ask the user to confirm the rest rather than inferring them,
-and mark the recommendation as resting on a confirmed setting.
+Not carried: Photon, cluster-policy contents behind `policy_id`, retry and concurrency limits, and
+notification configuration. Of these only Photon has another route — `product_features.is_photon`,
+below. Ask the user to confirm the rest rather than inferring them, and mark the recommendation as
+resting on a confirmed setting.
+
+Task-level compute mapping is behaviour rather than configuration, and the task timeline carries
+it — see below.
 
 **The usage record is itself an evidence source.** Every row in `system.billing.usage` carries
 `usage_metadata`, `product_features` and `identity_metadata` beside the cost, and those columns
@@ -269,12 +273,21 @@ Under-claiming reads as rigour and is not — a limitation asserted where the ev
 exactly the credibility the claim gates are there to protect, and a reader who catches one has no
 reason to believe the next one.
 
-**Configuration is intent; the timeline is behaviour.** Corroborate every setting against
-`system.lakeflow.job_run_timeline` or `system.compute.node_timeline` before recommending a change to
-it. Observed in a live workspace: 15 of 16 scheduled jobs were paused, yet 6 of those paused jobs
-ran 21 times in 30 days — pausing stops the trigger, not the job. Meanwhile jobs with no trigger at
-all produced most of the week's runs, orchestrated from outside Databricks. A recommendation drawn
-from the schedule alone would have been wrong about nearly every job.
+**Configuration is intent; the timeline is behaviour.** Corroborate every setting against the
+timeline before recommending a change to it: `system.lakeflow.job_run_timeline` for job runs,
+`system.lakeflow.job_task_run_timeline` for each task within them,
+`system.lakeflow.pipeline_update_timeline` for pipeline updates, and `system.compute.node_timeline`
+for what the nodes did. Observed in a live workspace: 15 of 16 scheduled jobs were paused, yet 6 of
+those paused jobs ran 21 times in 30 days — pausing stops the trigger, not the job. Meanwhile jobs
+with no trigger at all produced most of the week's runs, orchestrated from outside Databricks. A
+recommendation drawn from the schedule alone would have been wrong about nearly every job.
+
+**The task timeline maps a job to its compute.** `job_task_run_timeline` carries `compute_ids` for
+every task run, naming the compute each task ran on. Read it there: the same column on
+`job_run_timeline` came back empty in a live workspace. For a job on all-purpose compute this is
+the only link to its cluster, since its billing records carry no `job_id`. The link finds the
+cluster, not the job's share of it — splitting a shared cluster's cost between the jobs on it stays
+modeled.
 
 Where the timeline tables do not cover the workspace, `usage_metadata.job_run_id` still counts runs
 — less detail than the timeline, but a count rather than a silence.
