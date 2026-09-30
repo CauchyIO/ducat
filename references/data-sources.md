@@ -314,6 +314,7 @@ scope, say so in the assessment rather than reporting the figure as though it we
 | Pool tag key collides with cluster tag key | Pool tag wins; the cluster tag is silently dropped on cloud resources |
 | Custom tag key collides with a default | Custom key is prefixed `x_` |
 | Job runs on all-purpose compute | No `job_id` on the billing record. Per-job attribution is impossible on shared all-purpose compute — this is a structural gap, not a query problem. `compute_ids` in `system.lakeflow.job_task_run_timeline` still ties the job to the cluster it ran on; the job's share of that cluster's cost stays modeled |
+| Job that only runs other jobs | Its own billing is empty; the cost sits on the jobs and pipelines it starts. Sum them through `source_task_run_id` on `system.lakeflow.job_run_timeline`, not `trigger_type` (see `opportunities/job-or-pipeline.md`). Not all-purpose compute, and not zero |
 | All-purpose compute, attributed by identity | `identity_metadata.run_as` names whoever created the compute, not its owner. Attribute to the owner through `system.compute.clusters.owned_by`, joined on `cluster_id` |
 | Serverless private-endpoint networking | Bills per hour under `NETWORKING` with `workspace_id` null, so a scope filtered by workspace never sees it |
 | Notebook runs inside a job | The job's serverless usage policy applies; the notebook's is ignored |
