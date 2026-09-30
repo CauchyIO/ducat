@@ -22,5 +22,17 @@ its billing record.** Per-job cost on shared all-purpose compute cannot be measu
 Say which one you did. Find the cluster through `compute_ids` in
 `system.lakeflow.job_task_run_timeline`; that identifies the compute, not the job's share of it.
 
+**A job that only runs other jobs has no cost of its own.** Its tasks are `run_job_task`s that
+start other jobs, so its billing records are empty and its task runs carry no `compute_ids`. The
+cost sits on the jobs it runs, each under its own `job_id`; the orchestrator's cost is their sum.
+Find them in `system.lakeflow.job_run_timeline`: each child run names the task run that started it
+in `source_task_run_id`, which is a `run_id` in `system.lakeflow.job_task_run_timeline` under the
+orchestrator's `job_id`. Join on that column, not on `trigger_type`: the documented `RUN_JOB_TASK`
+value did not appear in a live workspace, where every child run read `ONETIME`. A pipeline it
+starts names the job in `trigger_details.job_task` on `system.lakeflow.pipeline_update_timeline`.
+These links exist only for runs from early December 2025; before that, confirm the list of jobs
+with the user. An empty cost for a job is never read as all-purpose compute until its tasks have
+been checked: empty `compute_ids` on a run-job task means it ran nothing itself.
+
 Normalize by cost per successful run when volume moved during the period. A pipeline that got
 cheaper per run while total cost rose has not regressed.
