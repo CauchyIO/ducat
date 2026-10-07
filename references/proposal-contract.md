@@ -159,6 +159,12 @@ Section 7 is the one most often written thinly. A saving nobody can confirm 30 d
 indistinguishable from a saving that never landed, so give the actual query and the number it should
 return.
 
+**The package is not content.** Rule lists, vendor limits and figures measured in other estates
+inform the reasoning; none of them is copied into the design. State what a rule means for this
+estate — that a proposed tag key is reserved, say — never the rule's full list. A figure from
+another estate never appears: measure the equivalent here, or name it under open decisions as
+unmeasured.
+
 Add a calculation ledger only when the numbers cannot stay reproducible inside the document. Add
 `scope.yaml` only when a multi-session engagement needs resumable state. Educational material is
 included on request and must not obscure the decisions.

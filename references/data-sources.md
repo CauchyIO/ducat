@@ -328,6 +328,8 @@ Reserved keys that must not be used as custom tags: `Vendor`, `ClusterId`, `Clus
 `Name`, `RunName`, `JobId`, `DatabricksInstancePoolId`, `DatabricksInstancePoolCreatorId`,
 `SqlWarehouseId`, the `LakehouseMonitoring*` family, and the `budget-policy-*` family. Overriding
 `Name` breaks cluster tracking and auto-termination — a tagging change that causes runaway cost.
+The list is reference only: check the tags the design proposes against it, and do not copy it into
+the design.
 
 Tags cannot be applied retroactively to historical billing records. A tagging improvement is a
 prerequisite that improves future attribution, never a saving.
@@ -382,7 +384,8 @@ Attribution method carries its own FOCUS names: `AllocatedMethodId`, `AllocatedT
   managed resource group bills for its NAT gateway, public IPs and storage account whether or not
   anything runs. Measured in one estate: a workspace with zero DBUs for a week still cost €7.38,
   ninety percent of it NAT gateway — around €384 a year to exist. No Databricks system table shows
-  a cent of it. Serverless closes the per-workload gap and never touches this one.
+  a cent of it. Serverless closes the per-workload gap and never touches this one. Both
+  figures are another estate's and reference only: neither appears in this estate's design.
 - Sum `usage_quantity` over every `record_type`. A correction lands as a `RETRACTION` carrying a
   negative quantity beside a `RESTATEMENT`; filtering to `ORIGINAL` keeps the wrong figure, and
   reading rows one by one counts it twice.
