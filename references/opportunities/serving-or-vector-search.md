@@ -23,5 +23,13 @@ Both bill in more than one component, which is where assessments usually go wron
 | Change model tier | Cost per served request by model family | Quality change — needs an evaluation, not an assertion |
 | Retire the workload | Consumers observed over the period; benefit claimed by the owner | Whether anything still depends on it |
 
+**Reading traffic.** `system.serving.endpoint_usage` records each request with its status code,
+tokens and requester. It names no endpoint: join it on `served_entity_id` to the latest
+`system.serving.served_entities` row, which carries `endpoint_name`, and from there to cost on
+`usage_metadata.endpoint_name`. Count successful requests apart from errors, or a failing endpoint
+reads as a busy one. `served_entities` also carries provisioned concurrency and throughput, the
+other side of a right-sizing case. An endpoint that bills and has no usage rows has not been shown
+to be tracked: report its traffic as unknown, never as zero.
+
 Normalize by cost per served request. An endpoint whose cost rose with traffic is behaving
 correctly; one whose cost rose without traffic is the finding.

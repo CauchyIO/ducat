@@ -43,9 +43,10 @@ on a mutable vendor fact.
 | Databricks usage | `system.billing.usage` | Usage quantity, SKU, product, resource, identity, tag attribution |
 | Historical published cost | Date-valid `system.billing.list_prices` | Historical list cost, normalized comparisons |
 | Per-statement attribution | `system.billing.attributed_usage` | DBSQL statement-level DBUs, query tags, executing identity. Empty in some accounts — check before designing around it |
-| Workload behaviour | `system.lakeflow.*`, `system.compute.*`, `system.query.history`, serving telemetry | Runtime, failures, utilization, schedules, consumers, performance |
+| Workload behaviour | `system.lakeflow.*`, `system.compute.*`, `system.query.history`, `system.serving.*` | Runtime, failures, utilization, schedules, consumers, performance |
 | Job and pipeline runs | `system.lakeflow.job_run_timeline`, `system.lakeflow.job_task_run_timeline`, `system.lakeflow.pipeline_update_timeline` | Each run's outcome and duration; per-task runtimes and the compute each task ran on (`compute_ids`); each pipeline update's type, outcome and compute |
 | Node sizes | `system.compute.node_types` | Cores, memory and GPUs per node type, so a cluster's size is stated in hardware rather than asserted |
+| Serving traffic | `system.serving.endpoint_usage`, `system.serving.served_entities` | Each request to a serving endpoint with its status code, tokens and requester; what each endpoint serves, with its provisioned concurrency or throughput. The usage table names no endpoint: join it to the latest `served_entities` row on `served_entity_id`. An endpoint that bills with no usage rows is not shown to be tracked, never idle |
 | Object configuration | `system.compute.*` and `system.lakeflow.*`, as slowly-changing dimensions | Settings as they were during the period, carrying `change_time`. A live API returns only what is true now |
 | Actual Azure cost | Cost Management actual or amortized data | Billed cost, discounts, classic infrastructure, invoice reconciliation |
 | Azure attribution | Resource Graph, resource tags | Resource identity, region, ownership, tag context |
