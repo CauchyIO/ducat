@@ -24,17 +24,21 @@ modeled allocation rather than a measured cost. Queries carrying no tag stay una
 never spread silently across teams.
 
 **Look past the team's own warehouses.** A team's dedicated warehouse often idles between bursts
-while another warehouse of the same type in the same workspace is already running. Find the
-candidates in `system.compute.warehouses` by type and workspace, then set each candidate's billed
-hours (`system.billing.usage` by `usage_metadata.warehouse_id` and hour) against the hours the team
-queries (`system.query.history` by `start_time`). Hours where the candidate was already running cost
-nothing extra; the rest it would have to run for. Size the move as a range. At best it saves the
+while another warehouse of the same type in the same workspace is already running. List **every**
+warehouse in `system.compute.warehouses` with the team warehouse's type and workspace, not only the
+ones the team's people already use: the best candidate is often a shared warehouse nobody on the
+team has touched. For each, count the team warehouse's billed hours (`system.billing.usage` by
+`usage_metadata.warehouse_id` and hour) in which the candidate was also billed, and rank the
+candidates by that count. Hours where a candidate was already running cost nothing extra; the rest
+it would have to run for.
+
+Size the move to the top candidate as a range, even when the overlap is small. At best it saves the
 team warehouse's whole cost, when every team hour falls inside the candidate's running hours; at
 worst it saves that cost minus the candidate's extra hours at the candidate's rate. Widen the range
-if the candidate would need a larger size to hold the team's queue time. Until
-warehouse start and stop events are in the evidence, active hours come from billed hours and query
-times, so say the overlap is approximated. After the move the team's cost no longer carries its own
-`warehouse_id`, so chargeback rests on query tags: state that alongside the saving.
+if the candidate would need a larger size to hold the team's queue time. Whatever the result, state
+three things beside it: contention at shared peaks; that the overlap is approximated from billed
+hours until warehouse start and stop events are in the evidence; and that after the move the team's
+cost no longer carries its own `warehouse_id`, so chargeback rests on query tags.
 
 Deliver the allocation map itself. It is reusable as the team's showback definition and is often
 worth more than the savings figure.
