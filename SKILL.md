@@ -250,6 +250,7 @@ a snapshot says what a setting *was* during it. A live API returns only what it 
 | Warehouse | `system.compute.warehouses` | Type, size, min and max clusters, auto-stop, channel |
 | Job | `system.lakeflow.jobs` | Trigger and cron expression, paused, timeout, health rules, run-as |
 | Pipeline | `system.lakeflow.pipelines` | Pipeline configuration over time |
+| Serving endpoint | `system.serving.served_entities` | What each endpoint serves: entity type and name, task, provisioned concurrency or throughput |
 | Node type | `system.compute.node_types` | Cores, memory and GPUs per node type — what a cluster's node types amount to in hardware, so "oversized" is stated rather than asserted |
 
 Not carried: Photon, cluster-policy contents behind `policy_id`, retry and concurrency limits, and
