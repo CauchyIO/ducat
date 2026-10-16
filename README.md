@@ -4,7 +4,7 @@
 
 # DUCAT: Databricks Usage Cost Assessment Tool
 
-A read-only [Claude Code](https://claude.com/claude-code) skill that works out what a specific
+A [Claude Code](https://claude.com/claude-code) skill that works out what a specific
 Databricks workload costs today, then designs a way to make it cost less.
 
 You point it at one thing — a job, a pipeline, a SQL warehouse, a team's workload — and it reads
@@ -16,13 +16,14 @@ It never optimises an estate at once — every assessment starts from one
 confirmed scope. And it never quotes a number it cannot support: where evidence is missing it says
 so and narrows what it claims rather than guessing.
 
-The skill is designed to have read-only functionality. It never writes. No create, update, start, stop, resize or delete operation is invoked. The output
+The skill recommends reading only. It never creates, updates, starts, stops, resizes or deletes
+anything on its own initiative, and changes a workspace only when you ask for a named change. The output
 is a Markdown proposal a human reviews and decides on.
 
 **Claude Code only, for the time being.** The package itself is Markdown — `SKILL.md` and
 `references/` — and nothing in it is structurally tied to one harness. Everything around it is
 Claude Code's: the skills directory it installs into, the `.mcp.json` that connects it to
-Databricks, and the `.claude/settings.json` that denies the tools it must not use. No other
+Databricks, and the `.claude/settings.json` that sets which tools it may use. No other
 harness has been tried.
 
 ## Status
@@ -41,9 +42,9 @@ each file governs:
 
 All four behavioural witnesses in Section 10 have been run against recorded controls. The clearest
 is the scope gate: without the skill the same request produced twenty unrequested queries and a set
-of verdicts; with it, no query ran until a scope was confirmed. The witness covering the refusal to
-implement has failed and passed on different models, which is why the section below states what is
-enforced and what is not.
+of verdicts; with it, no query ran until a scope was confirmed. The witness covering requests to
+implement was rewritten on 2026-10-16, when a named request became enough to change a workspace, and
+has not been run in its new form.
 
 ## What it can claim
 
@@ -152,16 +153,15 @@ that decide what the skill may claim and what counts as a saving. If you want to
 **Enforced by Unity Catalog.** The service principal holds read on system tables and `CAN_USE` on
 one warehouse. Every write it attempts is refused by the platform, whatever the model intends.
 
-**Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies the
-read-write MCP tool outright, and `dbsp`, the service-principal wrapper, since that identity's
-route is the MCP server. It does not deny `databricks`: on the personal-account route the CLI is
-the transport, and `databricks` is listed under `ask`, so every direct call prompts the user after
-the route warning in `SKILL.md`, in auto mode as well: an `ask` rule overrides auto mode for that
-command. The skill is told to stop on a promptless refusal, which means a deny rule is in force,
-rather than work around it. A permission rule carries no reason text, which
-is why the warning lives in the prompt. This applies only where those settings load, and it sees
-only the command string: a script that shells out to the CLI passes it unseen, which is why on this
-route the user's own permissions, and nothing else, are the boundary.
+**Enforced by configuration.** [`.claude/settings.json`](.claude/settings.json) denies `dbsp`,
+the service-principal wrapper, since that identity's route is the MCP server. It allows
+`databricks`, the transport on the personal-account route, and the read-only MCP tools. It neither
+allows nor denies the read-write MCP tool, so that tool falls to the session's permission mode.
+
+**Not enforced.** Configuration does not stop an unrequested write on the personal-account route.
+`SKILL.md` lets the session change a workspace only when the user asks for a named change, and that
+rule is instruction, not configuration: on this route the user's own permissions, and nothing
+else, are the boundary.
 
 ### Other limits
 

@@ -13,9 +13,10 @@ reproduce it. Expect an acknowledgement within a few business days.
 
 ## What matters here
 
-The skill is **read-only** by design. It never creates, updates, starts, stops, resizes or
-deletes anything in an estate. A way to make it write, or to make it act on an estate it
-was not scoped to, is a vulnerability.
+The skill recommends reading only. It changes an estate only when the user asks for a named
+change, and then makes only that change. A way to make it write without that request, to
+make it change more than was named, or to make it act on an estate it was not scoped to, is
+a vulnerability.
 
 The sensitive assets are the outputs, not the code:
 

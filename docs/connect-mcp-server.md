@@ -85,9 +85,10 @@ the variables you just exported.
 }
 ```
 
-`.claude/settings.json` denies the tools the skill must not use: the read-write MCP tool
-`execute_sql`, and the Databricks CLI, which the skill never needs because it reads everything as
-SQL. It allows `execute_sql_read_only` and `poll_sql_result`.
+`.claude/settings.json` allows `execute_sql_read_only` and `poll_sql_result`, and the Databricks
+CLI for the personal-account route. It denies `dbsp`, the service-principal wrapper. The
+read-write tool `execute_sql` is neither allowed nor denied; on this route the principal cannot
+write, so a write through it fails at Databricks.
 
 ## 5. Verify
 

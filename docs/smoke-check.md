@@ -31,8 +31,8 @@ for the statement to finish, and shows the rows in the conversation. The query e
 service principal, because the token in the connection belongs to the principal rather than to you —
 which is exactly why these four checks test the setup and not your own access.
 
-Only reads will run this way. `.claude/settings.json` denies the read-write tool, so a query that
-tried to change anything would be refused before it reached Databricks. Every query below is a
+Only reads will run this way. The principal holds read grants only, so a query that tried to change
+anything would be refused by Databricks. Every query below is a
 `SELECT`, so the question never arises.
 
 ## Check 1 — the schemas carry rows

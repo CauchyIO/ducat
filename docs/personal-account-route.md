@@ -13,13 +13,12 @@ personal account is on offer:
 
 > ⚠️ **Warning:** On this route the session runs as you, through the Databricks CLI, with every
 > privilege your account holds. If your account can create, resize or delete compute, so can this
-> session. The read-only rule is written instruction in this package, not something the platform
-> enforces, and under insistence it has been seen to break in testing. Choose this route only if
-> you accept that your own permissions, and nothing else, are the boundary.
+> session. It changes your workspace only when you ask for a named change, but that rule is written
+> instruction in this package, not something the platform enforces. Your own permissions, and
+> nothing else, are the boundary.
 
-Nothing is read until you have chosen the route, named the profile, and consented once. The skill
-then names the route in one line you can quote back, and every direct CLI call after that asks
-your permission before it runs.
+Nothing is read until you have chosen the route and named the profile. The skill then names the
+route in one line you can quote back.
 
 ## Prerequisites
 
@@ -46,8 +45,8 @@ Three things, and the second is the one most people lack.
    ```
 
    The check passes when it returns a count. `INSUFFICIENT_PRIVILEGES` on `USE SCHEMA` means the
-   grant is missing. Granting it is a write in the workspace, and the skill will not do it for
-   you: run the principal runbook's catalog grant with your own account as the principal, in your
+   grant is missing. Granting it is a write in the workspace, and the skill makes it only if you
+   ask for that grant by name. We recommend you run the principal runbook's catalog grant with your own account as the principal, in your
    own admin session, and weigh the same caveat, that the catalog-level grant is wider than the
    eleven tables the skill reads and includes the audit log.
 
@@ -90,18 +89,12 @@ SQL text the MCP route runs, so a figure from the CLI route and one from the MCP
 compared line for line. That comparison is what proves the route, and it is still owed for one
 confirmed scope.
 
-## What the permission prompt does, and what it cannot see
+## What stops a write on this route
 
-`.claude/settings.json` lists `databricks` under `ask`, so Claude Code stops before every direct CLI
-command, shows you the exact command, and runs it only if you approve — in auto mode as well.
-Approve one call at a time; the option to allow the rest of the session removes exactly the stop
-this route depends on.
-
-The rule sees only the command string. A script that shells out to the CLI, invoked as
-`python3 something.py`, passes it unseen. The skill is told never to reach the CLI that way, and in
-testing it has held to that on this route, but nothing in configuration enforces it. That is why the
-warning ends the way it does: on this route your own permissions, and nothing else, are the
-boundary.
+`.claude/settings.json` lists `databricks` under `allow`, so CLI commands run without a prompt.
+Nothing in configuration tells a read from a write. The skill changes your workspace only when you
+ask for a named change, and that rule is instruction, not configuration. That is why the warning
+ends the way it does: on this route your own permissions, and nothing else, are the boundary.
 
 ## When it fails
 
