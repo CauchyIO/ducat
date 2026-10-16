@@ -1,15 +1,14 @@
 # The personal-account route: reading as yourself through the CLI
 
-Two routes reach a workspace. The default is the service principal through the managed SQL MCP
-server, where Unity Catalog holds the read-only boundary and the principal cannot write whatever a
-session intends. This runbook covers the other one: the Databricks CLI, authenticated as you, from
-a profile you choose. It runs the same packaged queries and returns the same evidence. What it does
-not have is a platform boundary — the account can do whatever its grants allow, writes included.
+Two routes reach a workspace. This runbook covers the default: the Databricks CLI, authenticated as
+you, from a profile you choose. The safe alternative is the service principal through the managed
+SQL MCP server, where Unity Catalog holds the read-only boundary and the principal cannot write
+whatever a session intends. Both run the same packaged queries and return the same evidence. What
+this route does not have is a platform boundary — the account can do whatever its grants allow,
+writes included.
 
-Use it when the service-principal route is unavailable and you accept that trade, or when you want
-to read as yourself on purpose. The skill offers the choice before it reads anything, marks the
-service principal as recommended whenever it is available, and carries this warning whenever the
-personal account is on offer:
+The skill offers the choice before it reads anything, presents this route as the default whenever
+a valid CLI profile exists, and carries this warning whenever it is on offer:
 
 > ⚠️ **Warning:** On this route the session runs as you, through the Databricks CLI, with every
 > privilege your account holds. If your account can create, resize or delete compute, so can this
@@ -109,8 +108,8 @@ of this repository still carrying the older `.claude/settings.json`, which denie
 outright. The skill stops on that refusal rather than working around it. Check which directory the
 session started in.
 
-**The MCP server is connected and you chose this route anyway.** Nothing wrong: the route is yours
-to choose. What must not happen is a `databricks-sql` call after the choice. A chosen route is never
+**The MCP server is connected as well.** Nothing wrong: this route stays the default, and the route
+is yours to choose. What must not happen is a `databricks-sql` call after the choice. A chosen route is never
 mixed; asking to switch mid-assessment returns you to the route choice.
 
 ## Proving the route

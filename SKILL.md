@@ -49,9 +49,9 @@ ahead", or "make the changes" names nothing: answer it with the exact steps, not
 
 ```mermaid
 flowchart TD
-  START([Invoke]) --> ROUTE{{Choose access route<br/>explicit, safe default}}
-  ROUTE -->|service principal| Q{Scope named<br/>in the request?}
+  START([Invoke]) --> ROUTE{{Choose access route<br/>explicit, CLI by default}}
   ROUTE -->|personal account| BRIEF[CLI warning]
+  ROUTE -->|service principal| Q{Scope named<br/>in the request?}
   BRIEF --> Q
 
   Q -->|no| OFFER[Offer coarse driver scan]
@@ -93,25 +93,29 @@ before the scope question, and so before the coarse driver scan, which reads evi
 The route decides the identity and what bounds it, not the evidence: both run the same packaged
 queries.
 
-**Service principal.** The managed SQL MCP server, authenticated as the read-only principal. It is
-available when the `execute_sql_read_only` and `poll_sql_result` tools are present in the session
-and `DATABRICKS_MCP_URL` and `DATABRICKS_SP_TOKEN` are set in the shell that launched it. Unity
-Catalog holds the boundary on this route: the principal cannot write, whatever the session intends.
+**Personal account — the default.** The Databricks CLI, authenticated as the person from a profile
+they choose. It is available when `databricks auth profiles` lists at least one valid profile. The
+account can do whatever its grants allow, writes included, so nothing on the platform stops a write
+on this route. The rule in **Read only, unless asked by name** is what governs it, and the warning
+below says so before anything is read.
 
-**Personal account.** The Databricks CLI, authenticated as the person from a profile they choose.
-The account can do whatever its grants allow, writes included, so nothing on the platform stops a
-write on this route. The rule in **Read only, unless asked by name** is what governs it, and the
-warning below says so before anything is read.
+**Service principal — the safe alternative.** The managed SQL MCP server, authenticated as the
+read-only principal. It is available when the `execute_sql_read_only` and `poll_sql_result` tools
+are present in the session and `DATABRICKS_MCP_URL` and `DATABRICKS_SP_TOKEN` are set in the shell
+that launched it. Unity Catalog holds the boundary on this route: the principal cannot write,
+whatever the session intends.
 
-Report both availability facts first, whichever route is then chosen: whether the MCP server is
-connected, and whether the two variables are set. Then put the choice to the user and wait.
+Report the availability facts first, whichever route is then chosen: whether a valid CLI profile
+exists, whether the MCP server is connected, and whether the two variables are set. Then put the
+choice to the user and wait.
 
-When the service-principal route is available, present it as the recommended default and the
-personal-account route as the alternative. When the service-principal route is unavailable, say so,
-and narrow the choice to the personal-account route or stopping here. Whenever the personal-account
-route is on offer, the question itself carries this warning in full, marked as one and not softened
-— never condensed into an option's description, and no less prominent when the service principal is
-available and recommended than when it is the only route left:
+When the personal-account route is available, present it as the default, and the service-principal
+route, if it is available too, as the safe alternative. When the personal-account route is
+unavailable, say so, and narrow the choice to the service-principal route or stopping here. When
+neither is available, say what each lacks, point to `docs/getting-started.md`, and stop. Whenever
+the personal-account route is on offer, the question itself carries this warning in full, marked as
+one and not softened — never condensed into an option's description, and no less prominent when the
+service principal is on offer too than when the personal account is the only route left:
 
 > ⚠️ **Warning:** On this route the session runs as you, through the Databricks CLI, with every
 > privilege your account holds. If your account can create, resize or delete compute, so can this

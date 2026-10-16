@@ -65,8 +65,10 @@ measures a change that has not happened yet.
 
 ## Install
 
-The skill needs a read-only identity and a connection before it can read anything;
-[`docs/getting-started.md`](docs/getting-started.md) walks the whole sequence. To install the
+By default the skill reads as you, through the Databricks CLI, so it needs an authenticated CLI
+profile with read on the `system` catalog. The read-only service principal, through the managed SQL
+MCP server, is the safe alternative; [`docs/getting-started.md`](docs/getting-started.md) walks both
+in order, the CLI first. To install the
 package itself, copy or symlink this repository into a skills directory, keeping the directory
 name. Which directory decides where the skill loads.
 
