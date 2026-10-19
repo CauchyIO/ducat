@@ -22,7 +22,7 @@ Session transcripts from validation runs are **not here and not committed**. A t
 The consequential ones: scope is confirmed before any tool runs; a broad driver scan needs separate
 confirmation and returns candidates rather than conclusions; cost bases are never blurred; a cheaper
 design counts as a saving only when the workload's required outcomes survive; and the skill stops at
-an approved design rather than implementing it. Loosening an invariant here and every downstream
+an approved design, changing a workspace only when the user asks for a named change. Loosening an invariant here and every downstream
 document changes meaning.
 
 **The setup runbooks — the access layer.** [`create-read-only-principal.md`](create-read-only-principal.md) and
@@ -30,8 +30,8 @@ document changes meaning.
 and extend them. Each setup decision is a lever: how wide the read grant is
 (catalog-level by default, which includes audit logs; a tighter per-schema grant needs an account
 admin, and the runbook carries both), how long the
-credential lives, which warehouse the queries run on, and whether the read-write tool stays denied
-in the client configuration. The workspace-catalog exception is documented in the principal runbook
+credential lives, which warehouse the queries run on, and whether the client configuration denies
+the read-write tool. The workspace-catalog exception is documented in the principal runbook
 along with the reason it was left open.
 
 ## Where the analytical criteria live

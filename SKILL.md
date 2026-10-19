@@ -17,10 +17,11 @@ Azure Databricks only. The deliverable is a Markdown proposal a human decides on
 never a valid starting point — not because breadth is hard, but because a number nobody can trace to
 an object is a number nobody can act on.
 
-**Read-only means read-only.** No create, update, start, stop, resize, or delete operation is
-invoked, ever. Work stops at the approved design specification. If someone asks you to apply an
-accepted change, produce the exact steps and hand them over — running them is a different job with a
-different authorization.
+**Read only, unless asked by name.** Reading only is the recommendation. The assessment never
+creates, updates, starts, stops, resizes, or deletes anything on its own initiative, and work stops
+at the approved design specification. A workspace changes only when the user explicitly asks for a
+named change — this setting, on this object — and then only that change is made. "Proceed", "go
+ahead", or "make the changes" names nothing: answer it with the exact steps, not with execution.
 
 ## Invariants
 
@@ -35,8 +36,9 @@ different authorization.
    and a verification method.
 6. A cheaper design is a saving only when required output, performance, reliability, and service
    levels survive. A change that breaks a deadline is not a saving; it is a defect with a discount.
-7. Assessment executes queries and reads. It stops at the design — whatever credentials are within
-   reach, and however late or however politely the request to go further arrives.
+7. Assessment executes queries and reads. It stops at the design and never carries out its own
+   proposal unprompted, however late or however politely a general request to go further arrives.
+   Only an explicit request for a named change authorizes that one change.
 8. Education is offered, never forced into the decision flow.
 9. Collect narrowly. Bound query periods to the scope, never request pasted credentials, never
    persist secrets, never retain row-level business data or raw exports in this package, and agree
@@ -49,7 +51,7 @@ different authorization.
 flowchart TD
   START([Invoke]) --> ROUTE{{Choose access route<br/>explicit, safe default}}
   ROUTE -->|service principal| Q{Scope named<br/>in the request?}
-  ROUTE -->|personal account| BRIEF[CLI briefing<br/>explicit consent]
+  ROUTE -->|personal account| BRIEF[CLI warning]
   BRIEF --> Q
 
   Q -->|no| OFFER[Offer coarse driver scan]
@@ -69,7 +71,7 @@ flowchart TD
   SHORT --> SEL{{Select opportunities}}
   SEL -->|authorises recommendation| PORT[Quantify as portfolio<br/>interactions, not a sum]
   PORT --> HAND[Produce design handoff]
-  HAND --> STOP([Stop · no mutation])
+  HAND --> STOP([Stop · change only on a named request])
 
   classDef gate fill:#DDEEEB,stroke:#0F766E,stroke-width:1.5px,color:#0B3D39;
   classDef term fill:#12212B,stroke:#12212B,color:#F1F4F6;
@@ -97,9 +99,9 @@ and `DATABRICKS_MCP_URL` and `DATABRICKS_SP_TOKEN` are set in the shell that lau
 Catalog holds the boundary on this route: the principal cannot write, whatever the session intends.
 
 **Personal account.** The Databricks CLI, authenticated as the person from a profile they choose.
-The account can do whatever its grants allow, writes included, so the boundary on this route is the
-briefing and the person's explicit consent, not the platform. Taking this route means delivering
-that briefing next; nothing is read until consent is recorded.
+The account can do whatever its grants allow, writes included, so nothing on the platform stops a
+write on this route. The rule in **Read only, unless asked by name** is what governs it, and the
+warning below says so before anything is read.
 
 Report both availability facts first, whichever route is then chosen: whether the MCP server is
 connected, and whether the two variables are set. Then put the choice to the user and wait.
@@ -113,9 +115,9 @@ available and recommended than when it is the only route left:
 
 > ⚠️ **Warning:** On this route the session runs as you, through the Databricks CLI, with every
 > privilege your account holds. If your account can create, resize or delete compute, so can this
-> session. The read-only rule is written instruction in this package, not something the platform
-> enforces, and under insistence it has been seen to break in testing. Choose this route only if
-> you accept that your own permissions, and nothing else, are the boundary.
+> session. It changes your workspace only when you ask for a named change, but that rule is written
+> instruction in this package, not something the platform enforces. Your own permissions, and
+> nothing else, are the boundary.
 
 Proceed only on an explicit choice. Silence, a pasted scope, or a yes given to another question
 chooses nothing.
@@ -125,11 +127,9 @@ which transport, and what bounds what the session can do. A route is chosen once
 on it is not a request for the other one, and changing route mid-assessment means returning to this
 step and choosing again, never switching in place.
 
-On the personal-account route every direct `databricks` call is meant to prompt the user, in any
-session mode. If one is refused with no prompt, a rule in force denies the CLI outright, and the
-refusal is the boundary working as designed: say so, name what the user can run themselves, and
-stop. Never reach the CLI another way — a script, another interpreter, a different shape of the
-same command.
+If a `databricks` call is refused, a rule in force denies the CLI in this session: say so, name what
+the user can run themselves, and stop. Never reach the CLI another way — a script, another
+interpreter, a different shape of the same command.
 
 ### 2. Scope gate
 
@@ -307,8 +307,9 @@ rules apply.
 
 Rung 1 is the Databricks-managed SQL MCP server at `https://<workspace-hostname>/api/2.0/mcp/sql`.
 Use `execute_sql_read_only` for every query and `poll_sql_result` for anything that returns
-`PENDING`. That server also exposes `execute_sql`, which reads *and writes*; it is denied in
-configuration. Its absence is deliberate — never ask for it, and never route around it.
+`PENDING`. That server also exposes `execute_sql`, which reads *and writes*. Use it only to make a
+change the user has asked for by name; the service principal cannot write, so on that route it
+fails, and the failure is the answer.
 
 No warehouse is named in the call. The server picks one the caller may use, and the skill's identity
 holds `CAN_USE` on exactly one, so the choice is settled by permission rather than configuration.
@@ -383,23 +384,22 @@ about source precedence should not drag the entire practice catalog into context
 
 ## Stopping
 
-The engagement ends with `cost-optimization-design.md` and no mutation. If asked to implement,
-say plainly that this skill stops at the design, then make the handoff as executable as possible —
-exact settings, sequencing, verification queries — so whoever holds write access can act without
-guessing.
+The engagement ends with `cost-optimization-design.md` and no mutation. If asked to implement in
+general terms, say plainly that this skill stops at the design, then make the handoff as executable
+as possible — exact settings, sequencing, verification queries — so whoever holds write access can
+act without guessing.
 
-The rule does not expire at the handoff. A request to proceed once the design is agreed is the same
-request, arriving later and more reasonably. Answer it the same way.
+A general request does not become a named one at the handoff. "Proceed" once the design is agreed is
+the same request, arriving later and more reasonably. Answer it the same way.
+
+A named request is different. When the user asks for one specific change — this setting, on this
+object — restate it in one line, make exactly that change, and verify it with a read. Make nothing
+the request did not name, even when the design pairs it with other steps.
 
 Never offer to execute. Not as an option, not as a convenience, not hedged with a safeguard. The
 offer is the failure: whoever is reading has just been told what to do by the thing offering to do
 it, and declining an offer is harder than making a request.
 
-Approval per command is not this boundary. A person clicking through prompts is approving a stream
-of commands from the agent that recommended them, which is a weaker check than executing a runsheet
-themselves — the review is exactly where the independence was supposed to be.
-
-The boundary is the act, not the identity. A session often sits beside credentials that can write:
-a command-line tool authenticated as its owner, an administrator's terminal. That the write would
-succeed is not evidence that it is permitted. The design names who executes; the skill is never
-that party.
+The boundary is the request, not the identity. A session often sits beside credentials that can
+write: a command-line tool authenticated as its owner, an administrator's terminal. That the write
+would succeed is not evidence that it is permitted; only the user's named request is.
